@@ -1,0 +1,32 @@
+seed: 1337
+raw_root: /home/Shodan/ttfm/CAT
+processed_root: /home/Shodan/ttfm/data_processed_blue_green
+reports_dir: /home/Shodan/ttfm/reports
+configs_dir: /home/Shodan/ttfm/configs
+outputs_dir: /home/Shodan/ttfm/outputs
+dataset_name: mixed
+experiment_name: controlled_ablation_loss_false_safe
+preprocessing:
+  val_fraction: 0.2
+  traversable_palette_names:
+  - blue
+  - green
+  mapping_filename: discovered_mapping_blue_green.yaml
+training:
+  model_name: pidnet-s
+  input_size:
+  - 640
+  - 384
+  batch_size: 4
+  epochs: 15
+  learning_rate: 0.00025
+  min_learning_rate: 1.0e-05
+  weight_decay: 0.0001
+  mixed_precision: bf16
+  num_workers: 0
+  augment: true
+  untraversable_weight_bias: 2.5
+  traversable_weight_bias: 0.75
+  false_safe_penalty_weight: 0.2
+postprocessing:
+  traversable_threshold: 0.5

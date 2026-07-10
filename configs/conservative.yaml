@@ -1,0 +1,25 @@
+seed: 1337
+raw_root: /home/Shodan/ttfm/CAT
+processed_root: /home/Shodan/ttfm/data_processed
+reports_dir: /home/Shodan/ttfm/reports
+configs_dir: /home/Shodan/ttfm/configs
+outputs_dir: /home/Shodan/ttfm/outputs
+dataset_name: mixed
+experiment_name: mixed_binary_traversability_conservative
+
+preprocessing:
+  val_fraction: 0.2
+
+training:
+  model_name: pidnet-s
+  input_size: [640, 384]
+  batch_size: 4
+  epochs: 15
+  learning_rate: 0.00025
+  min_learning_rate: 0.00001
+  weight_decay: 0.0001
+  mixed_precision: bf16
+  num_workers: 0
+  augment: true
+  untraversable_weight_bias: 2.5
+  traversable_weight_bias: 0.75

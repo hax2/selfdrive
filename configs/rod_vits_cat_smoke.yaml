@@ -1,0 +1,32 @@
+seed: 1337
+raw_root: CAT
+processed_root: data_processed_blue_green
+reports_dir: reports
+configs_dir: configs
+outputs_dir: outputs
+dataset_name: mixed
+experiment_name: mixed_binary_traversability_rod_vits_smoke_batch4
+
+training:
+  model_name: rod-vits
+  rod_encoder_checkpoint: weights/efficient_sam_vits.pt
+  rod_encoder_image_size: 1024
+  input_size: [640, 384]
+  batch_size: 4
+  gradient_accumulation_steps: 1
+  val_batch_size: 2
+  epochs: 1
+  learning_rate: 0.00025
+  min_learning_rate: 0.00001
+  weight_decay: 0.0001
+  mixed_precision: bf16
+  num_workers: 0
+  augment: true
+  untraversable_weight_bias: 2.5
+  traversable_weight_bias: 0.75
+  max_train_samples: 8
+  max_val_samples: 4
+  max_test_samples: 4
+
+postprocessing:
+  traversable_threshold: 0.5

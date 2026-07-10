@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.codex
+
+# Downloaded datasets and model weights
+CAT/
+CaT/
+cat/
+data_processed*/
+weights/
+*.tar.gz
+configs/discovered_mapping*.yaml
+
+# Generated training artifacts
+outputs/
+alice/
+*.log
+reports/*benchmark*.json
+reports/dataset_audit.*
+reports/controlled_ablation_summary.*
+reports/smoke_experiment_report.md
+reports/supervised_ablation_report.md
+reports/thesis_draft.tex
+reports/traversability_report_latex.txt
+
+# External working copies are not required by the packaged implementation
+third_party/
