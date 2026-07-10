@@ -1,0 +1,71 @@
+{
+  "accuracy_samples": 544,
+  "batch_size": 1,
+  "checkpoint": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_paper/checkpoints/best.pt",
+  "config": "rod_suite_results/configs/rod_vits_cat_paper.yaml",
+  "cuda_allocated_after_load_mib": 56.49755859375,
+  "cuda_peak_allocated_mib": 679.9677734375,
+  "device": "NVIDIA GeForce RTX 5060",
+  "forward": {
+    "fps_from_mean_latency": 22.773082910299994,
+    "mean_ms": 43.91148989088833,
+    "p50_ms": 43.91148989088833,
+    "p95_ms": 43.91148989088833,
+    "p99_ms": 43.91148989088833,
+    "samples": 1
+  },
+  "fp16_test_metrics": {
+    "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+    "confusion_counts_traversable": {
+      "fn": 2271078,
+      "fp": 2942400,
+      "tn": 73509730,
+      "tp": 54970232
+    },
+    "confusion_matrix": [
+      [
+        73509730,
+        2942400
+      ],
+      [
+        2271078,
+        54970232
+      ]
+    ],
+    "f1_traversable": 0.9547260136348611,
+    "false_block_rate": 0.039675507076969416,
+    "false_safe_rate": 0.03848682829373099,
+    "fbr_traversable": 0.039675507076969416,
+    "iou_traversable": 0.9133739345746549,
+    "iou_untraversable": 0.9337745738207214,
+    "mIoU": 0.9235742541976881,
+    "precision_traversable": 0.9491924317996806,
+    "recall_traversable": 0.9603244929230306
+  },
+  "input_dir": "data_processed_blue_green/test/images",
+  "input_size": [
+    640,
+    384
+  ],
+  "internal_encoder_size": 1024,
+  "model_name": "rod-vits",
+  "parameter_memory_mib": 55.515384674072266,
+  "pipeline": {
+    "fps_from_mean_latency": 22.544022123312846,
+    "mean_ms": 44.357656966894865,
+    "p50_ms": 44.357656966894865,
+    "p95_ms": 44.357656966894865,
+    "p99_ms": 44.357656966894865,
+    "samples": 1
+  },
+  "precision": "fp16",
+  "python": "3.12.12",
+  "repeats": 1,
+  "timing_scope": {
+    "forward": "GPU forward, softmax, and threshold; excludes H2D and mask D2H",
+    "pipeline": "decoded host RGB resize/normalise, H2D, forward, threshold, and mask D2H; excludes disk/camera/planner"
+  },
+  "torch": "2.10.0+cu128",
+  "unique_frames": 1,
+  "warmup": 1
+}

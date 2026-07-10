@@ -1,0 +1,39 @@
+{
+  "device": "NVIDIA GeForce RTX 5060",
+  "precision": "fp16 weights",
+  "batch_size": 1,
+  "timing_samples_per_model": 320,
+  "unique_frames": 64,
+  "warmup": 10,
+  "scope": {
+    "forward": "GPU inference, softmax, threshold",
+    "pipeline": "decoded host RGB resize/normalise, H2D, forward, threshold, mask D2H"
+  },
+  "excluded": ["disk I/O", "camera driver", "visualisation", "planner"],
+  "pidnet_s": {
+    "checkpoint": "outputs/controlled_ablation_augment_off/checkpoints/best.pt",
+    "forward_mean_ms": 8.37478404828289,
+    "forward_p95_ms": 10.548949049552904,
+    "forward_fps": 119.40606399337942,
+    "pipeline_mean_ms": 14.8955339074746,
+    "pipeline_p95_ms": 18.55500094825402,
+    "pipeline_fps": 67.13421661899602,
+    "parameter_memory_mib": 14.540714263916016,
+    "peak_allocated_mib": 57.85693359375,
+    "fp16_full_test_miou": 0.8939638673110821,
+    "fp32_full_test_miou": 0.8939406948414585
+  },
+  "rod": {
+    "checkpoint": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_paper/checkpoints/best.pt",
+    "forward_mean_ms": 31.387723726584227,
+    "forward_p95_ms": 31.626036041416228,
+    "forward_fps": 31.859589714466534,
+    "pipeline_mean_ms": 38.35714783381263,
+    "pipeline_p95_ms": 41.07431966695003,
+    "pipeline_fps": 26.070760118365186,
+    "parameter_memory_mib": 55.515384674072266,
+    "peak_allocated_mib": 679.9677734375,
+    "fp16_full_test_miou": 0.9235742541976881,
+    "fp32_full_test_miou": 0.923568606153993
+  }
+}

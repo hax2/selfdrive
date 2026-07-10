@@ -23,7 +23,15 @@ reports/dataset_audit.*
 reports/controlled_ablation_summary.*
 reports/smoke_experiment_report.md
 reports/supervised_ablation_report.md
-reports/thesis_draft.*
+reports/thesis_draft.aux
+reports/thesis_draft.fdb_latexmk
+reports/thesis_draft.fls
+reports/thesis_draft.lof
+reports/thesis_draft.log
+reports/thesis_draft.lot
+reports/thesis_draft.out
+reports/thesis_draft.pdf
+reports/thesis_draft.toc
 reports/traversability_report_latex.txt
 reports/rod_suite_*
 rod_suite_results.zip

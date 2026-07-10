@@ -1,0 +1,71 @@
+{
+  "accuracy_samples": 64,
+  "batch_size": 1,
+  "checkpoint": "outputs/controlled_ablation_augment_off/checkpoints/best.pt",
+  "config": "configs/ablations/controlled_ablation_augment_off.yaml",
+  "cuda_allocated_after_load_mib": 14.70068359375,
+  "cuda_peak_allocated_mib": 57.85693359375,
+  "device": "NVIDIA GeForce RTX 5060",
+  "forward": {
+    "fps_from_mean_latency": 119.40606399337942,
+    "mean_ms": 8.37478404828289,
+    "p50_ms": 8.04506300482899,
+    "p95_ms": 10.548949049552904,
+    "p99_ms": 11.419939940096812,
+    "samples": 320
+  },
+  "fp16_test_metrics": {
+    "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+    "confusion_counts_traversable": {
+      "fn": 352344,
+      "fp": 362743,
+      "tn": 12642921,
+      "tp": 2370632
+    },
+    "confusion_matrix": [
+      [
+        12642921,
+        362743
+      ],
+      [
+        352344,
+        2370632
+      ]
+    ],
+    "f1_traversable": 0.8689440983543764,
+    "false_block_rate": 0.12939666012480464,
+    "false_safe_rate": 0.02789115573030335,
+    "fbr_traversable": 0.12939666012480464,
+    "iou_traversable": 0.7682591966410421,
+    "iou_untraversable": 0.9464675421664668,
+    "mIoU": 0.8573633694037545,
+    "precision_traversable": 0.8672911693419307,
+    "recall_traversable": 0.8706033398751953
+  },
+  "input_dir": "data_processed_blue_green/test/images",
+  "input_size": [
+    640,
+    384
+  ],
+  "internal_encoder_size": null,
+  "model_name": "pidnet-s",
+  "parameter_memory_mib": 14.540714263916016,
+  "pipeline": {
+    "fps_from_mean_latency": 67.13421661899602,
+    "mean_ms": 14.8955339074746,
+    "p50_ms": 14.280536968726665,
+    "p95_ms": 18.55500094825402,
+    "p99_ms": 26.70144264469855,
+    "samples": 320
+  },
+  "precision": "fp16",
+  "python": "3.12.12",
+  "repeats": 5,
+  "timing_scope": {
+    "forward": "GPU forward, softmax, and threshold; excludes H2D and mask D2H",
+    "pipeline": "decoded host RGB resize/normalise, H2D, forward, threshold, and mask D2H; excludes disk/camera/planner"
+  },
+  "torch": "2.10.0+cu128",
+  "unique_frames": 64,
+  "warmup": 10
+}
