@@ -1,7 +1,7 @@
 PYTHONPATH=src
 CONFIG=configs/default.yaml
 
-.PHONY: audit preprocess preprocess-blue-green preprocess-rod prepare-rod download-cat train train-conservative train-third train-fourth train-blue-green-second train-rod eval infer export review alice-preview alice-fourth-preview eval-third review-third wait-third eval-fourth review-fourth run-fourth run-blue-green-second run-rod eval-rod review-rod download-rod-weights top-success-fourth eval-blue-green-second review-blue-green-second supervised-ablation-report threshold-sweep generate-controlled-ablations run-controlled-ablations gpu-benchmark cpu-robot-benchmark
+.PHONY: audit preprocess preprocess-blue-green preprocess-rod preprocess-rod-blue prepare-rod prepare-rod-blue download-cat train train-conservative train-third train-fourth train-blue-green-second train-rod train-rod-blue eval infer export review alice-preview alice-fourth-preview eval-third review-third wait-third eval-fourth review-fourth run-fourth run-blue-green-second run-rod run-rod-blue eval-rod eval-rod-blue review-rod review-rod-blue download-rod-weights top-success-fourth eval-blue-green-second review-blue-green-second supervised-ablation-report threshold-sweep generate-controlled-ablations run-controlled-ablations gpu-benchmark cpu-robot-benchmark
 
 audit:
 	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config $(CONFIG) audit
@@ -20,6 +20,12 @@ preprocess-rod:
 	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config configs/rod_vits_cat.yaml preprocess
 
 prepare-rod: download-cat download-rod-weights preprocess-rod
+
+preprocess-rod-blue:
+	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config configs/rod_vits_cat_blue.yaml audit
+	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config configs/rod_vits_cat_blue.yaml preprocess
+
+prepare-rod-blue: download-cat download-rod-weights preprocess-rod-blue
 
 train:
 	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config $(CONFIG) train
@@ -50,6 +56,18 @@ review-rod:
 
 run-rod:
 	bash scripts/run_train_eval_review.sh configs/rod_vits_cat.yaml
+
+train-rod-blue:
+	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config configs/rod_vits_cat_blue.yaml train
+
+eval-rod-blue:
+	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config configs/rod_vits_cat_blue.yaml eval
+
+review-rod-blue:
+	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config configs/rod_vits_cat_blue.yaml review --split test --top-k 10
+
+run-rod-blue:
+	bash scripts/run_train_eval_review.sh configs/rod_vits_cat_blue.yaml
 
 eval:
 	PYTHONPATH=$(PYTHONPATH) python -m ttfm.cli --config $(CONFIG) eval
