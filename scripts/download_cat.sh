@@ -11,7 +11,11 @@ if [[ -d "$dataset_dir/mixed/Train/imgs" && -d "$dataset_dir/mixed/Test/imgs" ]]
     exit 0
 fi
 
-curl -L --fail --show-error --continue-at - "$url" -o "$archive"
+if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --show-error --continue-at - "$url" -o "$archive"
+else
+    python "$root_dir/scripts/download_file.py" "$url" "$archive"
+fi
 
 extract_dir="$(mktemp -d "$root_dir/.cat_extract.XXXXXX")"
 trap 'rm -rf "$extract_dir"' EXIT
@@ -37,4 +41,3 @@ mkdir -p "$dataset_dir"
 cp -a "$source_dir"/. "$dataset_dir"/
 rm -f "$archive"
 echo "Downloaded and extracted CaT: $dataset_dir"
-

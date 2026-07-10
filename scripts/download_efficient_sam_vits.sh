@@ -12,9 +12,16 @@ if [[ -f "$checkpoint" ]]; then
     exit 0
 fi
 
-curl -L --fail --show-error \
-    https://github.com/yformer/EfficientSAM/raw/main/weights/efficient_sam_vits.pt.zip \
-    -o "$archive"
-unzip -o "$archive" -d "$weights_dir"
+url="https://github.com/yformer/EfficientSAM/raw/main/weights/efficient_sam_vits.pt.zip"
+if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --show-error "$url" -o "$archive"
+else
+    python "$root_dir/scripts/download_file.py" "$url" "$archive"
+fi
+if command -v unzip >/dev/null 2>&1; then
+    unzip -o "$archive" -d "$weights_dir"
+else
+    python -m zipfile -e "$archive" "$weights_dir"
+fi
 rm "$archive"
 echo "Downloaded: $checkpoint"

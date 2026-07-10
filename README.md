@@ -18,6 +18,7 @@ make prepare-rod
 ```
 
 `make prepare-rod` downloads the official 3.92 GB CaT archive and the 106 MB EfficientSAM ViT-S checkpoint, then audits and preprocesses the blue+green binary labels. It produces 1,002 training, 266 validation, and 544 test samples.
+The download scripts use `curl` and `unzip` when available, with Python standard-library fallbacks; no system package installation is required.
 
 Start the controlled 15-epoch comparison in a persistent session:
 
@@ -40,4 +41,3 @@ make review-rod
 ```
 
 The CaT archive comes from the dataset authors at `cavs.msstate.edu`. ROD uses the official EfficientSAM ViT-S weights from `yformer/EfficientSAM`; neither large download is stored in this repository.
-
