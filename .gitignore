@@ -41,3 +41,4 @@ rod_blue_results/
 
 # External working copies are not required by the packaged implementation
 third_party/
+reports/.trt_scratch
