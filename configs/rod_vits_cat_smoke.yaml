@@ -7,6 +7,11 @@ outputs_dir: outputs
 dataset_name: mixed
 experiment_name: mixed_binary_traversability_rod_vits_smoke_batch4
 
+preprocessing:
+  val_fraction: 0.2
+  traversable_palette_names: [blue, green]
+  mapping_filename: discovered_mapping_blue_green.yaml
+
 training:
   model_name: rod-vits
   rod_encoder_checkpoint: weights/efficient_sam_vits.pt
