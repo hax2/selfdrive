@@ -10,8 +10,8 @@ cd selfdrive
 
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+python -m pip --isolated install --no-user --upgrade pip
+python -m pip --isolated install --no-user -r requirements.txt
 
 python -c "import torch; print(torch.__version__, torch.cuda.get_device_name(0))"
 make prepare-rod
@@ -53,3 +53,22 @@ make run-rod-blue
 ```
 
 The CaT archive comes from the dataset authors at `cavs.msstate.edu`. ROD uses the official EfficientSAM ViT-S weights from `yformer/EfficientSAM`; neither large download is stored in this repository.
+
+## Full Follow-up Suite
+
+After the controlled blue-only and blue+green runs exist, launch all remaining experiments with:
+
+```bash
+nohup make run-rod-suite > rod_suite.log 2>&1 < /dev/null &
+echo $! > rod_suite.pid
+tail -f rod_suite.log
+```
+
+The suite is resumable: experiments with an existing `test_metrics.json` are skipped. It runs:
+
+- Controlled ROD seeds `1337`, `2027`, and `4242` for blue-only and blue+green.
+- The closest documented paper recipe for both policies: CE only, neutral weights, AdamW `1e-3`, weight decay `0.01`, batch 8, and iteration-level polynomial decay with power `0.9`.
+- Matched PIDNet-S seeds `1337`, `2027`, and `4242` for both policies, enabling seed-wise architecture comparisons and same-H100 latency baselines.
+- Forward-pass benchmarks over 128 test images with 5 warmups and 10 repeats.
+
+When complete, download `rod_suite_results.zip`. It contains aggregate JSON/Markdown reports, individual metrics and histories, exact generated configs, benchmarks, the suite log, and both paper-recipe best checkpoints. Other repeat-seed checkpoints remain on the server to avoid an unnecessarily large archive.

@@ -12,6 +12,7 @@ data_processed*/
 weights/
 *.tar.gz
 configs/discovered_mapping*.yaml
+configs/generated/
 
 # Generated training artifacts
 outputs/
@@ -22,8 +23,13 @@ reports/dataset_audit.*
 reports/controlled_ablation_summary.*
 reports/smoke_experiment_report.md
 reports/supervised_ablation_report.md
-reports/thesis_draft.tex
+reports/thesis_draft.*
 reports/traversability_report_latex.txt
+reports/rod_suite_*
+rod_suite_results.zip
+rod_results.zip
+rod_results/
+rod_blue_results/
 
 # External working copies are not required by the packaged implementation
 third_party/

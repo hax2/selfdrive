@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
 import torch
 from torch import nn
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, LambdaLR
 from torch.utils.data import DataLoader
 
 from .data import SegmentationDataset, compute_class_weights
@@ -53,6 +54,7 @@ def _run_epoch(
     ce_loss_weight: float,
     dice_loss_weight: float,
     gradient_accumulation_steps: int = 1,
+    batch_scheduler: Any | None = None,
 ) -> tuple[float, dict[str, Any], list[dict[str, Any]]]:
     training = optimizer is not None
     model.train(training)
@@ -80,6 +82,8 @@ def _run_epoch(
             accumulation_complete = (batch_index + 1) % gradient_accumulation_steps == 0
             if accumulation_complete or batch_index + 1 == len(loader):
                 optimizer.step()
+                if batch_scheduler is not None:
+                    batch_scheduler.step()
                 optimizer.zero_grad(set_to_none=True)
         running_loss += loss.item() * images.shape[0]
         confusion = update_confusion(
@@ -166,7 +170,24 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
         model_config=config["training"],
     ).to(device)
     optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=float(config["training"]["weight_decay"]))
-    scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=float(config["training"].get("min_learning_rate", 1e-5)))
+    scheduler_name = str(config["training"].get("lr_scheduler", "cosine"))
+    scheduler_steps_per_batch = scheduler_name == "poly"
+    if scheduler_steps_per_batch:
+        optimizer_steps_per_epoch = math.ceil(len(train_loader) / gradient_accumulation_steps)
+        total_optimizer_steps = max(optimizer_steps_per_epoch * epochs, 1)
+        poly_power = float(config["training"].get("poly_power", 0.9))
+        scheduler = LambdaLR(
+            optimizer,
+            lr_lambda=lambda step: (1.0 - min(step, total_optimizer_steps) / total_optimizer_steps) ** poly_power,
+        )
+    elif scheduler_name == "cosine":
+        scheduler = CosineAnnealingLR(
+            optimizer,
+            T_max=epochs,
+            eta_min=float(config["training"].get("min_learning_rate", 1e-5)),
+        )
+    else:
+        raise ValueError(f"Unsupported lr_scheduler: {scheduler_name}")
     ce_loss = nn.CrossEntropyLoss(weight=class_weights)
 
     best_metric = -1.0
@@ -186,6 +207,7 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             ce_loss_weight,
             dice_loss_weight,
             gradient_accumulation_steps,
+            scheduler if scheduler_steps_per_batch else None,
         )
         if device.type == "cuda":
             torch.cuda.empty_cache()
@@ -201,7 +223,8 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             ce_loss_weight,
             dice_loss_weight,
         )
-        scheduler.step()
+        if not scheduler_steps_per_batch:
+            scheduler.step()
         epoch_record = {
             "epoch": epoch,
             "train_loss": train_loss,
@@ -247,6 +270,7 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
         "gradient_accumulation_steps": gradient_accumulation_steps,
         "effective_batch_size": batch_size * gradient_accumulation_steps,
         "val_batch_size": val_batch_size,
+        "lr_scheduler": scheduler_name,
         "best_val_mIoU": best_metric,
         "history": history,
     }
