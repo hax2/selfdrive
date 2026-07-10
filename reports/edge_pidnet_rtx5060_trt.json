@@ -5,45 +5,45 @@
   "checkpoint": "outputs/controlled_ablation_augment_off/checkpoints/best.pt",
   "config": "configs/ablations/controlled_ablation_augment_off.yaml",
   "cuda_allocated_after_load_mib": 4.6875,
-  "cuda_peak_allocated_mib": 15.234375,
+  "cuda_peak_allocated_mib": 13.59375,
   "device": "NVIDIA GeForce RTX 5060",
-  "engine_build_time_s": 19.0,
-  "engine_path": "reports/.trt_scratch/pidnet-s_fp32.engine",
+  "engine_build_time_s": 21.5,
+  "engine_path": "reports/.trt_scratch/pidnet-s_fp16.engine",
   "forward": {
-    "fps_from_mean_latency": 578.1226920626615,
-    "mean_ms": 1.7297366350248922,
-    "p50_ms": 1.6850155079737306,
-    "p95_ms": 2.0249740045983344,
-    "p99_ms": 2.259154370985925,
+    "fps_from_mean_latency": 1037.9723198919773,
+    "mean_ms": 0.9634168280172162,
+    "p50_ms": 0.880012521520257,
+    "p95_ms": 1.4141778578050437,
+    "p99_ms": 1.8325593415647745,
     "samples": 320
   },
   "fp16_test_metrics": {
     "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
     "confusion_counts_traversable": {
-      "fn": 4029804,
-      "fp": 3299625,
-      "tn": 73152505,
-      "tp": 53211506
+      "fn": 4045047,
+      "fp": 3296396,
+      "tn": 73155734,
+      "tp": 53196263
     },
     "confusion_matrix": [
       [
-        73152505,
-        3299625
+        73155734,
+        3296396
       ],
       [
-        4029804,
-        53211506
+        4045047,
+        53196263
       ]
     ],
-    "f1_traversable": 0.935566842033746,
-    "false_block_rate": 0.070400275605153,
-    "false_safe_rate": 0.04315935998120654,
-    "fbr_traversable": 0.070400275605153,
-    "iou_traversable": 0.8789343276578071,
-    "iou_untraversable": 0.9089307545715788,
-    "mIoU": 0.893932541114693,
-    "precision_traversable": 0.9416110606598902,
-    "recall_traversable": 0.9295997243948471
+    "f1_traversable": 0.9354507447111073,
+    "false_block_rate": 0.07066656930108693,
+    "false_safe_rate": 0.04311712440189698,
+    "fbr_traversable": 0.07066656930108693,
+    "iou_traversable": 0.8787294153498317,
+    "iou_untraversable": 0.9087987520357391,
+    "mIoU": 0.8937640836927854,
+    "precision_traversable": 0.9416491264820798,
+    "recall_traversable": 0.929333430698913
   },
   "input_dir": "data_processed_blue_green/test/images",
   "input_size": [
@@ -54,14 +54,14 @@
   "model_name": "pidnet-s",
   "parameter_memory_mib": 29.174530029296875,
   "pipeline": {
-    "fps_from_mean_latency": 119.68256341198298,
-    "mean_ms": 8.355436009151163,
-    "p50_ms": 8.213580003939569,
-    "p95_ms": 9.829814155818895,
-    "p99_ms": 10.47342317760922,
+    "fps_from_mean_latency": 106.43250455588225,
+    "mean_ms": 9.395625933757401,
+    "p50_ms": 9.178187465295196,
+    "p95_ms": 10.943362902617082,
+    "p99_ms": 12.627503669355066,
     "samples": 320
   },
-  "precision": "fp32",
+  "precision": "fp16",
   "python": "3.12.12",
   "repeats": 5,
   "tensorrt_version": "10.16.1.11",

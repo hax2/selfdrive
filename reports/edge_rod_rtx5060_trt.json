@@ -5,45 +5,45 @@
   "checkpoint": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_paper/checkpoints/best.pt",
   "config": "rod_suite_results/configs/rod_vits_cat_paper.yaml",
   "cuda_allocated_after_load_mib": 4.6875,
-  "cuda_peak_allocated_mib": 15.234375,
+  "cuda_peak_allocated_mib": 13.59375,
   "device": "NVIDIA GeForce RTX 5060",
-  "engine_build_time_s": 21.5,
-  "engine_path": "reports/.trt_scratch/rod-vits_fp32.engine",
+  "engine_build_time_s": 41.8,
+  "engine_path": "reports/.trt_scratch/rod-vits_fp16.engine",
   "forward": {
-    "fps_from_mean_latency": 12.134532538652183,
-    "mean_ms": 82.40943743112439,
-    "p50_ms": 82.13133597746491,
-    "p95_ms": 84.96290424373001,
-    "p99_ms": 86.41759607824497,
+    "fps_from_mean_latency": 57.466633097835945,
+    "mean_ms": 17.40140227630036,
+    "p50_ms": 17.39735301816836,
+    "p95_ms": 17.668755463091657,
+    "p99_ms": 17.799586927285418,
     "samples": 320
   },
   "fp16_test_metrics": {
     "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
     "confusion_counts_traversable": {
-      "fn": 2271561,
-      "fp": 2942405,
-      "tn": 73509725,
-      "tp": 54969749
+      "fn": 2265250,
+      "fp": 2944021,
+      "tn": 73508109,
+      "tp": 54976060
     },
     "confusion_matrix": [
       [
-        73509725,
-        2942405
+        73508109,
+        2944021
       ],
       [
-        2271561,
-        54969749
+        2265250,
+        54976060
       ]
     ],
-    "f1_traversable": 0.9547215878803264,
-    "false_block_rate": 0.03968394503899369,
-    "false_safe_rate": 0.038486893694132523,
-    "fbr_traversable": 0.03968394503899369,
-    "iou_traversable": 0.9133658332656932,
-    "iou_untraversable": 0.9337687812427392,
-    "mIoU": 0.9235673072542162,
-    "precision_traversable": 0.9491919261024205,
-    "recall_traversable": 0.9603160549610064
+    "f1_traversable": 0.9547654734389237,
+    "false_block_rate": 0.03957369249585658,
+    "false_safe_rate": 0.03850803110390776,
+    "fbr_traversable": 0.03957369249585658,
+    "iou_traversable": 0.9134461684691906,
+    "iou_untraversable": 0.9338231150477824,
+    "mIoU": 0.9236346417584864,
+    "precision_traversable": 0.949170979232574,
+    "recall_traversable": 0.9604263075041434
   },
   "input_dir": "data_processed_blue_green/test/images",
   "input_size": [
@@ -54,14 +54,14 @@
   "model_name": "rod-vits",
   "parameter_memory_mib": 111.07698059082031,
   "pipeline": {
-    "fps_from_mean_latency": 11.267815356215868,
-    "mean_ms": 88.74834813905181,
-    "p50_ms": 88.20690948050469,
-    "p95_ms": 91.59036163473502,
-    "p99_ms": 96.51525150518866,
+    "fps_from_mean_latency": 39.38266496724548,
+    "mean_ms": 25.391882464828086,
+    "p50_ms": 25.255229498725384,
+    "p95_ms": 26.57978713978082,
+    "p99_ms": 27.533904903102666,
     "samples": 320
   },
-  "precision": "fp32",
+  "precision": "fp16",
   "python": "3.12.12",
   "repeats": 5,
   "tensorrt_version": "10.16.1.11",

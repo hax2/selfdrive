@@ -134,6 +134,34 @@ def build_engine(
     config.set_memory_pool_limit(trt.MemoryPoolType.WORKSPACE, 1 << 30)  # 1 GiB
     if fp16:
         config.set_flag(trt.BuilderFlag.FP16)
+        config.set_flag(trt.BuilderFlag.OBEY_PRECISION_CONSTRAINTS)
+
+        unsafe_types = [
+            trt.LayerType.REDUCE,
+            trt.LayerType.SOFTMAX,
+            trt.LayerType.NORMALIZATION,
+        ]
+
+        for i in range(network.num_layers):
+            layer = network.get_layer(i)
+            is_unsafe = False
+            if layer.type in unsafe_types:
+                is_unsafe = True
+            elif layer.type == trt.LayerType.UNARY:
+                try:
+                    if layer.op in [trt.UnaryOperation.POW, trt.UnaryOperation.EXP, trt.UnaryOperation.LOG]:
+                        is_unsafe = True
+                except Exception:
+                    pass
+
+            if is_unsafe:
+                try:
+                    layer.precision = trt.DataType.FLOAT
+                    for j in range(layer.num_outputs):
+                        if layer.get_output(j).is_execution_tensor:
+                            layer.set_output_type(j, trt.DataType.FLOAT)
+                except Exception:
+                    pass
 
     # Set fixed optimisation profile for batch=1.
     profile = builder.create_optimization_profile()
@@ -173,13 +201,20 @@ class TRTInferenceContext:
         input_shape = engine.get_tensor_shape(self.input_name)
         output_shape = engine.get_tensor_shape(self.output_name)
 
-        # Pre-allocate device buffers via PyTorch (easiest CUDA alloc).
-        torch_dtype = torch.float16 if dtype == np.float16 else torch.float32
+        # Pre-allocate device buffers via PyTorch. Query actual dtype from engine
+        # since ONNX parser may preserve FP32 I/O bindings even if engine uses FP16 internally.
+        trt_to_torch = {
+            trt.DataType.FLOAT: torch.float32,
+            trt.DataType.HALF: torch.float16,
+        }
+        in_dtype = trt_to_torch[engine.get_tensor_dtype(self.input_name)]
+        out_dtype = trt_to_torch[engine.get_tensor_dtype(self.output_name)]
+
         self.d_input = torch.empty(
-            tuple(input_shape), dtype=torch_dtype, device="cuda"
+            tuple(input_shape), dtype=in_dtype, device="cuda"
         )
         self.d_output = torch.empty(
-            tuple(output_shape), dtype=torch_dtype, device="cuda"
+            tuple(output_shape), dtype=out_dtype, device="cuda"
         )
 
         # Bind addresses.
@@ -192,15 +227,19 @@ class TRTInferenceContext:
 
     def infer(self, host_input: np.ndarray) -> torch.Tensor:
         """Copy input H→D, run inference, return device output tensor."""
-        self.d_input.copy_(
-            torch.from_numpy(host_input).to(self.d_input.device)
-        )
+        # Convert numpy to the expected torch tensor on device
+        t = torch.from_numpy(host_input).to(self.d_input.device)
+        if t.dtype != self.d_input.dtype:
+            t = t.to(self.d_input.dtype)
+        self.d_input.copy_(t, non_blocking=True)
         self.context.execute_async_v3(self.stream.cuda_stream)
         self.stream.synchronize()
         return self.d_output
 
     def infer_from_device(self, device_input: torch.Tensor) -> torch.Tensor:
         """Run inference with input already on device."""
+        if device_input.dtype != self.d_input.dtype:
+            device_input = device_input.to(self.d_input.dtype)
         self.d_input.copy_(device_input)
         self.context.execute_async_v3(self.stream.cuda_stream)
         self.stream.synchronize()
