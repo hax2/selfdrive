@@ -19,7 +19,7 @@ fi
 
 extract_dir="$(mktemp -d "$root_dir/.cat_extract.XXXXXX")"
 trap 'rm -rf "$extract_dir"' EXIT
-tar -xzf "$archive" -C "$extract_dir"
+tar --no-same-owner -xzf "$archive" -C "$extract_dir"
 
 source_dir=""
 for candidate in "$extract_dir/CAT" "$extract_dir/CaT" "$extract_dir/cat"; do
@@ -38,6 +38,6 @@ fi
 
 rm -rf "$dataset_dir"
 mkdir -p "$dataset_dir"
-cp -a "$source_dir"/. "$dataset_dir"/
+cp -R "$source_dir"/. "$dataset_dir"/
 rm -f "$archive"
 echo "Downloaded and extracted CaT: $dataset_dir"

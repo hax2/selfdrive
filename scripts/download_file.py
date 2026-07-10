@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -13,7 +14,15 @@ def download(url: str, destination: Path) -> None:
         headers["Range"] = f"bytes={existing_size}-"
 
     request = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(request) as response:
+    try:
+        response_context = urllib.request.urlopen(request)
+    except urllib.error.HTTPError as error:
+        if error.code == 416 and existing_size:
+            print(f"Download already complete: {destination}")
+            return
+        raise
+
+    with response_context as response:
         resume = existing_size > 0 and response.status == 206
         mode = "ab" if resume else "wb"
         downloaded = existing_size if resume else 0
@@ -32,4 +41,3 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         raise SystemExit(f"Usage: {sys.argv[0]} URL DESTINATION")
     download(sys.argv[1], Path(sys.argv[2]))
-
