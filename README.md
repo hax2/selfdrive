@@ -94,6 +94,20 @@ tail -f realtime_comparison_suite.log
 Completed seed-1337 runs are reused. Generated repeat-seed configurations are
 saved under `configs/generated/realtime/`.
 
+Run the same seven models and three seeds with the blue+green traversability
+policy in separate output directories:
+
+```bash
+nohup bash scripts/run_realtime_blue_green_suite.sh > realtime_blue_green_suite.log 2>&1 < /dev/null &
+echo $! > realtime_blue_green_suite.pid
+tail -f realtime_blue_green_suite.log
+```
+
+The blue+green suite omits duplicate latency benchmarks because changing the
+label mapping does not change any model architecture or inference operation.
+Generated configurations are saved under
+`configs/generated/realtime_blue_green/`.
+
 The suite is resumable: experiments with an existing `test_metrics.json` are skipped. It runs:
 
 - Controlled ROD seeds `1337`, `2027`, and `4242` for blue-only and blue+green.
