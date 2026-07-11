@@ -643,6 +643,46 @@ aggregated confusion matrix (pixel-level TP, FP, TN, FN across the entire test s
 and test loss (combined CE~+~Dice).
 Inference speed is measured separately as forward-pass-only latency (excluding I/O) on the target hardware.
 
+\subsection{Result Provenance and Reproduction Protocol}
+\label{sec:result_provenance}
+
+Every headline result is tied to five concrete artifacts: the processed split
+manifest, the complete YAML configuration, the saved checkpoint, the evaluation
+implementation, and the resulting JSON metrics file.  Training and validation
+use only the original CaT training partition.  The checkpoint saved as
+\texttt{best.pt} is selected by validation mIoU.  The original CaT test
+partition is excluded from checkpoint selection, threshold fitting, and model
+updates.  Final evaluation loads the saved checkpoint with
+\texttt{map\_location=cpu}, restores its model state and class weights, switches
+the network to evaluation mode, disables gradient computation, and traverses
+the test dataset once in deterministic order with shuffling disabled.  Metrics
+are computed from one pixel-level confusion matrix accumulated across all 544
+test images.  Re-running evaluation can overwrite the JSON report; it does not
+modify the checkpoint.
+
+For the frozen PIDNet-S headline result, the artifact chain is:
+\begin{itemize}[nosep]
+  \item split manifest: \texttt{data\_processed\_blue\_green/manifest.json};
+  \item portable configuration: \texttt{configs/frozen\_pidnet\_cat.yaml};
+  \item checkpoint: \texttt{outputs/controlled\_ablation\_augment\_off/checkpoints/best.pt};
+  \item evaluator and metric definitions: \texttt{src/ttfm/eval.py} and
+        \texttt{src/ttfm/metrics.py};
+  \item saved result: \texttt{outputs/controlled\_ablation\_augment\_off/test\_metrics.json}.
+\end{itemize}
+The checkpoint, configuration, and manifest SHA-256 digests are recorded in
+\texttt{reports/reproducibility\_baseline.md}.  The frozen checkpoint digest is
+\texttt{b9862fe4\ldots591f471}; the manifest digest is
+\texttt{198fef93\ldots201fa2}.  The exact re-evaluation command is:
+\begin{verbatim}
+PYTHONPATH=src python -m ttfm.cli \
+  --config configs/frozen_pidnet_cat.yaml eval --split test
+\end{verbatim}
+Two independent CPU re-evaluations produced the same confusion counts and
+headline values: mIoU 0.8939407, FSR 0.0431759, and FBR 0.0703687.  This
+artifact-level procedure is applied to each architecture and seed in the final
+comparison; aggregate tables are generated only after every constituent JSON
+report has passed the same provenance check.
+
 
 % ============================================================
 \chapter{Experiments}
