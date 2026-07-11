@@ -5,7 +5,7 @@ reports_dir: reports
 configs_dir: configs
 outputs_dir: outputs
 dataset_name: mixed
-experiment_name: mixed_binary_traversability_smp_fpn_mobilenetv2
+experiment_name: mixed_binary_traversability_segformer_b0_blue
 
 preprocessing:
   val_fraction: 0.2
@@ -13,7 +13,8 @@ preprocessing:
   mapping_filename: discovered_mapping_blue.yaml
 
 training:
-  model_name: smp:FPN:mobilenet_v2
+  model_name: smp:Segformer:mit_b0
+  encoder_weights: imagenet
   input_size: [640, 384]
   batch_size: 4
   epochs: 15

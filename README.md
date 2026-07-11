@@ -64,6 +64,23 @@ echo $! > rod_suite.pid
 tail -f rod_suite.log
 ```
 
+## Additional Real-Time Baselines
+
+The optional blue-only real-time suite trains SegFormer-B0, DDRNet-23-Slim,
+and BiSeNetV2 under the same split, resolution, loss, seed, and 15-epoch budget.
+It skips completed runs and writes a batch-one GPU benchmark for each model.
+
+```bash
+nohup bash scripts/run_modern_realtime_suite.sh > modern_realtime_suite.log 2>&1 < /dev/null &
+echo $! > modern_realtime_suite.pid
+tail -f modern_realtime_suite.log
+```
+
+SegFormer-B0 and BiSeNetV2 use pretrained backbones. DDRNet-23-Slim is trained
+from scratch because its official ImageNet checkpoint is not distributed through
+a stable programmatic URL. Keep that initialization difference explicit when
+interpreting the results.
+
 The suite is resumable: experiments with an existing `test_metrics.json` are skipped. It runs:
 
 - Controlled ROD seeds `1337`, `2027`, and `4242` for blue-only and blue+green.
