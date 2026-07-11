@@ -81,6 +81,19 @@ from scratch because its official ImageNet checkpoint is not distributed through
 a stable programmatic URL. Keep that initialization difference explicit when
 interpreting the results.
 
+For the complete comparison, including the full FPN/U-Net by
+MobileNetV2/EfficientNet-B0 2x2 design and seeds 1337, 2027, and 4242 for
+every lightweight model, run:
+
+```bash
+nohup bash scripts/run_realtime_comparison_suite.sh > realtime_comparison_suite.log 2>&1 < /dev/null &
+echo $! > realtime_comparison_suite.pid
+tail -f realtime_comparison_suite.log
+```
+
+Completed seed-1337 runs are reused. Generated repeat-seed configurations are
+saved under `configs/generated/realtime/`.
+
 The suite is resumable: experiments with an existing `test_metrics.json` are skipped. It runs:
 
 - Controlled ROD seeds `1337`, `2027`, and `4242` for blue-only and blue+green.
