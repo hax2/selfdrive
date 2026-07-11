@@ -60,12 +60,15 @@ def run_benchmark(
     requested_device: str,
     threads: int | None,
     compile: bool = False,
+    checkpoint_override: Path | None = None,
 ) -> dict[str, Any]:
     if threads is not None:
         torch.set_num_threads(threads)
 
     config = load_yaml(config_path)
-    checkpoint_path = Path(config["outputs_dir"]) / config["experiment_name"] / "checkpoints" / "best.pt"
+    checkpoint_path = checkpoint_override or (
+        Path(config["outputs_dir"]) / config["experiment_name"] / "checkpoints" / "best.pt"
+    )
     checkpoint = torch.load(checkpoint_path, map_location="cpu")
 
     device = _resolve_device(requested_device)
@@ -152,6 +155,7 @@ def main() -> None:
     parser.add_argument("--threads", type=int, default=None, help="Override torch CPU thread count, e.g. 4 for a small robot CPU.")
     parser.add_argument("--compile", action="store_true", help="Compile model via torch.compile")
     parser.add_argument("--output", default="reports/gpu_inference_benchmark.json")
+    parser.add_argument("--checkpoint", type=Path, default=None, help="Override the checkpoint path from the config.")
     args = parser.parse_args()
 
     payload = run_benchmark(
@@ -164,6 +168,7 @@ def main() -> None:
         args.device,
         args.threads,
         args.compile,
+        args.checkpoint,
     )
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
