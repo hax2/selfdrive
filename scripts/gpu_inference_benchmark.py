@@ -59,6 +59,7 @@ def run_benchmark(
     limit: int | None,
     requested_device: str,
     threads: int | None,
+    compile: bool = False,
 ) -> dict[str, Any]:
     if threads is not None:
         torch.set_num_threads(threads)
@@ -75,6 +76,10 @@ def run_benchmark(
     ).to(device)
     model.load_state_dict(checkpoint["model_state"])
     model.eval()
+
+    if compile:
+        print("Compiling model via torch.compile...")
+        model = torch.compile(model)
 
     width, height = config["training"]["input_size"]
     threshold = float(config.get("postprocessing", {}).get("traversable_threshold", 0.5))
@@ -130,6 +135,7 @@ def run_benchmark(
         "latency_ms_mean_per_image": float(np.mean(per_image_ms)),
         "latency_ms_p50_per_image": percentile(per_image_ms, 0.50),
         "latency_ms_p95_per_image": percentile(per_image_ms, 0.95),
+        "compiled": compile,
         "note": "Forward pass only: no mask writing, overlay writing, or disk output. Use --device cpu --batch-size 1 for robot-style CPU latency.",
     }
 
@@ -144,6 +150,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=128)
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--threads", type=int, default=None, help="Override torch CPU thread count, e.g. 4 for a small robot CPU.")
+    parser.add_argument("--compile", action="store_true", help="Compile model via torch.compile")
     parser.add_argument("--output", default="reports/gpu_inference_benchmark.json")
     args = parser.parse_args()
 
@@ -156,6 +163,7 @@ def main() -> None:
         args.limit,
         args.device,
         args.threads,
+        args.compile,
     )
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
