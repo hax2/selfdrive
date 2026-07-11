@@ -1,6 +1,7 @@
 {
   "aggregates": [
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": true,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -78,6 +79,7 @@
       "trainable_parameters": 5759614
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": true,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -155,6 +157,7 @@
       "trainable_parameters": 6251614
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": true,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -232,6 +235,7 @@
       "trainable_parameters": 4215554
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": true,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -309,6 +313,7 @@
       "trainable_parameters": 3714658
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": true,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -386,6 +391,7 @@
       "trainable_parameters": 6629090
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": false,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -463,6 +469,7 @@
       "trainable_parameters": 6752386
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": true,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -540,6 +547,7 @@
       "trainable_parameters": 3341202
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": false,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -617,6 +625,7 @@
       "trainable_parameters": 7623522
     },
     {
+      "all_checkpoint_hashes_recorded": true,
       "all_checkpoints_available": true,
       "all_metrics_integrity_checks_passed": true,
       "controlled_seed_configs": true,
@@ -701,47 +710,17 @@
     "all_seed_configs_controlled": true,
     "expected_models": 9,
     "expected_runs": 27,
-    "missing_checkpoint_hashes": [
-      {
-        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware/checkpoints/best.pt",
-        "model": "PIDNet-S",
-        "seed": 1337
-      },
-      {
-        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed2027/checkpoints/best.pt",
-        "model": "PIDNet-S",
-        "seed": 2027
-      },
-      {
-        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed4242/checkpoints/best.pt",
-        "model": "PIDNet-S",
-        "seed": 4242
-      },
-      {
-        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue/checkpoints/best.pt",
-        "model": "ROD ViT-S",
-        "seed": 1337
-      },
-      {
-        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed2027/checkpoints/best.pt",
-        "model": "ROD ViT-S",
-        "seed": 2027
-      },
-      {
-        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed4242/checkpoints/best.pt",
-        "model": "ROD ViT-S",
-        "seed": 4242
-      }
-    ]
+    "missing_checkpoint_hashes": []
   },
   "generator_script": "./scripts/build_blue_only_ledger.py",
-  "generator_script_sha256": "1cbf7a626ace266c65cb160f03fd967b5d6b50c836b523b5324644d1374a29a4",
+  "generator_script_sha256": "6e2b1607c974f837871fbc0fd5ee2683add8a888889b2852413368c1e0ca4b12",
   "policy": "blue_only",
   "positive_class": "CaT blue/sedan traversable; black, green, and red untraversable",
   "realtime_suite_commit": "ffe68ea514df744aa6fe082257f1c3dabccf8b78",
   "runs": [
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2/checkpoints/best.pt",
       "checkpoint_sha256": "858491446422f28155f58c0113e9836b0cfcf95dbfc2295f5e7a8f54fec47d2a",
       "config_path": "realtime_comparison_results/configs/smp_fpn_mobilenetv2.yaml",
@@ -783,6 +762,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2_seed2027/checkpoints/best.pt",
       "checkpoint_sha256": "6d9ddc912aa81999e18666e343e27474b8775aed51c5bb61098c2000af057a93",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_mobilenetv2_seed2027.yaml",
@@ -824,6 +804,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2_seed4242/checkpoints/best.pt",
       "checkpoint_sha256": "f525346decf84cb012be7a2082d7d3d2c2d27ef5714134bd746ca3339931b708",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_mobilenetv2_seed4242.yaml",
@@ -865,6 +846,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0/checkpoints/best.pt",
       "checkpoint_sha256": "6ae9aa2a20b7ca918b30e7ed0744f55ce04f3bf4745f203561216709b0d71d6a",
       "config_path": "realtime_comparison_results/configs/smp_fpn_efficientnetb0.yaml",
@@ -906,6 +888,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0_seed2027/checkpoints/best.pt",
       "checkpoint_sha256": "282478d94bfb5840d789ab9f04107c35f4aa37e4bcdc6d466c50db08eaeda3be",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_efficientnetb0_seed2027.yaml",
@@ -947,6 +930,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0_seed4242/checkpoints/best.pt",
       "checkpoint_sha256": "36a1f13cf4252f723a73f25a8ca0acade105d45a543324ef173c6c4cc6e632aa",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_efficientnetb0_seed4242.yaml",
@@ -988,6 +972,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2/checkpoints/best.pt",
       "checkpoint_sha256": "96cb3bbd5c7845ab12c5d9f6640648881596b2c22c4a45f9799b728e5a515599",
       "config_path": "realtime_comparison_results/configs/smp_unet_mobilenetv2.yaml",
@@ -1029,6 +1014,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2_seed2027/checkpoints/best.pt",
       "checkpoint_sha256": "29b3584e235b3efc883f8cb660316a13b1f8fa19cb2424952490336eaf9f60ef",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_mobilenetv2_seed2027.yaml",
@@ -1070,6 +1056,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2_seed4242/checkpoints/best.pt",
       "checkpoint_sha256": "96c8e17816a5bd7843c79a7259d76190d633a2cf12a54e427faa43ff07671159",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_mobilenetv2_seed4242.yaml",
@@ -1111,6 +1098,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0/checkpoints/best.pt",
       "checkpoint_sha256": "24e6fd21b486ac39d5748924fd3619baefbe3b9d70b351259f9ce17b0417a60f",
       "config_path": "realtime_comparison_results/configs/smp_unet_efficientnetb0.yaml",
@@ -1152,6 +1140,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0_seed2027/checkpoints/best.pt",
       "checkpoint_sha256": "a15efda96b049674160f924775e279feba437a19866a175bb6f60b98fa11e08f",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_efficientnetb0_seed2027.yaml",
@@ -1193,6 +1182,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0_seed4242/checkpoints/best.pt",
       "checkpoint_sha256": "6f417583897f08ca5873e2f974174089d4d78d8cb650c7b31ed09ec2ea1bdc91",
       "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_efficientnetb0_seed4242.yaml",
@@ -1234,6 +1224,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue/checkpoints/best.pt",
       "checkpoint_sha256": "25254326e45006cd9093adc8ddfe9e0ec28a6f23a8f6c8b24c35d733400315c6",
       "config_path": "realtime_comparison_results/configs/segformer_b0_cat_blue.yaml",
@@ -1275,6 +1266,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue_seed2027/checkpoints/best.pt",
       "checkpoint_sha256": "5f4de23f1938f727d67b94db4c49b64d7d62ad7271d6879c60325c3a360e9020",
       "config_path": "realtime_comparison_results/configs/generated/realtime/segformer_b0_cat_blue_seed2027.yaml",
@@ -1316,6 +1308,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue_seed4242/checkpoints/best.pt",
       "checkpoint_sha256": "f4eca55c19a2f0a1aaf14fd1bd8895cf390cb440bdb8ba98a859637bd63ee42e",
       "config_path": "realtime_comparison_results/configs/generated/realtime/segformer_b0_cat_blue_seed4242.yaml",
@@ -1357,6 +1350,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue/checkpoints/best.pt",
       "checkpoint_sha256": "079d1d61b788e316dbd4362984d017dc58679959505532a425595320ed28b4bc",
       "config_path": "realtime_comparison_results/configs/ddrnet23_slim_cat_blue.yaml",
@@ -1398,6 +1392,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue_seed2027/checkpoints/best.pt",
       "checkpoint_sha256": "eb73edbac90d134eda1acc45021e166283704bc6e7176ee0cc34103d09da97e5",
       "config_path": "realtime_comparison_results/configs/generated/realtime/ddrnet23_slim_cat_blue_seed2027.yaml",
@@ -1439,6 +1434,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue_seed4242/checkpoints/best.pt",
       "checkpoint_sha256": "455144ea74477e02593a52d5f807fafa829d5f985ca5d434b11ead9a10387c9e",
       "config_path": "realtime_comparison_results/configs/generated/realtime/ddrnet23_slim_cat_blue_seed4242.yaml",
@@ -1480,6 +1476,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue/checkpoints/best.pt",
       "checkpoint_sha256": "808ca5f52eb7c79d931346f6d66c81ea371effa692169aeac68e2dfb3e421d06",
       "config_path": "realtime_comparison_results/configs/bisenetv2_cat_blue.yaml",
@@ -1521,6 +1518,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue_seed2027/checkpoints/best.pt",
       "checkpoint_sha256": "03e6180621fa3321416e2b2a7c8018aca23ada40cdfcd8e81bfbf081438b72ed",
       "config_path": "realtime_comparison_results/configs/generated/realtime/bisenetv2_cat_blue_seed2027.yaml",
@@ -1562,6 +1560,7 @@
     },
     {
       "checkpoint_available": true,
+      "checkpoint_hash_source": "local_file",
       "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue_seed4242/checkpoints/best.pt",
       "checkpoint_sha256": "4751e0dea28c280ec30e4b87aa6e045899c54fc9727bf227f7d8bb60f931c2db",
       "config_path": "realtime_comparison_results/configs/generated/realtime/bisenetv2_cat_blue_seed4242.yaml",
@@ -1603,8 +1602,9 @@
     },
     {
       "checkpoint_available": false,
+      "checkpoint_hash_source": "server_manifest",
       "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware/checkpoints/best.pt",
-      "checkpoint_sha256": null,
+      "checkpoint_sha256": "fdc7ba348fd4e80a86b5b6c780884ba0be7e7834037a243f16aeedd11ab442b7",
       "config_path": "rod_suite_results/configs/pidnet_cat_blue.yaml",
       "config_sha256": "cfb9474515782999d1452ed7844e4e968de8b23265bb2f8655d61bf8cc699982",
       "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware",
@@ -1644,8 +1644,9 @@
     },
     {
       "checkpoint_available": false,
+      "checkpoint_hash_source": "server_manifest",
       "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed2027/checkpoints/best.pt",
-      "checkpoint_sha256": null,
+      "checkpoint_sha256": "f6117515ff91b739f6ae15a785813bff65bba360ced0d6b6f7de4bc4844e5c81",
       "config_path": "rod_suite_results/configs/generated/pidnet_blue_only_seed2027.yaml",
       "config_sha256": "00b263da732d66bec43cef86a539a56910a89916863621fe57c200eb491b756b",
       "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware_seed2027",
@@ -1685,8 +1686,9 @@
     },
     {
       "checkpoint_available": false,
+      "checkpoint_hash_source": "server_manifest",
       "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed4242/checkpoints/best.pt",
-      "checkpoint_sha256": null,
+      "checkpoint_sha256": "649e5f2ab06161bf2d13671f451108f2d8e2486d4665d0229003e1f00ad74676",
       "config_path": "rod_suite_results/configs/generated/pidnet_blue_only_seed4242.yaml",
       "config_sha256": "5803fbe1b399711329713d6ae0da187521f2fe93c8b2e7d0f6d591b1df00b0aa",
       "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware_seed4242",
@@ -1726,8 +1728,9 @@
     },
     {
       "checkpoint_available": false,
+      "checkpoint_hash_source": "server_manifest",
       "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue/checkpoints/best.pt",
-      "checkpoint_sha256": null,
+      "checkpoint_sha256": "90d44f98540f9719a64c2839bac1b77a727c8e0c087dab4c71a6751947fe0998",
       "config_path": "rod_suite_results/configs/rod_vits_cat_blue.yaml",
       "config_sha256": "690bb41319aa5fd950df7c2b6f4a8c2d775757fb5cc404240e07c5187c2bf3be",
       "experiment_name": "mixed_binary_traversability_rod_vits_blue",
@@ -1767,8 +1770,9 @@
     },
     {
       "checkpoint_available": false,
+      "checkpoint_hash_source": "server_manifest",
       "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed2027/checkpoints/best.pt",
-      "checkpoint_sha256": null,
+      "checkpoint_sha256": "03d1161d4eeebe1fcbcbcb4e6f7582211f2b6cd50214ce3a00739fb7afb45e94",
       "config_path": "rod_suite_results/configs/generated/rod_blue_only_seed2027.yaml",
       "config_sha256": "e2c5d40c2f79ea4b9c80ef6e3166a3feb73adc0f9c032179735f09f98a2d2fac",
       "experiment_name": "mixed_binary_traversability_rod_vits_blue_seed2027",
@@ -1808,8 +1812,9 @@
     },
     {
       "checkpoint_available": false,
+      "checkpoint_hash_source": "server_manifest",
       "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed4242/checkpoints/best.pt",
-      "checkpoint_sha256": null,
+      "checkpoint_sha256": "a8ae789d3a32b97846404fbdd87d69813669a14b467d24ab1655a438675c507d",
       "config_path": "rod_suite_results/configs/generated/rod_blue_only_seed4242.yaml",
       "config_sha256": "2eb66d17d10ca2bcca55ba6d20bd7dc01b68445d728ee9d4588b63c2f6fa7c2e",
       "experiment_name": "mixed_binary_traversability_rod_vits_blue_seed4242",

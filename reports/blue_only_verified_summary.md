@@ -20,7 +20,7 @@ H100 and Ryzen throughput use batch 1 and 640 x 384 input. Throughput is forward
 - Runs present: 27/27
 - Metric integrity checks: PASS
 - Seed-only configuration checks: PASS
-- Checkpoint hashes present: 21/27
-- Missing hashes are the three controlled PIDNet-S and three controlled ROD checkpoints omitted from the earlier download bundle; recover them from the server before publication.
+- Checkpoint hashes present: 27/27
+- The six controlled PIDNet-S and ROD checkpoints were omitted from the earlier download bundle; their SHA-256 values were recovered directly from the retained server files and recorded in `blue_only_legacy_checkpoint_sha256.txt`.
 
 Detailed per-run paths and SHA-256 values: `blue_only_verified_ledger.json`.

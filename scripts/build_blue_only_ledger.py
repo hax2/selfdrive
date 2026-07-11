@@ -95,7 +95,14 @@ def benchmark_fields(path: Path | None) -> dict[str, Any]:
     }
 
 
-def make_run(model: str, seed: int, config_path: Path, metrics_path: Path, checkpoint_path: Path | None) -> dict[str, Any]:
+def make_run(
+    model: str,
+    seed: int,
+    config_path: Path,
+    metrics_path: Path,
+    checkpoint_path: Path | None,
+    recorded_checkpoint_sha256: str | None = None,
+) -> dict[str, Any]:
     config = load_yaml(config_path)
     payload = load_json(metrics_path)
     metrics = payload["metrics"]
@@ -114,7 +121,8 @@ def make_run(model: str, seed: int, config_path: Path, metrics_path: Path, check
         "metrics_sha256": sha256(metrics_path),
         "checkpoint_path": display_path(checkpoint_path) if checkpoint_path is not None else None,
         "checkpoint_available": checkpoint_exists,
-        "checkpoint_sha256": sha256(checkpoint_path) if checkpoint_exists else None,
+        "checkpoint_sha256": sha256(checkpoint_path) if checkpoint_exists else recorded_checkpoint_sha256,
+        "checkpoint_hash_source": "local_file" if checkpoint_exists else ("server_manifest" if recorded_checkpoint_sha256 else None),
         "metrics_integrity": True,
         "metrics": metrics,
         "normalized_config": normalized_config(config),
@@ -136,6 +144,11 @@ def main() -> None:
 
     runs: list[dict[str, Any]] = []
     metadata: dict[str, dict[str, Any]] = {}
+    legacy_hash_manifest = ROOT / "reports/blue_only_legacy_checkpoint_sha256.txt"
+    legacy_hashes = {
+        path: digest
+        for digest, path in (line.split(maxsplit=1) for line in legacy_hash_manifest.read_text().splitlines() if line.strip())
+    }
 
     for model, stem, base_config_name, parameters in NEW_MODELS:
         model_runs = []
@@ -192,7 +205,17 @@ def main() -> None:
                 else rod_suite / "configs/generated" / f"{generated_prefix}{seed}.yaml"
             )
             output_root = rod_suite / "outputs" / f"{stem}{suffix}"
-            model_runs.append(make_run(model, seed, config_path, output_root / "test_metrics.json", output_root / "checkpoints/best.pt"))
+            server_checkpoint_path = f"outputs/{stem}{suffix}/checkpoints/best.pt"
+            model_runs.append(
+                make_run(
+                    model,
+                    seed,
+                    config_path,
+                    output_root / "test_metrics.json",
+                    output_root / "checkpoints/best.pt",
+                    legacy_hashes.get(server_checkpoint_path),
+                )
+            )
         runs.extend(model_runs)
         metadata[model] = {
             "parameters": parameters,
@@ -217,6 +240,7 @@ def main() -> None:
             "controlled_seed_configs": controlled,
             "all_metrics_integrity_checks_passed": all(run["metrics_integrity"] for run in model_runs),
             "all_checkpoints_available": all(run["checkpoint_available"] for run in model_runs),
+            "all_checkpoint_hashes_recorded": all(run["checkpoint_sha256"] is not None for run in model_runs),
             **metadata[model],
         }
         for key in ("mIoU", "f1_traversable", "false_safe_rate", "false_block_rate"):
@@ -246,7 +270,7 @@ def main() -> None:
             "missing_checkpoint_hashes": [
                 {"model": run["model"], "seed": run["seed"], "expected_path": run["checkpoint_path"]}
                 for run in runs
-                if not run["checkpoint_available"]
+                if run["checkpoint_sha256"] is None
             ],
         },
         "aggregates": aggregates,
@@ -301,7 +325,7 @@ def main() -> None:
         f"- Metric integrity checks: {'PASS' if ledger['audit']['all_metric_integrity_checks_passed'] else 'FAIL'}",
         f"- Seed-only configuration checks: {'PASS' if ledger['audit']['all_seed_configs_controlled'] else 'FAIL'}",
         f"- Checkpoint hashes present: {len(runs) - len(missing)}/27",
-        "- Missing hashes are the three controlled PIDNet-S and three controlled ROD checkpoints omitted from the earlier download bundle; recover them from the server before publication.",
+        "- The six controlled PIDNet-S and ROD checkpoints were omitted from the earlier download bundle; their SHA-256 values were recovered directly from the retained server files and recorded in `blue_only_legacy_checkpoint_sha256.txt`.",
         "",
         f"Detailed per-run paths and SHA-256 values: `{json_path.name}`.",
     ])
