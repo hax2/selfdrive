@@ -1,0 +1,30 @@
+seed: 4242
+raw_root: CAT
+processed_root: data_processed_blue
+reports_dir: reports
+configs_dir: configs
+outputs_dir: outputs
+dataset_name: mixed
+experiment_name: mixed_binary_traversability_pidnet_blue_hardware_seed4242
+preprocessing:
+  val_fraction: 0.2
+  traversable_palette_names:
+  - blue
+  mapping_filename: discovered_mapping_blue.yaml
+training:
+  model_name: pidnet-s
+  input_size:
+  - 640
+  - 384
+  batch_size: 4
+  epochs: 15
+  learning_rate: 0.00025
+  min_learning_rate: 1.0e-05
+  weight_decay: 0.0001
+  mixed_precision: bf16
+  num_workers: 4
+  augment: true
+  untraversable_weight_bias: 2.5
+  traversable_weight_bias: 0.75
+postprocessing:
+  traversable_threshold: 0.5

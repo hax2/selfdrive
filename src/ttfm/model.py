@@ -28,4 +28,23 @@ def build_model(
         from .rod import RODSegNet
 
         return RODSegNet(num_classes=num_classes, model_config=model_config)
+    if model_name.startswith("smp:"):
+        import segmentation_models_pytorch as smp
+        
+        # Expected format: smp:arch:encoder_name, e.g. smp:FPN:mobilenet_v3_small
+        parts = model_name.split(":")
+        if len(parts) != 3:
+            raise ValueError(f"Invalid smp model name format: {model_name}. Expected smp:arch:encoder.")
+        
+        arch = parts[1]
+        encoder = parts[2]
+        
+        return smp.create_model(
+            arch=arch,
+            encoder_name=encoder,
+            encoder_weights="imagenet",
+            in_channels=3,
+            classes=num_classes,
+        )
+        
     raise ValueError(f"Unsupported model_name: {model_name}")

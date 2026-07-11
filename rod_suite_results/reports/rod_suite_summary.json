@@ -1,0 +1,697 @@
+{
+  "benchmarks": {
+    "rod_suite_benchmark_pidnet_blue_green": {
+      "batch_size": 1,
+      "checkpoint": "outputs/mixed_binary_traversability_pidnet_hardware/checkpoints/best.pt",
+      "config": "configs/pidnet_cat.yaml",
+      "cpu": "x86_64",
+      "cuda_available": true,
+      "cuda_device_name": "NVIDIA H100 NVL MIG 3g.47gb",
+      "device": "cuda",
+      "fps": 272.00115069395576,
+      "images_per_repeat": 128,
+      "input_dir": "data_processed_blue_green/test/images",
+      "latency_ms_mean_per_image": 3.668968239799142,
+      "latency_ms_p50_per_image": 3.662882372736931,
+      "latency_ms_p95_per_image": 3.696814179420471,
+      "note": "Forward pass only: no mask writing, overlay writing, or disk output. Use --device cpu --batch-size 1 for robot-style CPU latency.",
+      "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.35",
+      "python": "3.11.4",
+      "repeats": 10,
+      "requested_device": "cuda",
+      "torch": "2.13.0+cu130",
+      "torch_num_threads": 48,
+      "total_images": 1280,
+      "total_seconds": 4.7058624448254704,
+      "warmup": 5
+    },
+    "rod_suite_benchmark_pidnet_blue_only": {
+      "batch_size": 1,
+      "checkpoint": "outputs/mixed_binary_traversability_pidnet_blue_hardware/checkpoints/best.pt",
+      "config": "configs/pidnet_cat_blue.yaml",
+      "cpu": "x86_64",
+      "cuda_available": true,
+      "cuda_device_name": "NVIDIA H100 NVL MIG 3g.47gb",
+      "device": "cuda",
+      "fps": 270.3845312905148,
+      "images_per_repeat": 128,
+      "input_dir": "data_processed_blue/test/images",
+      "latency_ms_mean_per_image": 3.6906804860336706,
+      "latency_ms_p50_per_image": 3.6366814747452736,
+      "latency_ms_p95_per_image": 4.057141020894051,
+      "note": "Forward pass only: no mask writing, overlay writing, or disk output. Use --device cpu --batch-size 1 for robot-style CPU latency.",
+      "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.35",
+      "python": "3.11.4",
+      "repeats": 10,
+      "requested_device": "cuda",
+      "torch": "2.13.0+cu130",
+      "torch_num_threads": 48,
+      "total_images": 1280,
+      "total_seconds": 4.733998627401888,
+      "warmup": 5
+    },
+    "rod_suite_benchmark_rod_blue_green": {
+      "batch_size": 1,
+      "checkpoint": "outputs/mixed_binary_traversability_rod_vits/checkpoints/best.pt",
+      "config": "configs/rod_vits_cat.yaml",
+      "cpu": "x86_64",
+      "cuda_available": true,
+      "cuda_device_name": "NVIDIA H100 NVL MIG 3g.47gb",
+      "device": "cuda",
+      "fps": 21.801453868676347,
+      "images_per_repeat": 128,
+      "input_dir": "data_processed_blue_green/test/images",
+      "latency_ms_mean_per_image": 45.859054484026274,
+      "latency_ms_p50_per_image": 45.85782252252102,
+      "latency_ms_p95_per_image": 45.89909594506025,
+      "note": "Forward pass only: no mask writing, overlay writing, or disk output. Use --device cpu --batch-size 1 for robot-style CPU latency.",
+      "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.35",
+      "python": "3.11.4",
+      "repeats": 10,
+      "requested_device": "cuda",
+      "torch": "2.13.0+cu130",
+      "torch_num_threads": 48,
+      "total_images": 1280,
+      "total_seconds": 58.71168077643961,
+      "warmup": 5
+    },
+    "rod_suite_benchmark_rod_blue_only": {
+      "batch_size": 1,
+      "checkpoint": "outputs/mixed_binary_traversability_rod_vits_blue/checkpoints/best.pt",
+      "config": "configs/rod_vits_cat_blue.yaml",
+      "cpu": "x86_64",
+      "cuda_available": true,
+      "cuda_device_name": "NVIDIA H100 NVL MIG 3g.47gb",
+      "device": "cuda",
+      "fps": 21.793652701039072,
+      "images_per_repeat": 128,
+      "input_dir": "data_processed_blue/test/images",
+      "latency_ms_mean_per_image": 45.87555171747226,
+      "latency_ms_p50_per_image": 45.87323870509863,
+      "latency_ms_p95_per_image": 45.91633193194866,
+      "note": "Forward pass only: no mask writing, overlay writing, or disk output. Use --device cpu --batch-size 1 for robot-style CPU latency.",
+      "platform": "Linux-6.8.0-117-generic-x86_64-with-glibc2.35",
+      "python": "3.11.4",
+      "repeats": 10,
+      "requested_device": "cuda",
+      "torch": "2.13.0+cu130",
+      "torch_num_threads": 48,
+      "total_images": 1280,
+      "total_seconds": 58.73269697185606,
+      "warmup": 5
+    }
+  },
+  "controlled_pidnet_seeds": {
+    "blue_green": {
+      "aggregate": {
+        "f1_traversable": {
+          "max": 0.9282730437890276,
+          "mean": 0.9280697036061933,
+          "min": 0.9278989457327602,
+          "std_population": 0.0001544528926894361
+        },
+        "false_block_rate": {
+          "max": 0.08347211131261671,
+          "mean": 0.07665959543320491,
+          "min": 0.07068307835722139,
+          "std_population": 0.005254459152824202
+        },
+        "false_safe_rate": {
+          "max": 0.05460582981795275,
+          "mean": 0.049764591254684465,
+          "min": 0.04414672292322006,
+          "std_population": 0.004305081850286355
+        },
+        "mIoU": {
+          "max": 0.8825623362545211,
+          "mean": 0.8822229442228839,
+          "min": 0.8820118906601956,
+          "std_population": 0.00024235051755278948
+        }
+      },
+      "runs": [
+        {
+          "config": "configs/pidnet_cat.yaml",
+          "experiment_name": "mixed_binary_traversability_pidnet_hardware",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 4045992,
+              "fp": 4174732,
+              "tn": 72277398,
+              "tp": 53195318
+            },
+            "confusion_matrix": [
+              [
+                72277398,
+                4174732
+              ],
+              [
+                4045992,
+                53195318
+              ]
+            ],
+            "f1_traversable": 0.9282730437890276,
+            "false_block_rate": 0.07068307835722139,
+            "false_safe_rate": 0.05460582981795275,
+            "fbr_traversable": 0.07068307835722139,
+            "iou_traversable": 0.8661469588027181,
+            "iou_untraversable": 0.8978768225176731,
+            "mIoU": 0.8820118906601956,
+            "precision_traversable": 0.9272315084264351,
+            "recall_traversable": 0.9293169216427786
+          },
+          "seed": 1337
+        },
+        {
+          "config": "configs/generated/pidnet_blue_green_seed2027.yaml",
+          "experiment_name": "mixed_binary_traversability_pidnet_hardware_seed2027",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 4340242,
+              "fp": 3863984,
+              "tn": 72588146,
+              "tp": 52901068
+            },
+            "confusion_matrix": [
+              [
+                72588146,
+                3863984
+              ],
+              [
+                4340242,
+                52901068
+              ]
+            ],
+            "f1_traversable": 0.9280371212967922,
+            "false_block_rate": 0.07582359662977664,
+            "false_safe_rate": 0.05054122102288059,
+            "fbr_traversable": 0.07582359662977664,
+            "iou_traversable": 0.8657362486464757,
+            "iou_untraversable": 0.8984529628613949,
+            "mIoU": 0.8820946057539353,
+            "precision_traversable": 0.9319302305932883,
+            "recall_traversable": 0.9241764033702233
+          },
+          "seed": 2027
+        },
+        {
+          "config": "configs/generated/pidnet_blue_green_seed4242.yaml",
+          "experiment_name": "mixed_binary_traversability_pidnet_hardware_seed4242",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 4778053,
+              "fp": 3375111,
+              "tn": 73077019,
+              "tp": 52463257
+            },
+            "confusion_matrix": [
+              [
+                73077019,
+                3375111
+              ],
+              [
+                4778053,
+                52463257
+              ]
+            ],
+            "f1_traversable": 0.9278989457327602,
+            "false_block_rate": 0.08347211131261671,
+            "false_safe_rate": 0.04414672292322006,
+            "fbr_traversable": 0.08347211131261671,
+            "iou_traversable": 0.8654957870244434,
+            "iou_untraversable": 0.8996288854845987,
+            "mIoU": 0.8825623362545211,
+            "precision_traversable": 0.9395557011981439,
+            "recall_traversable": 0.9165278886873833
+          },
+          "seed": 4242
+        }
+      ]
+    },
+    "blue_only": {
+      "aggregate": {
+        "f1_traversable": {
+          "max": 0.9107479458695154,
+          "mean": 0.9092822071872251,
+          "min": 0.907448644149557,
+          "std_population": 0.0013718160778415766
+        },
+        "false_block_rate": {
+          "max": 0.09403457553352469,
+          "mean": 0.08966180937481127,
+          "min": 0.08459638950102218,
+          "std_population": 0.00388412716688383
+        },
+        "false_safe_rate": {
+          "max": 0.03650739997482059,
+          "mean": 0.03527521432179476,
+          "min": 0.03295509788748571,
+          "std_population": 0.0016416267477857758
+        },
+        "mIoU": {
+          "max": 0.8847394424510382,
+          "mean": 0.8831567226989808,
+          "min": 0.8809013515618087,
+          "std_population": 0.0016374940881153848
+        }
+      },
+      "runs": [
+        {
+          "config": "configs/pidnet_cat_blue.yaml",
+          "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 3348439,
+              "fp": 3527875,
+              "tn": 93106643,
+              "tp": 33710483
+            },
+            "confusion_matrix": [
+              [
+                93106643,
+                3527875
+              ],
+              [
+                3348439,
+                33710483
+              ]
+            ],
+            "f1_traversable": 0.907448644149557,
+            "false_block_rate": 0.09035446308988697,
+            "false_safe_rate": 0.03650739997482059,
+            "fbr_traversable": 0.09035446308988697,
+            "iou_traversable": 0.8305775644232286,
+            "iou_untraversable": 0.9312251387003887,
+            "mIoU": 0.8809013515618087,
+            "precision_traversable": 0.9052623372921008,
+            "recall_traversable": 0.9096455369101131
+          },
+          "seed": 1337
+        },
+        {
+          "config": "configs/generated/pidnet_blue_only_seed2027.yaml",
+          "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware_seed2027",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 3135051,
+              "fp": 3513935,
+              "tn": 93120583,
+              "tp": 33923871
+            },
+            "confusion_matrix": [
+              [
+                93120583,
+                3513935
+              ],
+              [
+                3135051,
+                33923871
+              ]
+            ],
+            "f1_traversable": 0.9107479458695154,
+            "false_block_rate": 0.08459638950102218,
+            "false_safe_rate": 0.03636314510307797,
+            "fbr_traversable": 0.08459638950102218,
+            "iou_traversable": 0.8361223120176131,
+            "iou_untraversable": 0.9333565728844634,
+            "mIoU": 0.8847394424510382,
+            "precision_traversable": 0.9061393982328986,
+            "recall_traversable": 0.9154036104989778
+          },
+          "seed": 2027
+        },
+        {
+          "config": "configs/generated/pidnet_blue_only_seed4242.yaml",
+          "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware_seed4242",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 3484820,
+              "fp": 3184600,
+              "tn": 93449918,
+              "tp": 33574102
+            },
+            "confusion_matrix": [
+              [
+                93449918,
+                3184600
+              ],
+              [
+                3484820,
+                33574102
+              ]
+            ],
+            "f1_traversable": 0.9096500315426029,
+            "false_block_rate": 0.09403457553352469,
+            "false_safe_rate": 0.03295509788748571,
+            "fbr_traversable": 0.09403457553352469,
+            "iou_traversable": 0.8342734515135132,
+            "iou_untraversable": 0.9333852966546783,
+            "mIoU": 0.8838293740840957,
+            "precision_traversable": 0.9133647319755741,
+            "recall_traversable": 0.9059654244664753
+          },
+          "seed": 4242
+        }
+      ]
+    }
+  },
+  "controlled_rod_seeds": {
+    "blue_green": {
+      "aggregate": {
+        "f1_traversable": {
+          "max": 0.9485071090454952,
+          "mean": 0.9482289796061255,
+          "min": 0.9478600937735172,
+          "std_population": 0.0002718268232146284
+        },
+        "false_block_rate": {
+          "max": 0.05962340833918721,
+          "mean": 0.05623676909793527,
+          "min": 0.05100183765885162,
+          "std_population": 0.003754553527423268
+        },
+        "false_safe_rate": {
+          "max": 0.03896138668732971,
+          "mean": 0.03505205588560231,
+          "min": 0.03281875861405038,
+          "std_population": 0.0027736601819454056
+        },
+        "mIoU": {
+          "max": 0.9140283384014479,
+          "mean": 0.9137570488021668,
+          "min": 0.9133689896076296,
+          "std_population": 0.0002815570537323271
+        }
+      },
+      "runs": [
+        {
+          "config": "configs/rod_vits_cat.yaml",
+          "experiment_name": "mixed_binary_traversability_rod_vits",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 2919412,
+              "fp": 2978681,
+              "tn": 73473449,
+              "tp": 54321898
+            },
+            "confusion_matrix": [
+              [
+                73473449,
+                2978681
+              ],
+              [
+                2919412,
+                54321898
+              ]
+            ],
+            "f1_traversable": 0.9485071090454952,
+            "false_block_rate": 0.05100183765885162,
+            "false_safe_rate": 0.03896138668732971,
+            "fbr_traversable": 0.05100183765885162,
+            "iou_traversable": 0.902057557597443,
+            "iou_untraversable": 0.925690079197403,
+            "mIoU": 0.913873818397423,
+            "precision_traversable": 0.9480165636720704,
+            "recall_traversable": 0.9489981623411484
+          },
+          "seed": 1337
+        },
+        {
+          "config": "configs/generated/rod_blue_green_seed2027.yaml",
+          "experiment_name": "mixed_binary_traversability_rod_vits_seed2027",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 3412922,
+              "fp": 2509064,
+              "tn": 73943066,
+              "tp": 53828388
+            },
+            "confusion_matrix": [
+              [
+                73943066,
+                2509064
+              ],
+              [
+                3412922,
+                53828388
+              ]
+            ],
+            "f1_traversable": 0.9478600937735172,
+            "false_block_rate": 0.05962340833918721,
+            "false_safe_rate": 0.03281875861405038,
+            "fbr_traversable": 0.05962340833918721,
+            "iou_traversable": 0.9008878839821153,
+            "iou_untraversable": 0.925850095233144,
+            "mIoU": 0.9133689896076296,
+            "precision_traversable": 0.9554636585268358,
+            "recall_traversable": 0.9403765916608128
+          },
+          "seed": 2027
+        },
+        {
+          "config": "configs/generated/rod_blue_green_seed4242.yaml",
+          "experiment_name": "mixed_binary_traversability_rod_vits_seed4242",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 3324865,
+              "fp": 2551668,
+              "tn": 73900462,
+              "tp": 53916445
+            },
+            "confusion_matrix": [
+              [
+                73900462,
+                2551668
+              ],
+              [
+                3324865,
+                53916445
+              ]
+            ],
+            "f1_traversable": 0.948319735999364,
+            "false_block_rate": 0.05808506129576699,
+            "false_safe_rate": 0.03337602235542685,
+            "fbr_traversable": 0.05808506129576699,
+            "iou_traversable": 0.901718676731572,
+            "iou_untraversable": 0.9263380000713238,
+            "mIoU": 0.9140283384014479,
+            "precision_traversable": 0.9548122318165653,
+            "recall_traversable": 0.941914938704233
+          },
+          "seed": 4242
+        }
+      ]
+    },
+    "blue_only": {
+      "aggregate": {
+        "f1_traversable": {
+          "max": 0.9409743922917536,
+          "mean": 0.9401441728332472,
+          "min": 0.9391283150453116,
+          "std_population": 0.0007650039180608723
+        },
+        "false_block_rate": {
+          "max": 0.06198639561075198,
+          "mean": 0.0597171804763596,
+          "min": 0.05742506487371651,
+          "std_population": 0.0018622258808105115
+        },
+        "false_safe_rate": {
+          "max": 0.024837139457766014,
+          "mean": 0.023015702663652066,
+          "min": 0.021882273992405075,
+          "std_population": 0.0013007238657618985
+        },
+        "mIoU": {
+          "max": 0.922151944552315,
+          "mean": 0.9210803834299277,
+          "min": 0.9196962219676051,
+          "std_population": 0.0010266231319750088
+        }
+      },
+      "runs": [
+        {
+          "config": "configs/rod_vits_cat_blue.yaml",
+          "experiment_name": "mixed_binary_traversability_rod_vits_blue",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 2128111,
+              "fp": 2400125,
+              "tn": 94234393,
+              "tp": 34930811
+            },
+            "confusion_matrix": [
+              [
+                94234393,
+                2400125
+              ],
+              [
+                2128111,
+                34930811
+              ]
+            ],
+            "f1_traversable": 0.9391283150453116,
+            "false_block_rate": 0.05742506487371651,
+            "false_safe_rate": 0.024837139457766014,
+            "fbr_traversable": 0.05742506487371651,
+            "iou_traversable": 0.8852421347124779,
+            "iou_untraversable": 0.9541503092227324,
+            "mIoU": 0.9196962219676051,
+            "precision_traversable": 0.935706808958661,
+            "recall_traversable": 0.9425749351262835
+          },
+          "seed": 1337
+        },
+        {
+          "config": "configs/generated/rod_blue_only_seed2027.yaml",
+          "experiment_name": "mixed_binary_traversability_rod_vits_blue_seed2027",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 2213903,
+              "fp": 2157626,
+              "tn": 94476892,
+              "tp": 34845019
+            },
+            "confusion_matrix": [
+              [
+                94476892,
+                2157626
+              ],
+              [
+                2213903,
+                34845019
+              ]
+            ],
+            "f1_traversable": 0.9409743922917536,
+            "false_block_rate": 0.059740080944610315,
+            "false_safe_rate": 0.022327694540785106,
+            "fbr_traversable": 0.059740080944610315,
+            "iou_traversable": 0.8885284599756205,
+            "iou_untraversable": 0.9557754291290096,
+            "mIoU": 0.922151944552315,
+            "precision_traversable": 0.9416899521642305,
+            "recall_traversable": 0.9402599190553896
+          },
+          "seed": 2027
+        },
+        {
+          "config": "configs/generated/rod_blue_only_seed4242.yaml",
+          "experiment_name": "mixed_binary_traversability_rod_vits_blue_seed4242",
+          "metrics": {
+            "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+            "confusion_counts_traversable": {
+              "fn": 2297149,
+              "fp": 2114583,
+              "tn": 94519935,
+              "tp": 34761773
+            },
+            "confusion_matrix": [
+              [
+                94519935,
+                2114583
+              ],
+              [
+                2297149,
+                34761773
+              ]
+            ],
+            "f1_traversable": 0.9403298111626766,
+            "false_block_rate": 0.06198639561075198,
+            "false_safe_rate": 0.021882273992405075,
+            "fbr_traversable": 0.06198639561075198,
+            "iou_traversable": 0.8873796970682097,
+            "iou_untraversable": 0.9554062704715165,
+            "mIoU": 0.9213929837698631,
+            "precision_traversable": 0.9426574849206901,
+            "recall_traversable": 0.938013604389248
+          },
+          "seed": 4242
+        }
+      ]
+    }
+  },
+  "notes": [
+    "Paper-recipe epochs are approximated at 15 because the paper does not disclose an epoch budget.",
+    "Hardware benchmarks are forward-pass-only, batch 1, on the same server GPU.",
+    "Controlled seed standard deviation is population standard deviation across seeds 1337, 2027, and 4242."
+  ],
+  "paper_recipe": {
+    "blue_green": {
+      "config": "configs/rod_vits_cat_paper.yaml",
+      "experiment_name": "mixed_binary_traversability_rod_vits_paper",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 2271972,
+          "fp": 2941892,
+          "tn": 73510238,
+          "tp": 54969338
+        },
+        "confusion_matrix": [
+          [
+            73510238,
+            2941892
+          ],
+          [
+            2271972,
+            54969338
+          ]
+        ],
+        "f1_traversable": 0.954722110341639,
+        "false_block_rate": 0.03969112516816963,
+        "false_safe_rate": 0.03848018361293531,
+        "fbr_traversable": 0.03969112516816963,
+        "iou_traversable": 0.9133667896234567,
+        "iou_untraversable": 0.9337704226845294,
+        "mIoU": 0.923568606153993,
+        "precision_traversable": 0.949199973822003,
+        "recall_traversable": 0.9603088748318304
+      },
+      "seed": 1337
+    },
+    "blue_only": {
+      "config": "configs/rod_vits_cat_blue_paper.yaml",
+      "experiment_name": "mixed_binary_traversability_rod_vits_blue_paper",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1904858,
+          "fp": 2130390,
+          "tn": 94504128,
+          "tp": 35154064
+        },
+        "confusion_matrix": [
+          [
+            94504128,
+            2130390
+          ],
+          [
+            1904858,
+            35154064
+          ]
+        ],
+        "f1_traversable": 0.9457214856640355,
+        "false_block_rate": 0.051400793579478646,
+        "false_safe_rate": 0.022045849082622835,
+        "fbr_traversable": 0.051400793579478646,
+        "iou_traversable": 0.8970319254392626,
+        "iou_untraversable": 0.9590493854964132,
+        "mIoU": 0.9280406554678379,
+        "precision_traversable": 0.9428611721121087,
+        "recall_traversable": 0.9485992064205213
+      },
+      "seed": 1337
+    }
+  }
+}

@@ -1,0 +1,35 @@
+seed: 1337
+raw_root: CAT
+processed_root: data_processed_blue
+reports_dir: reports
+configs_dir: configs
+outputs_dir: outputs
+dataset_name: mixed
+experiment_name: mixed_binary_traversability_rod_vits_blue_paper
+
+preprocessing:
+  val_fraction: 0.2
+  traversable_palette_names: [blue]
+  mapping_filename: discovered_mapping_blue.yaml
+
+training:
+  model_name: rod-vits
+  rod_encoder_checkpoint: weights/efficient_sam_vits.pt
+  rod_encoder_image_size: 1024
+  input_size: [640, 384]
+  batch_size: 8
+  val_batch_size: 4
+  epochs: 15
+  learning_rate: 0.001
+  weight_decay: 0.01
+  lr_scheduler: poly
+  poly_power: 0.9
+  mixed_precision: bf16
+  num_workers: 4
+  augment: false
+  class_weights: [1.0, 1.0]
+  ce_loss_weight: 1.0
+  dice_loss_weight: 0.0
+
+postprocessing:
+  traversable_threshold: 0.5

@@ -3,3 +3,4 @@ Pillow
 PyYAML
 torch
 onnx
+segmentation-models-pytorch

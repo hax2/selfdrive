@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 import torch
-from PIL import Image
+from PIL import Image, ImageFilter
 from torch.utils.data import DataLoader
 
 from .data import SegmentationDataset
@@ -17,6 +17,15 @@ from .utils import ensure_dir, save_json
 from .visualize import save_mask, save_overlay, save_triptych
 
 
+def _boundary_mask(gt: np.ndarray, radius: int = 2) -> np.ndarray:
+    """Return a label-boundary band without requiring an extra image library."""
+    mask = Image.fromarray((gt * 255).astype(np.uint8))
+    size = radius * 2 + 1
+    dilated = np.asarray(mask.filter(ImageFilter.MaxFilter(size=size)))
+    eroded = np.asarray(mask.filter(ImageFilter.MinFilter(size=size)))
+    return dilated != eroded
+
+
 def _per_image_rates(pred: np.ndarray, gt: np.ndarray) -> dict[str, float | int]:
     untrav = gt == 0
     trav = gt == 1
@@ -24,6 +33,9 @@ def _per_image_rates(pred: np.ndarray, gt: np.ndarray) -> dict[str, float | int]
     false_block_pixels = int(np.logical_and(trav, pred == 0).sum())
     untrav_pixels = int(untrav.sum())
     trav_pixels = int(trav.sum())
+    boundary = _boundary_mask(gt)
+    boundary_pixels = int(boundary.sum())
+    boundary_error_pixels = int(np.logical_and(boundary, pred != gt).sum())
     return {
         "false_safe_pixels": false_safe_pixels,
         "false_block_pixels": false_block_pixels,
@@ -31,6 +43,9 @@ def _per_image_rates(pred: np.ndarray, gt: np.ndarray) -> dict[str, float | int]
         "traversable_pixels": trav_pixels,
         "false_safe_rate": false_safe_pixels / max(untrav_pixels, 1),
         "false_block_rate": false_block_pixels / max(trav_pixels, 1),
+        "boundary_pixels": boundary_pixels,
+        "boundary_error_pixels": boundary_error_pixels,
+        "boundary_error_rate": boundary_error_pixels / max(boundary_pixels, 1),
     }
 
 
@@ -46,6 +61,7 @@ def run_review(config: dict[str, Any], split: str = "test", top_k: int = 10, che
     all_masks = ensure_dir(review_root / "all_masks")
     worst_safe_dir = ensure_dir(review_root / "worst_false_safe")
     worst_block_dir = ensure_dir(review_root / "worst_false_block")
+    worst_boundary_dir = ensure_dir(review_root / "worst_boundary_error")
 
     checkpoint = torch.load(output_root / "checkpoints" / checkpoint_name, map_location="cpu")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -92,8 +108,13 @@ def run_review(config: dict[str, Any], split: str = "test", top_k: int = 10, che
 
     worst_false_safe = sorted(results, key=lambda item: item["false_safe_rate"], reverse=True)[:top_k]
     worst_false_block = sorted(results, key=lambda item: item["false_block_rate"], reverse=True)[:top_k]
+    worst_boundary_error = sorted(results, key=lambda item: item["boundary_error_rate"], reverse=True)[:top_k]
 
-    for group, directory in [(worst_false_safe, worst_safe_dir), (worst_false_block, worst_block_dir)]:
+    for group, directory in [
+        (worst_false_safe, worst_safe_dir),
+        (worst_false_block, worst_block_dir),
+        (worst_boundary_error, worst_boundary_dir),
+    ]:
         for item in group:
             stem = item["name"]
             shutil.copy2(all_triptychs / f"{stem}.png", directory / f"{stem}.png")
@@ -107,6 +128,7 @@ def run_review(config: dict[str, Any], split: str = "test", top_k: int = 10, che
         "traversable_threshold": traversable_threshold,
         "worst_false_safe": worst_false_safe,
         "worst_false_block": worst_false_block,
+        "worst_boundary_error": worst_boundary_error,
     }
     save_json(review_root / "summary.json", payload)
 
@@ -127,6 +149,12 @@ def run_review(config: dict[str, Any], split: str = "test", top_k: int = 10, che
     for item in worst_false_block:
         lines.append(
             f"- `{item['name']}` false_block_rate=`{item['false_block_rate']:.4f}` false_block_pixels=`{item['false_block_pixels']}`"
+        )
+    lines.extend(["", "## Worst Boundary Error", ""])
+    for item in worst_boundary_error:
+        lines.append(
+            f"- `{item['name']}` boundary_error_rate=`{item['boundary_error_rate']:.4f}` "
+            f"boundary_error_pixels=`{item['boundary_error_pixels']}`"
         )
     (review_root / "summary.md").write_text("\n".join(lines) + "\n")
     return payload
