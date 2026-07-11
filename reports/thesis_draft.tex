@@ -660,7 +660,7 @@ are computed from one pixel-level confusion matrix accumulated across all 544
 test images.  Re-running evaluation can overwrite the JSON report; it does not
 modify the checkpoint.
 
-For the frozen PIDNet-S headline result, the artifact chain is:
+For the existing verified PIDNet-S reference result, the artifact chain is:
 \begin{itemize}[nosep]
   \item split manifest: \texttt{data\_processed\_blue\_green/manifest.json};
   \item portable configuration: \texttt{configs/frozen\_pidnet\_cat.yaml};
@@ -670,7 +670,7 @@ For the frozen PIDNet-S headline result, the artifact chain is:
   \item saved result: \texttt{outputs/controlled\_ablation\_augment\_off/test\_metrics.json}.
 \end{itemize}
 The checkpoint, configuration, and manifest SHA-256 digests are recorded in
-\texttt{reports/reproducibility\_baseline.md}.  The frozen checkpoint digest is
+\texttt{reports/reproducibility\_baseline.md}.  The saved checkpoint digest is
 \texttt{b9862fe4\ldots591f471}; the manifest digest is
 \texttt{198fef93\ldots201fa2}.  The exact re-evaluation command is:
 \begin{verbatim}
@@ -864,7 +864,7 @@ ROD lightweight at inference time.
 \section{RTX 5060 Edge-Style Deployment Benchmark}
 \label{sec:edge_benchmark}
 
-Table~\ref{tab:edge_inference} measures the frozen blue+green deployment
+Table~\ref{tab:edge_inference} measures the saved blue+green deployment
 candidates on a local NVIDIA GeForce RTX~5060 compiled with TensorRT FP16 (with strict FP32 Mixed-Precision fallback for unstable LayerNorm and reduction layers) at batch size 1. The forward scope includes GPU inference, softmax, and threshold.
 The pipeline scope starts from an already decoded native-resolution host RGB
 array and adds resize to $640\times384$, normalisation, host-to-device transfer,
@@ -1499,7 +1499,7 @@ problems. \\
 \noindent\textbf{Experiment stop rule.}
 The architecture and multi-seed training campaign is complete. No new training
 begins after this suite; remaining experiments are deployment benchmarks or
-post-hoc analyses of frozen checkpoints.
+post-hoc analyses of saved checkpoints.
 
 \section{Short-term (Remaining Thesis Period)}
 \begin{itemize}[nosep]
@@ -1511,7 +1511,7 @@ post-hoc analyses of frozen checkpoints.
   \item \textbf{Qualitative evidence completed}: Figures~\ref{fig:qualitative_cat}--\ref{fig:qualitative_alice}
   include ranked CaT successes, false-safe, false-block, and boundary-error
   cases, plus explicitly unscored ALICE examples.
-  \item \textbf{Edge-style measurement completed}: both frozen model families
+  \item \textbf{Edge-style measurement completed}: both saved model families
   were benchmarked on the same RTX~5060 with batch size 1, FP16 weights,
   postprocessing, synchronisation, and peak-memory reporting.
   \item \textbf{Finish the document}: prioritize supervisor feedback,
@@ -1525,7 +1525,7 @@ post-hoc analyses of frozen checkpoints.
   from-scratch encoders within one model family.
   \item \textbf{Expanded augmentation ablation}: separate geometric,
   photometric, and domain-specific augmentation effects.
-  \item \textbf{ONNX/TensorRT export}: optimise the frozen model and benchmark
+  \item \textbf{ONNX/TensorRT export}: optimise the saved model and benchmark
   end-to-end latency on representative embedded hardware.
   \item \textbf{4-class CaT segmentation}: Extend the pipeline to the full 4-class task for direct comparison with CaT baselines.
   \item \textbf{Cross-dataset evaluation}: Evaluate on RUGD and RELLIS-3D to assess generalisation.

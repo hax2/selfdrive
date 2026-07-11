@@ -65,7 +65,7 @@ writes the selected triptychs and `summary.json` under
 
 ## Remaining work after the frozen package
 
-- Incorporate supervisor feedback without changing the frozen experiment.
+- Incorporate supervisor feedback without changing the verified experiment.
 - Apply the official university cover and PDF/A requirements.
 - Perform final language proofreading and submission checks.
 - Do not begin a new training campaign after 17 July; keep optional architectures
