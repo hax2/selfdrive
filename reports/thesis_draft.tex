@@ -564,6 +564,63 @@ three scales with the final 256-channel image embedding and predicts two logits,
 which are resized back to $640\times384$. Encoder parameters remain frozen and
 in evaluation mode throughout training.
 
+\subsection{Comparative Real-Time Architectures}
+
+Seven additional compact segmentation systems broaden the comparison beyond
+PIDNet-S and ROD:
+\begin{itemize}[nosep]
+  \item \textbf{FPN}~\cite{lin2017fpn} combines a top-down feature pyramid with
+  lateral encoder connections. It is paired separately with MobileNetV2 and
+  EfficientNet-B0.
+  \item \textbf{U-Net}~\cite{ronneberger2015unet} uses a symmetric decoder and
+  skip connections from encoder stages at matching spatial scales. It uses the
+  same two encoders, completing a $2\times2$ encoder--decoder design.
+  \item \textbf{MobileNetV2}~\cite{sandler2018mobilenetv2} uses inverted
+  residual blocks and depthwise separable convolutions.
+  \item \textbf{EfficientNet-B0}~\cite{tan2019efficientnet} is the smallest
+  member of the EfficientNet family and provides a higher-capacity compact
+  encoder.
+  \item \textbf{SegFormer-B0}~\cite{xie2021segformer} combines a MiT-B0
+  hierarchical transformer encoder with a lightweight MLP decoder.
+  \item \textbf{DDRNet-23-Slim}~\cite{hong2022ddrnet} maintains high- and
+  low-resolution branches with repeated bilateral fusion.
+  \item \textbf{BiSeNetV2}~\cite{yu2021bisenetv2} separates spatial detail and
+  semantic context into two branches before guided aggregation.
+\end{itemize}
+
+Table~\ref{tab:model_implementations} records the exact implementation and
+initialisation of each two-class model. FPN, U-Net, and SegFormer use
+\texttt{segmentation-models-pytorch}; DDRNet-23-Slim and BiSeNetV2 are adapted
+from released PyTorch implementations under their MIT licences.
+
+\begin{table}[H]
+\centering
+\caption{Compared model implementations and initialisation.}
+\label{tab:model_implementations}
+\small
+\begin{tabular}{@{}lrl@{}}
+\toprule
+\textbf{Model} & \textbf{Parameters} & \textbf{Initialisation} \\
+\midrule
+PIDNet-S                    & 7.62M  & Random \\
+ROD ViT-S                   & 29.11M & EfficientSAM ViT-S; encoder fixed \\
+FPN/MobileNetV2             & 4.22M  & ImageNet encoder \\
+FPN/EfficientNet-B0         & 5.76M  & ImageNet encoder \\
+U-Net/MobileNetV2           & 6.63M  & ImageNet encoder \\
+U-Net/EfficientNet-B0       & 6.25M  & ImageNet encoder \\
+SegFormer-B0                & 3.71M  & ImageNet MiT-B0 encoder \\
+DDRNet-23-Slim              & 5.69M  & Random \\
+BiSeNetV2                   & 3.34M  & Released pretrained backbone \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Initialisation is part of each evaluated recipe and is reported because it can
+affect performance independently of architecture. The comparison therefore
+ranks complete trainable systems. BiSeNetV2 auxiliary heads are disabled so
+every controlled model is optimised through one full-resolution two-class
+logits tensor and the common loss.
+
 \section{Training Procedure}
 
 Training uses AdamW optimiser with cosine annealing learning rate schedule:
@@ -586,8 +643,16 @@ Scheduler         & CosineAnnealingLR \\
 \end{tabular}
 \end{center}
 
-The controlled architecture comparison applies this same recipe to PIDNet-S
-and ROD for seeds 1337, 2027, and 4242 under both label policies. A second ROD
+The controlled architecture comparison applies this recipe to all nine model
+families for seeds 1337, 2027, and 4242 under both label policies. Within each
+policy, every model uses the same 1,002/266/544 split, $640\times384$ input,
+batch size 4, 15 epochs, augmentation, class-weight bias, objective, threshold,
+and seed set. Model selection uses validation mIoU. The SMP $2\times2$ subset
+holds one component fixed while changing the other: FPN versus U-Net for each
+encoder, and MobileNetV2 versus EfficientNet-B0 for each decoder. This supports
+separate analysis of encoder, decoder, and pairing effects within that subset.
+
+A second ROD
 experiment follows the documented paper settings as closely as the publication
 allows: cross-entropy only, neutral class weights, AdamW learning rate
 $10^{-3}$ with default weight decay 0.01, batch size 8, and polynomial decay
@@ -660,28 +725,32 @@ are computed from one pixel-level confusion matrix accumulated across all 544
 test images.  Re-running evaluation can overwrite the JSON report; it does not
 modify the checkpoint.
 
-For the existing verified PIDNet-S reference result, the artifact chain is:
+For every controlled result, the artifact chain is:
 \begin{itemize}[nosep]
-  \item split manifest: \texttt{data\_processed\_blue\_green/manifest.json};
-  \item portable configuration: \texttt{configs/frozen\_pidnet\_cat.yaml};
-  \item checkpoint: \texttt{outputs/controlled\_ablation\_augment\_off/checkpoints/best.pt};
+  \item the policy-specific processed-data manifest;
+  \item a complete base or generated seed configuration;
+  \item the corresponding \texttt{checkpoints/best.pt};
   \item evaluator and metric definitions: \texttt{src/ttfm/eval.py} and
         \texttt{src/ttfm/metrics.py};
-  \item saved result: \texttt{outputs/controlled\_ablation\_augment\_off/test\_metrics.json}.
+  \item the corresponding \texttt{test\_metrics.json}.
 \end{itemize}
-The checkpoint, configuration, and manifest SHA-256 digests are recorded in
-\texttt{reports/reproducibility\_baseline.md}.  The saved checkpoint digest is
-\texttt{b9862fe4\ldots591f471}; the manifest digest is
-\texttt{198fef93\ldots201fa2}.  The exact re-evaluation command is:
+The blue-only comparison is indexed by
+\texttt{reports/blue\_only\_verified\_ledger.json}, with a readable table in
+\texttt{reports/blue\_only\_verified\_summary.md}. The ledger contains all 27
+model--seed records, configuration, metric, checkpoint, and benchmark SHA-256
+digests, per-seed confusion counts, and aggregate statistics. Its generator
+recomputes each reported metric directly from TP, FP, TN, and FN; verifies
+seeds 1337, 2027, and 4242; and checks that repeat configurations differ only
+in seed and experiment identifier. All 27 blue-only metric-integrity checks,
+seed-control checks, and checkpoint-hash checks pass. A single run can be
+re-evaluated with:
 \begin{verbatim}
 PYTHONPATH=src python -m ttfm.cli \
-  --config configs/frozen_pidnet_cat.yaml eval --split test
+  --config <exact-config.yaml> eval --split test
 \end{verbatim}
-Two independent CPU re-evaluations produced the same confusion counts and
-headline values: mIoU 0.8939407, FSR 0.0431759, and FBR 0.0703687.  This
-artifact-level procedure is applied to each architecture and seed in the final
-comparison; aggregate tables are generated only after every constituent JSON
-report has passed the same provenance check.
+The same procedure is applied to the blue+green campaign before its values
+enter a thesis table. Aggregate tables are generated only after every
+constituent JSON report passes these checks.
 
 
 % ============================================================
@@ -691,12 +760,16 @@ report has passed the same provenance check.
 
 \section{Experimental Overview}
 
-The experiments are organised in four phases:
+The experiments are organised in five phases:
 \begin{enumerate}[nosep]
   \item \textbf{Iterative development runs} (5~runs): progressively refined configurations exploring label mapping, epoch budget, class weighting, resolution, loss functions, and threshold tuning.
   \item \textbf{Controlled ablation study} (5~runs): a single-factor-at-a-time ablation starting from a fixed baseline, isolating the effect of each design choice.
-  \item \textbf{Architecture reproducibility suite}: matched PIDNet-S and ROD
-  runs for seeds 1337, 2027, and 4242 under both binary label policies.
+  \item \textbf{Nine-model architecture comparison}: PIDNet-S, ROD,
+  FPN/MobileNetV2, FPN/EfficientNet-B0, U-Net/MobileNetV2,
+  U-Net/EfficientNet-B0, SegFormer-B0, DDRNet-23-Slim, and BiSeNetV2 for seeds
+  1337, 2027, and 4242 under both binary label policies.
+  \item \textbf{SMP factorial analysis}: the full FPN/U-Net by
+  MobileNetV2/EfficientNet-B0 $2\times2$ design.
   \item \textbf{ROD recipe and deployment study}: transfer of the documented
   paper optimiser/loss settings and hardware-matched batch-1 latency tests.
 \end{enumerate}
@@ -754,21 +827,27 @@ A post-hoc threshold sweep was performed on the \texttt{blue\_green\_best} check
 
 \section{Inference Speed Measurement}
 
-Inference speed was measured on a CPU-only system to simulate robot-class deployment hardware:
-CPU: AMD Ryzen~5 5500 (6~cores, 12~threads);
-batch size: 1;
-measurement: 160 forward passes (32 images $\times$ 5 repeats), with 2 warmup rounds excluded;
-timing: forward pass only---no image loading, mask writing, or overlay generation.
+CPU latency for the lightweight architectures was measured on an AMD Ryzen~5
+5500 (6 cores, 12 threads) using PyTorch 2.13, six inference threads, batch size
+1, and $640\times384$ input. Each model processes 32 preloaded test images over
+five measured repeats after two excluded warm-up rounds, giving 160 timed
+inferences. The machine remained idle during the retained pass. Each model is
+measured in eager mode and again after \texttt{torch.compile}; compilation is
+triggered during warm-up and excluded from timed latency. These values measure
+forward pass and prediction only, excluding image decoding, camera acquisition,
+visualisation, and disk output.
 
-The reproducibility suite additionally measures PIDNet-S and ROD on the same
-NVIDIA H100 NVL 3g.47GB MIG partition. The protocol uses eager PyTorch FP32,
-batch size 1, 128 preloaded test images, five warm-up passes, ten timed repeats,
-and an explicit CUDA synchronisation around every forward pass. This controls
-the architecture comparison but is not representative of a smaller edge GPU.
+All nine models are additionally measured on the same NVIDIA H100 NVL
+3g.47GB MIG partition. The server protocol uses eager PyTorch, batch size 1,
+128 preloaded test images, five warm-up passes, ten timed repeats, and explicit
+CUDA synchronisation around every forward pass. Label policy does not change
+model structure, so latency is measured once per architecture and reused across
+the blue-only and blue+green accuracy tables. The H100 results control hardware
+within the architecture comparison and do not represent embedded-GPU latency.
 The local RTX~5060 benchmark introduced in Section~\ref{sec:edge_benchmark}
 uses persistent models, batch size 1, reduced precision, warm-up, synchronised
 timing, postprocessing, and peak-memory measurement to better approximate an
-edge inference process.
+edge inference process for the previously deployed PIDNet-S and ROD models.
 
 \section{Qualitative Out-of-Distribution Evaluation}
 
@@ -1548,7 +1627,7 @@ post-hoc analyses of saved checkpoints.
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliographystyle{IEEEtranN}
 % Inline bibliography since .bib file may not exist yet.
-\begin{thebibliography}{12}
+\begin{thebibliography}{19}
 
 \bibitem[Sharma et~al.(2022)]{sharma2022cat}
 S.~Sharma, J.~E. Ball, B.~Tang, D.~W. Carruth, M.~Doude, and M.~A. Islam.
@@ -1618,6 +1697,49 @@ D.~Wang, F.~Sun, and F.~Iandola.
 Segment Anything.
 \newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
 and Pattern Recognition (CVPR)}, 2024.
+
+\bibitem[Ronneberger et~al.(2015)]{ronneberger2015unet}
+O.~Ronneberger, P.~Fischer, and T.~Brox.
+\newblock U-Net: Convolutional Networks for Biomedical Image Segmentation.
+\newblock In \emph{Medical Image Computing and Computer-Assisted Intervention
+(MICCAI)}, pages 234--241, 2015.
+
+\bibitem[Lin et~al.(2017)]{lin2017fpn}
+T.-Y. Lin, P.~Doll\'{a}r, R.~Girshick, K.~He, B.~Hariharan, and S.~Belongie.
+\newblock Feature Pyramid Networks for Object Detection.
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR)}, pages 2117--2125, 2017.
+
+\bibitem[Sandler et~al.(2018)]{sandler2018mobilenetv2}
+M.~Sandler, A.~Howard, M.~Zhu, A.~Zhmoginov, and L.-C. Chen.
+\newblock MobileNetV2: Inverted Residuals and Linear Bottlenecks.
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR)}, pages 4510--4520, 2018.
+
+\bibitem[Tan and Le(2019)]{tan2019efficientnet}
+M.~Tan and Q.~V. Le.
+\newblock EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks.
+\newblock In \emph{Proceedings of the 36th International Conference on Machine
+Learning (ICML)}, pages 6105--6114, 2019.
+
+\bibitem[Xie et~al.(2021)]{xie2021segformer}
+E.~Xie, W.~Wang, Z.~Yu, A.~Anandkumar, J.~M. Alvarez, and P.~Luo.
+\newblock SegFormer: Simple and Efficient Design for Semantic Segmentation with Transformers.
+\newblock In \emph{Advances in Neural Information Processing Systems}, volume
+34, pages 12077--12090, 2021.
+
+\bibitem[Hong et~al.(2022)]{hong2022ddrnet}
+Y.~Hong, H.~Pan, W.~Sun, and Y.~Jia.
+\newblock Deep Dual-Resolution Networks for Real-Time and Accurate Semantic
+Segmentation of Road Scenes.
+\newblock \emph{IEEE Transactions on Intelligent Transportation Systems},
+23(10):19482--19494, 2022.
+
+\bibitem[Yu et~al.(2021)]{yu2021bisenetv2}
+C.~Yu, C.~Gao, J.~Wang, G.~Yu, C.~Shen, and N.~Sang.
+\newblock BiSeNet V2: Bilateral Network with Guided Aggregation for Real-Time
+Semantic Segmentation.
+\newblock \emph{International Journal of Computer Vision}, 129:3051--3068, 2021.
 
 \end{thebibliography}
 
