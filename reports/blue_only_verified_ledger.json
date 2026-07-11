@@ -1,0 +1,1857 @@
+{
+  "aggregates": [
+    {
+      "all_checkpoints_available": true,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9531418214705782,
+        "std_population": 0.0004911206141995136,
+        "values": [
+          0.9530141960572139,
+          0.9537968896228465,
+          0.9526143787316742
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.04686381145499411,
+        "std_population": 0.0016432516829369779,
+        "values": [
+          0.044871920451436766,
+          0.04682308352088601,
+          0.04889643039265956
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.017967503082076737,
+        "std_population": 0.0006668062830185428,
+        "values": [
+          0.01890945428009482,
+          0.017457902568521116,
+          0.017535152397614277
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 131.3980195442369,
+        "mean_ms": 7.602417938323924,
+        "p50_ms": 8.41796025633812,
+        "p95_ms": 8.47243145108223,
+        "path": "realtime_comparison_results/reports/benchmark_mixed_binary_traversability_smp_fpn_efficientnetb0.json",
+        "sha256": "a5a335e344f986a334205da120c6ec726b5ad856346747ce4f2a8453cbf911e1"
+      },
+      "mIoU": {
+        "mean": 0.9375869220436484,
+        "std_population": 0.0006289000052456669,
+        "values": [
+          0.9373694690196097,
+          0.9384425143144552,
+          0.9369487827968801
+        ]
+      },
+      "model": "FPN/EfficientNet-B0",
+      "parameters": 5759614,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 11.69586759099956,
+        "mean_ms": 85.49566928704735,
+        "p50_ms": 84.45919409859926,
+        "p95_ms": 106.21044994331896,
+        "path": "reports/cpu_mixed_binary_traversability_smp_fpn_efficientnetb0_ryzen5500_idle_compiled.json",
+        "sha256": "6e31de89869708dffd402ab2b461ffdeb3611a6d475046918cc3538e274f4745"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 5.9212489798204215,
+        "mean_ms": 168.87854557280662,
+        "p50_ms": 166.58335807733238,
+        "p95_ms": 193.9856930403039,
+        "path": "reports/cpu_mixed_binary_traversability_smp_fpn_efficientnetb0_ryzen5500_idle.json",
+        "sha256": "22444b1ada9e7a65f20841a125c3c9a24813a1bc8c694a322a0acc9997d1f821"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 5759614
+    },
+    {
+      "all_checkpoints_available": true,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9528822386814633,
+        "std_population": 0.000365253538924708,
+        "values": [
+          0.953247463462428,
+          0.9523832825442867,
+          0.953015970037675
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.04448326910318654,
+        "std_population": 0.002777859897025956,
+        "values": [
+          0.048035072363950576,
+          0.04416107948309991,
+          0.041253655462509135
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.01918009256278383,
+        "std_population": 0.001299384788437863,
+        "values": [
+          0.017389303892424858,
+          0.019718544050687976,
+          0.020432429745238654
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 101.24053289301357,
+        "mean_ms": 9.869134469045093,
+        "p50_ms": 9.745935909450054,
+        "p95_ms": 11.656475253403187,
+        "path": "realtime_comparison_results/reports/benchmark_mixed_binary_traversability_smp_unet_efficientnetb0.json",
+        "sha256": "9796e19d335178bc8b3cefc7c04319951abb041cf318d8d18353b6387b8d7981"
+      },
+      "mIoU": {
+        "mean": 0.9371867184495858,
+        "std_population": 0.0005058737706237555,
+        "values": [
+          0.937754233315166,
+          0.9365257242665754,
+          0.9372801977670158
+        ]
+      },
+      "model": "U-Net/EfficientNet-B0",
+      "parameters": 6251614,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 9.664434673455546,
+        "mean_ms": 103.4677555115195,
+        "p50_ms": 101.50849691126496,
+        "p95_ms": 125.64651109278202,
+        "path": "reports/cpu_mixed_binary_traversability_smp_unet_efficientnetb0_ryzen5500_idle_compiled.json",
+        "sha256": "9f2c058cb4b54eb0fceba7cf9e9cb417781ae34db40fe6a3e96d213319dd9b72"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 6.955533182760107,
+        "mean_ms": 143.76599543829798,
+        "p50_ms": 141.36539306491613,
+        "p95_ms": 163.9833910157904,
+        "path": "reports/cpu_mixed_binary_traversability_smp_unet_efficientnetb0_ryzen5500_idle.json",
+        "sha256": "d38864ba833119f1b350640b148f13b308e07c1432213803a14399d4e6550725"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 6251614
+    },
+    {
+      "all_checkpoints_available": true,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.949718505111811,
+        "std_population": 0.000747832895613641,
+        "values": [
+          0.9501266336982711,
+          0.948669482622971,
+          0.9503593990141909
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.05017312700029429,
+        "std_population": 0.004035747485728635,
+        "values": [
+          0.044504802379302884,
+          0.053584748093859824,
+          0.052429830527720156
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.01932791068853195,
+        "std_population": 0.0015085742765533403,
+        "values": [
+          0.02140118296031652,
+          0.01872699359870559,
+          0.017855555506573747
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 147.36369525047468,
+        "mean_ms": 6.7775699848425575,
+        "p50_ms": 7.563378661870956,
+        "p95_ms": 7.641061209142208,
+        "path": "realtime_comparison_results/reports/benchmark_mixed_binary_traversability_smp_fpn_mobilenetv2.json",
+        "sha256": "6c4c863f7aae6100b80dbb066f58e030e5266b1c8e47d198744589c290802ad1"
+      },
+      "mIoU": {
+        "mean": 0.9332057427205687,
+        "std_population": 0.000924383837030339,
+        "values": [
+          0.93358430561109,
+          0.9319328350386911,
+          0.9341000875119249
+        ]
+      },
+      "model": "FPN/MobileNetV2",
+      "parameters": 4215554,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 14.261041978994431,
+        "mean_ms": 70.1165164973645,
+        "p50_ms": 68.31395206972957,
+        "p95_ms": 87.47782092541456,
+        "path": "reports/cpu_mixed_binary_traversability_smp_fpn_mobilenetv2_ryzen5500_idle_compiled.json",
+        "sha256": "bb7ab21fc0142a49e18241460de7f90b40b4d9928f6832c50215c3665c999cd8"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 7.234255617098604,
+        "mean_ms": 138.22730160754872,
+        "p50_ms": 135.84238605108112,
+        "p95_ms": 171.68104089796543,
+        "path": "reports/cpu_mixed_binary_traversability_smp_fpn_mobilenetv2_ryzen5500_idle.json",
+        "sha256": "55c416c600b57fe6af4473d415a70c0ebbdce6d3568546ce06c066295a68035e"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 4215554
+    },
+    {
+      "all_checkpoints_available": true,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9460975302497399,
+        "std_population": 0.0010075917482588266,
+        "values": [
+          0.9455421105375426,
+          0.947511679019382,
+          0.9452388011922951
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.052285384879786845,
+        "std_population": 0.001138706425609373,
+        "values": [
+          0.05119825126051967,
+          0.051800076645510625,
+          0.053857826733330234
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.02136263565778845,
+        "std_population": 0.0007579863745285796,
+        "values": [
+          0.02227841608316399,
+          0.020422226351871492,
+          0.021387264538329873
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 141.2268377628202,
+        "mean_ms": 7.072184668504633,
+        "p50_ms": 7.990519516170025,
+        "p95_ms": 8.091540075838566,
+        "path": "realtime_comparison_results/reports/benchmark_mixed_binary_traversability_segformer_b0_blue.json",
+        "sha256": "df05608dbe6f972e2b1b5a587f6509c67d6987581b154c78dbce07beba3d1f7c"
+      },
+      "mIoU": {
+        "mean": 0.9285554387977168,
+        "std_population": 0.0012951584860674593,
+        "values": [
+          0.927801787356599,
+          0.9303780032170124,
+          0.9274865258195392
+        ]
+      },
+      "model": "SegFormer-B0",
+      "parameters": 3714658,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 8.230114708449472,
+        "mean_ms": 121.50132081660558,
+        "p50_ms": 119.79901499580592,
+        "p95_ms": 137.4822900397703,
+        "path": "reports/cpu_mixed_binary_traversability_segformer_b0_blue_ryzen5500_idle_compiled.json",
+        "sha256": "03a9e6a213d171a65213964714b73f758a2b7568e871fdb7fd4f862c9045a306"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 4.377162864328107,
+        "mean_ms": 228.45408556822804,
+        "p50_ms": 227.80113096814603,
+        "p95_ms": 258.0151349538937,
+        "path": "reports/cpu_mixed_binary_traversability_segformer_b0_blue_ryzen5500_idle.json",
+        "sha256": "3952f968b1eee645bf503b3a6eebdefe01852a4b2750c2f94de8ca0f9487dc53"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 3714658
+    },
+    {
+      "all_checkpoints_available": true,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9460314639974045,
+        "std_population": 2.1670619695484832e-05,
+        "values": [
+          0.9460233189500997,
+          0.9460099500541206,
+          0.9460611229879932
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.04794681651380289,
+        "std_population": 0.003976037013229916,
+        "values": [
+          0.04340849418123927,
+          0.047340907541779005,
+          0.0530910478183904
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.023269542256111837,
+        "std_population": 0.0017126111207400486,
+        "values": [
+          0.025215161729269454,
+          0.0235459238281708,
+          0.021047541210895263
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 131.85791282687197,
+        "mean_ms": 7.5760528932733,
+        "p50_ms": 8.371027186512947,
+        "p95_ms": 8.419353514909744,
+        "path": "realtime_comparison_results/reports/benchmark_mixed_binary_traversability_smp_unet_mobilenetv2.json",
+        "sha256": "c8a0630201ad33536a47a148b190e30c06bd2793c60b852668391479120845d4"
+      },
+      "mIoU": {
+        "mean": 0.9283423398155565,
+        "std_population": 0.00013914990180054158,
+        "values": [
+          0.9281992617299747,
+          0.9282968722823511,
+          0.9285308854343435
+        ]
+      },
+      "model": "U-Net/MobileNetV2",
+      "parameters": 6629090,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 10.148451472649054,
+        "mean_ms": 98.53255506022833,
+        "p50_ms": 96.53883194550872,
+        "p95_ms": 117.56093497388065,
+        "path": "reports/cpu_mixed_binary_traversability_smp_unet_mobilenetv2_ryzen5500_idle_compiled.json",
+        "sha256": "8a72135fb1325419c5de4e0c8ff11920dbff6032356d5529670bae9e32fe4c63"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 7.100056308619161,
+        "mean_ms": 140.8391002289136,
+        "p50_ms": 137.89499492850155,
+        "p95_ms": 170.26334104593843,
+        "path": "reports/cpu_mixed_binary_traversability_smp_unet_mobilenetv2_ryzen5500_idle.json",
+        "sha256": "e55880a888d7309fa3d732a44acd19a709db8bf8af3b42c65acad54f9409e7f1"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 6629090
+    },
+    {
+      "all_checkpoints_available": false,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9401441728332472,
+        "std_population": 0.0007650039180608723,
+        "values": [
+          0.9391283150453116,
+          0.9409743922917536,
+          0.9403298111626766
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.0597171804763596,
+        "std_population": 0.0018622258808105115,
+        "values": [
+          0.05742506487371651,
+          0.059740080944610315,
+          0.06198639561075198
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.023015702663652066,
+        "std_population": 0.0013007238657618985,
+        "values": [
+          0.024837139457766014,
+          0.022327694540785106,
+          0.021882273992405075
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 21.793652701039072,
+        "mean_ms": 45.87555171747226,
+        "p50_ms": 45.87323870509863,
+        "p95_ms": 45.91633193194866,
+        "path": "rod_suite_results/reports/rod_suite_benchmark_rod_blue_only.json",
+        "sha256": "6e315c4f274ba821d0e4d76f869d66899a81151b4c8c0a6605c7723d62d59d2c"
+      },
+      "mIoU": {
+        "mean": 0.9210803834299277,
+        "std_population": 0.0010266231319750088,
+        "values": [
+          0.9196962219676051,
+          0.922151944552315,
+          0.9213929837698631
+        ]
+      },
+      "model": "ROD ViT-S",
+      "parameters": 29106050,
+      "ryzen_compiled": {
+        "available": false,
+        "fps": null,
+        "mean_ms": null,
+        "p50_ms": null,
+        "p95_ms": null,
+        "path": null,
+        "sha256": null
+      },
+      "ryzen_eager": {
+        "available": false,
+        "fps": null,
+        "mean_ms": null,
+        "p50_ms": null,
+        "p95_ms": null,
+        "path": null,
+        "sha256": null
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 6752386
+    },
+    {
+      "all_checkpoints_available": true,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9139596440636677,
+        "std_population": 0.002045290536084758,
+        "values": [
+          0.9110837341759359,
+          0.9156653242467838,
+          0.9151298737682835
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.07881988580239868,
+        "std_population": 0.0051638878145682425,
+        "values": [
+          0.080398884781376,
+          0.08420522863563058,
+          0.07185554399018947
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.03628927570856893,
+        "std_population": 0.002756025459483026,
+        "values": [
+          0.0380029421784874,
+          0.0324007721547284,
+          0.038464112792490984
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 167.7998051817707,
+        "mean_ms": 5.951520492817508,
+        "p50_ms": 6.138629280030727,
+        "p95_ms": 7.002940401434898,
+        "path": "realtime_comparison_results/reports/benchmark_mixed_binary_traversability_bisenetv2_blue.json",
+        "sha256": "1cf9b23f6ae091936297209e89719ecd2d32018f392cb49d3742ae2f3d55c887"
+      },
+      "mIoU": {
+        "mean": 0.888496698742947,
+        "std_population": 0.002554812486272644,
+        "values": [
+          0.8849559235549086,
+          0.8908898090367696,
+          0.8896443636371629
+        ]
+      },
+      "model": "BiSeNetV2",
+      "parameters": 3341202,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 16.3423967965297,
+        "mean_ms": 61.18689863214968,
+        "p50_ms": 60.669730068184435,
+        "p95_ms": 68.13787494320422,
+        "path": "reports/cpu_mixed_binary_traversability_bisenetv2_blue_ryzen5500_idle_compiled.json",
+        "sha256": "09b67623ca1b303e2c33939d02245f572dc6aaa76ab209d0e1c5c8f2de4a361d"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 11.484249419852969,
+        "mean_ms": 87.07230170548428,
+        "p50_ms": 84.90540203638375,
+        "p95_ms": 104.67380401678383,
+        "path": "reports/cpu_mixed_binary_traversability_bisenetv2_blue_ryzen5500_idle.json",
+        "sha256": "1c65de183157ffe9e96f9cd88c473897d86ddb0cdecadbb60507d92ab4f01bd1"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 3341202
+    },
+    {
+      "all_checkpoints_available": false,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9092822071872251,
+        "std_population": 0.0013718160778415766,
+        "values": [
+          0.907448644149557,
+          0.9107479458695154,
+          0.9096500315426029
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.08966180937481127,
+        "std_population": 0.00388412716688383,
+        "values": [
+          0.09035446308988697,
+          0.08459638950102218,
+          0.09403457553352469
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.03527521432179476,
+        "std_population": 0.0016416267477857758,
+        "values": [
+          0.03650739997482059,
+          0.03636314510307797,
+          0.03295509788748571
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 270.3845312905148,
+        "mean_ms": 3.6906804860336706,
+        "p50_ms": 3.6366814747452736,
+        "p95_ms": 4.057141020894051,
+        "path": "rod_suite_results/reports/rod_suite_benchmark_pidnet_blue_only.json",
+        "sha256": "61793b68c6dbac89dd69d3b271bea64edb20e8b64020530c8024c4c3f43b3192"
+      },
+      "mIoU": {
+        "mean": 0.8831567226989808,
+        "std_population": 0.0016374940881153848,
+        "values": [
+          0.8809013515618087,
+          0.8847394424510382,
+          0.8838293740840957
+        ]
+      },
+      "model": "PIDNet-S",
+      "parameters": 7623522,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 27.044994350519474,
+        "mean_ms": 36.97206486831419,
+        "p50_ms": 35.853281035088,
+        "p95_ms": 47.564490931108594,
+        "path": "reports/cpu_pidnet_s_ryzen5500_torch213_idle_compiled.json",
+        "sha256": "92c5b7627ac88c077372c422b2c34bfab471ace5fd8f83026f323d6c6f56fd9b"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 21.161414158897035,
+        "mean_ms": 47.251970309298486,
+        "p50_ms": 46.454495983198285,
+        "p95_ms": 55.63261604402214,
+        "path": "reports/cpu_pidnet_s_ryzen5500_torch213_idle.json",
+        "sha256": "4db19ce68688fcdca4a44924dfa64670d9045474448703feff3302c459f53f5b"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 7623522
+    },
+    {
+      "all_checkpoints_available": true,
+      "all_metrics_integrity_checks_passed": true,
+      "controlled_seed_configs": true,
+      "f1_traversable": {
+        "mean": 0.9018719486067164,
+        "std_population": 0.003899954397129021,
+        "values": [
+          0.89850815587156,
+          0.8997685919740699,
+          0.9073390979745194
+        ]
+      },
+      "false_block_rate": {
+        "mean": 0.09632656521057646,
+        "std_population": 0.011647265124528006,
+        "values": [
+          0.10850920056444167,
+          0.09983606646734085,
+          0.08063442859994686
+        ]
+      },
+      "false_safe_rate": {
+        "mean": 0.03844515821285861,
+        "std_population": 0.0022352845734639947,
+        "values": [
+          0.0356226022672354,
+          0.038623703799091746,
+          0.04108916857224869
+        ]
+      },
+      "h100_eager": {
+        "available": true,
+        "fps": 245.1724379270031,
+        "mean_ms": 4.071112989913672,
+        "p50_ms": 3.9483774453401566,
+        "p95_ms": 4.96884249150753,
+        "path": "realtime_comparison_results/reports/benchmark_mixed_binary_traversability_ddrnet23_slim_blue.json",
+        "sha256": "1b4200287f1b46c14f5b1672e1a2f0148df2daaef7c94bd6d3c23930040d3af3"
+      },
+      "mIoU": {
+        "mean": 0.8743060794741092,
+        "std_population": 0.004240705558114773,
+        "values": [
+          0.8707847344197261,
+          0.8718625312409317,
+          0.8802709727616697
+        ]
+      },
+      "model": "DDRNet-23-Slim",
+      "parameters": 5694882,
+      "ryzen_compiled": {
+        "available": true,
+        "fps": 36.49962023667147,
+        "mean_ms": 27.393715501239058,
+        "p50_ms": 26.651658001355827,
+        "p95_ms": 32.73031197022647,
+        "path": "reports/cpu_mixed_binary_traversability_ddrnet23_slim_blue_ryzen5500_idle_compiled.json",
+        "sha256": "0afd7a88273cfdf3268bbd0242c991b94b7f9df7a27061385921e50e8838079c"
+      },
+      "ryzen_eager": {
+        "available": true,
+        "fps": 27.74174943306388,
+        "mean_ms": 36.04271162475925,
+        "p50_ms": 34.83032004442066,
+        "p95_ms": 46.688716975040734,
+        "path": "reports/cpu_mixed_binary_traversability_ddrnet23_slim_blue_ryzen5500_idle.json",
+        "sha256": "9f61fef9580e1182929252a3bfe5c960a1739570dec48a688cc98cfaaaacf862"
+      },
+      "seed_count": 3,
+      "seeds": [
+        1337,
+        2027,
+        4242
+      ],
+      "trainable_parameters": 5694882
+    }
+  ],
+  "audit": {
+    "actual_models": 9,
+    "actual_runs": 27,
+    "all_metric_integrity_checks_passed": true,
+    "all_seed_configs_controlled": true,
+    "expected_models": 9,
+    "expected_runs": 27,
+    "missing_checkpoint_hashes": [
+      {
+        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware/checkpoints/best.pt",
+        "model": "PIDNet-S",
+        "seed": 1337
+      },
+      {
+        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed2027/checkpoints/best.pt",
+        "model": "PIDNet-S",
+        "seed": 2027
+      },
+      {
+        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed4242/checkpoints/best.pt",
+        "model": "PIDNet-S",
+        "seed": 4242
+      },
+      {
+        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue/checkpoints/best.pt",
+        "model": "ROD ViT-S",
+        "seed": 1337
+      },
+      {
+        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed2027/checkpoints/best.pt",
+        "model": "ROD ViT-S",
+        "seed": 2027
+      },
+      {
+        "expected_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed4242/checkpoints/best.pt",
+        "model": "ROD ViT-S",
+        "seed": 4242
+      }
+    ]
+  },
+  "generator_script": "./scripts/build_blue_only_ledger.py",
+  "generator_script_sha256": "1cbf7a626ace266c65cb160f03fd967b5d6b50c836b523b5324644d1374a29a4",
+  "policy": "blue_only",
+  "positive_class": "CaT blue/sedan traversable; black, green, and red untraversable",
+  "realtime_suite_commit": "ffe68ea514df744aa6fe082257f1c3dabccf8b78",
+  "runs": [
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2/checkpoints/best.pt",
+      "checkpoint_sha256": "858491446422f28155f58c0113e9836b0cfcf95dbfc2295f5e7a8f54fec47d2a",
+      "config_path": "realtime_comparison_results/configs/smp_fpn_mobilenetv2.yaml",
+      "config_sha256": "9534c2c56173ff0ed51ff45829e7aa842a196d10ac4d6d0b630d526d69786c83",
+      "experiment_name": "mixed_binary_traversability_smp_fpn_mobilenetv2",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1649300,
+          "fp": 2068093,
+          "tn": 94566425,
+          "tp": 35409622
+        },
+        "confusion_matrix": [
+          [
+            94566425,
+            2068093
+          ],
+          [
+            1649300,
+            35409622
+          ]
+        ],
+        "f1_traversable": 0.9501266336982711,
+        "false_block_rate": 0.044504802379302884,
+        "false_safe_rate": 0.02140118296031652,
+        "fbr_traversable": 0.044504802379302884,
+        "iou_traversable": 0.9049916534650037,
+        "iou_untraversable": 0.9621769577571763,
+        "mIoU": 0.93358430561109,
+        "precision_traversable": 0.9448180605461138,
+        "recall_traversable": 0.9554951976206971
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2/test_metrics.json",
+      "metrics_sha256": "cd4717db7156f32fd441918b789879dd77ea3d6631c1e0ab9dda8fe08994acdf",
+      "model": "FPN/MobileNetV2",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": "6d9ddc912aa81999e18666e343e27474b8775aed51c5bb61098c2000af057a93",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_mobilenetv2_seed2027.yaml",
+      "config_sha256": "3f44624deadf82f239c8ee9dd90652f6d310afa710239556ba5c04dd1ee09b0a",
+      "experiment_name": "mixed_binary_traversability_smp_fpn_mobilenetv2_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1985793,
+          "fp": 1809674,
+          "tn": 94824844,
+          "tp": 35073129
+        },
+        "confusion_matrix": [
+          [
+            94824844,
+            1809674
+          ],
+          [
+            1985793,
+            35073129
+          ]
+        ],
+        "f1_traversable": 0.948669482622971,
+        "false_block_rate": 0.053584748093859824,
+        "false_safe_rate": 0.01872699359870559,
+        "fbr_traversable": 0.053584748093859824,
+        "iou_traversable": 0.9023513223889024,
+        "iou_untraversable": 0.9615143476884797,
+        "mIoU": 0.9319328350386911,
+        "precision_traversable": 0.9509344775124602,
+        "recall_traversable": 0.9464152519061402
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2_seed2027/test_metrics.json",
+      "metrics_sha256": "3ced8019faf0daafabc7e0af7846ee511d562d1eb701c3469b6184ab9c6a40e6",
+      "model": "FPN/MobileNetV2",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": "f525346decf84cb012be7a2082d7d3d2c2d27ef5714134bd746ca3339931b708",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_mobilenetv2_seed4242.yaml",
+      "config_sha256": "86832ceb41c156cc12b5a18de3f03933075735d353a4569f58742d7f8c0bf251",
+      "experiment_name": "mixed_binary_traversability_smp_fpn_mobilenetv2_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1942993,
+          "fp": 1725463,
+          "tn": 94909055,
+          "tp": 35115929
+        },
+        "confusion_matrix": [
+          [
+            94909055,
+            1725463
+          ],
+          [
+            1942993,
+            35115929
+          ]
+        ],
+        "f1_traversable": 0.9503593990141909,
+        "false_block_rate": 0.052429830527720156,
+        "false_safe_rate": 0.017855555506573747,
+        "fbr_traversable": 0.052429830527720156,
+        "iou_traversable": 0.9054140989988626,
+        "iou_untraversable": 0.9627860760249871,
+        "mIoU": 0.9341000875119249,
+        "precision_traversable": 0.9531650975620031,
+        "recall_traversable": 0.9475701694722799
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_mobilenetv2_seed4242/test_metrics.json",
+      "metrics_sha256": "f97b05438e3553644c4ca4258d43afd9ace9a1906b280c06ae3a4a4b47039a65",
+      "model": "FPN/MobileNetV2",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0/checkpoints/best.pt",
+      "checkpoint_sha256": "6ae9aa2a20b7ca918b30e7ed0744f55ce04f3bf4745f203561216709b0d71d6a",
+      "config_path": "realtime_comparison_results/configs/smp_fpn_efficientnetb0.yaml",
+      "config_sha256": "ecb49f4df60a6b7f4c5419e22f0c9006522e32c0b605411e8916a33058b0e49c",
+      "experiment_name": "mixed_binary_traversability_smp_fpn_efficientnetb0",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1662905,
+          "fp": 1827306,
+          "tn": 94807212,
+          "tp": 35396017
+        },
+        "confusion_matrix": [
+          [
+            94807212,
+            1827306
+          ],
+          [
+            1662905,
+            35396017
+          ]
+        ],
+        "f1_traversable": 0.9530141960572139,
+        "false_block_rate": 0.044871920451436766,
+        "false_safe_rate": 0.01890945428009482,
+        "fbr_traversable": 0.044871920451436766,
+        "iou_traversable": 0.9102455758887182,
+        "iou_untraversable": 0.9644933621505012,
+        "mIoU": 0.9373694690196097,
+        "precision_traversable": 0.9509096487704765,
+        "recall_traversable": 0.9551280795485633
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0/test_metrics.json",
+      "metrics_sha256": "e35471a7dfe55d412a2485c935f8e181a13b5859c79ae1e900b88aede91d51f8",
+      "model": "FPN/EfficientNet-B0",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": "282478d94bfb5840d789ab9f04107c35f4aa37e4bcdc6d466c50db08eaeda3be",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_efficientnetb0_seed2027.yaml",
+      "config_sha256": "3543633a1c5589332a74f72ef7509293149ac7081af86889f4c94c450af5308b",
+      "experiment_name": "mixed_binary_traversability_smp_fpn_efficientnetb0_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1735213,
+          "fp": 1687036,
+          "tn": 94947482,
+          "tp": 35323709
+        },
+        "confusion_matrix": [
+          [
+            94947482,
+            1687036
+          ],
+          [
+            1735213,
+            35323709
+          ]
+        ],
+        "f1_traversable": 0.9537968896228465,
+        "false_block_rate": 0.04682308352088601,
+        "false_safe_rate": 0.017457902568521116,
+        "fbr_traversable": 0.04682308352088601,
+        "iou_traversable": 0.9116746835889308,
+        "iou_untraversable": 0.9652103450399798,
+        "mIoU": 0.9384425143144552,
+        "precision_traversable": 0.9544176697875171,
+        "recall_traversable": 0.953176916479114
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0_seed2027/test_metrics.json",
+      "metrics_sha256": "986847bd4c95e2fd203c0b01a2624583c9a350026c18f8a2d2528cbba9286907",
+      "model": "FPN/EfficientNet-B0",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": "36a1f13cf4252f723a73f25a8ca0acade105d45a543324ef173c6c4cc6e632aa",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_fpn_efficientnetb0_seed4242.yaml",
+      "config_sha256": "01ae7058105048aeabfc38ab2133e92b7ff814dba0b296909fc550335bf0aadc",
+      "experiment_name": "mixed_binary_traversability_smp_fpn_efficientnetb0_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1812049,
+          "fp": 1694501,
+          "tn": 94940017,
+          "tp": 35246873
+        },
+        "confusion_matrix": [
+          [
+            94940017,
+            1694501
+          ],
+          [
+            1812049,
+            35246873
+          ]
+        ],
+        "f1_traversable": 0.9526143787316742,
+        "false_block_rate": 0.04889643039265956,
+        "false_safe_rate": 0.017535152397614277,
+        "fbr_traversable": 0.04889643039265956,
+        "iou_traversable": 0.9095163800111283,
+        "iou_untraversable": 0.9643811855826319,
+        "mIoU": 0.9369487827968801,
+        "precision_traversable": 0.9541299952730508,
+        "recall_traversable": 0.9511035696073404
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_fpn_efficientnetb0_seed4242/test_metrics.json",
+      "metrics_sha256": "a80d64789cad4faa73330597c4b83de13b0aeaf36323475bce06286480d1608a",
+      "model": "FPN/EfficientNet-B0",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2/checkpoints/best.pt",
+      "checkpoint_sha256": "96cb3bbd5c7845ab12c5d9f6640648881596b2c22c4a45f9799b728e5a515599",
+      "config_path": "realtime_comparison_results/configs/smp_unet_mobilenetv2.yaml",
+      "config_sha256": "1b15cf444fe57727072e272df49ee2dd5ddd0865d5ec0076721245f5eb338a48",
+      "experiment_name": "mixed_binary_traversability_smp_unet_mobilenetv2",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1608672,
+          "fp": 2436655,
+          "tn": 94197863,
+          "tp": 35450250
+        },
+        "confusion_matrix": [
+          [
+            94197863,
+            2436655
+          ],
+          [
+            1608672,
+            35450250
+          ]
+        ],
+        "f1_traversable": 0.9460233189500997,
+        "false_block_rate": 0.04340849418123927,
+        "false_safe_rate": 0.025215161729269454,
+        "fbr_traversable": 0.04340849418123927,
+        "iou_traversable": 0.8975751892420764,
+        "iou_untraversable": 0.958823334217873,
+        "mIoU": 0.9281992617299747,
+        "precision_traversable": 0.9356860899564111,
+        "recall_traversable": 0.9565915058187607
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2/test_metrics.json",
+      "metrics_sha256": "a15aa2ebce8c3f72c4268a85c9457dbb777a6d8fbe39103426ce603a9f961551",
+      "model": "U-Net/MobileNetV2",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": "29b3584e235b3efc883f8cb660316a13b1f8fa19cb2424952490336eaf9f60ef",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_mobilenetv2_seed2027.yaml",
+      "config_sha256": "0f2e317564139bc0630a38b17d6f99657ef06d92ea61f56f222c926b5e9020d7",
+      "experiment_name": "mixed_binary_traversability_smp_unet_mobilenetv2_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1754403,
+          "fp": 2275349,
+          "tn": 94359169,
+          "tp": 35304519
+        },
+        "confusion_matrix": [
+          [
+            94359169,
+            2275349
+          ],
+          [
+            1754403,
+            35304519
+          ]
+        ],
+        "f1_traversable": 0.9460099500541206,
+        "false_block_rate": 0.047340907541779005,
+        "false_safe_rate": 0.0235459238281708,
+        "fbr_traversable": 0.047340907541779005,
+        "iou_traversable": 0.8975511202432098,
+        "iou_untraversable": 0.9590426243214925,
+        "mIoU": 0.9282968722823511,
+        "precision_traversable": 0.9394529805160572,
+        "recall_traversable": 0.952659092458221
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2_seed2027/test_metrics.json",
+      "metrics_sha256": "803dc697490a7ed3abe4d08d0a81f0f4b17e156047bac1a12193f90e2ec66293",
+      "model": "U-Net/MobileNetV2",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": "96c8e17816a5bd7843c79a7259d76190d633a2cf12a54e427faa43ff07671159",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_mobilenetv2_seed4242.yaml",
+      "config_sha256": "c3c240f0ed6ddea62a9bdf349851b37e099dd54f936e32cff83c862e0526db3f",
+      "experiment_name": "mixed_binary_traversability_smp_unet_mobilenetv2_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1967497,
+          "fp": 2033919,
+          "tn": 94600599,
+          "tp": 35091425
+        },
+        "confusion_matrix": [
+          [
+            94600599,
+            2033919
+          ],
+          [
+            1967497,
+            35091425
+          ]
+        ],
+        "f1_traversable": 0.9460611229879932,
+        "false_block_rate": 0.0530910478183904,
+        "false_safe_rate": 0.021047541210895263,
+        "fbr_traversable": 0.0530910478183904,
+        "iou_traversable": 0.8976432539144443,
+        "iou_untraversable": 0.9594185169542427,
+        "mIoU": 0.9285308854343435,
+        "precision_traversable": 0.9452148106694984,
+        "recall_traversable": 0.9469089521816096
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_mobilenetv2_seed4242/test_metrics.json",
+      "metrics_sha256": "7ba0db4393a08e30ba822362c0c16002505fdfc88e07abcee3d1dbffa10e91cc",
+      "model": "U-Net/MobileNetV2",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0/checkpoints/best.pt",
+      "checkpoint_sha256": "24e6fd21b486ac39d5748924fd3619baefbe3b9d70b351259f9ce17b0417a60f",
+      "config_path": "realtime_comparison_results/configs/smp_unet_efficientnetb0.yaml",
+      "config_sha256": "87762a0502740d38e0f372253c8a5dcb51e851aa27bf50673e0ce1c3f4a69372",
+      "experiment_name": "mixed_binary_traversability_smp_unet_efficientnetb0",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1780128,
+          "fp": 1680407,
+          "tn": 94954111,
+          "tp": 35278794
+        },
+        "confusion_matrix": [
+          [
+            94954111,
+            1680407
+          ],
+          [
+            1780128,
+            35278794
+          ]
+        ],
+        "f1_traversable": 0.953247463462428,
+        "false_block_rate": 0.048035072363950576,
+        "false_safe_rate": 0.017389303892424858,
+        "fbr_traversable": 0.048035072363950576,
+        "iou_traversable": 0.910671271564874,
+        "iou_untraversable": 0.9648371950654581,
+        "mIoU": 0.937754233315166,
+        "precision_traversable": 0.9545334597466001,
+        "recall_traversable": 0.9519649276360495
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0/test_metrics.json",
+      "metrics_sha256": "bacc914f8e73e9d136100468eb8b8dafe67c8cc25b1bcfd3539ecf50027f905c",
+      "model": "U-Net/EfficientNet-B0",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": "a15efda96b049674160f924775e279feba437a19866a175bb6f60b98fa11e08f",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_efficientnetb0_seed2027.yaml",
+      "config_sha256": "5cbb957dbbc8c1332cabca06f66081c6f595ce4d7e17a2c4a1101aeb2689bba1",
+      "experiment_name": "mixed_binary_traversability_smp_unet_efficientnetb0_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1636562,
+          "fp": 1905492,
+          "tn": 94729026,
+          "tp": 35422360
+        },
+        "confusion_matrix": [
+          [
+            94729026,
+            1905492
+          ],
+          [
+            1636562,
+            35422360
+          ]
+        ],
+        "f1_traversable": 0.9523832825442867,
+        "false_block_rate": 0.04416107948309991,
+        "false_safe_rate": 0.019718544050687976,
+        "fbr_traversable": 0.04416107948309991,
+        "iou_traversable": 0.9090951553897358,
+        "iou_untraversable": 0.9639562931434151,
+        "mIoU": 0.9365257242665754,
+        "precision_traversable": 0.9489525408534089,
+        "recall_traversable": 0.9558389205169001
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0_seed2027/test_metrics.json",
+      "metrics_sha256": "b3682121e6472c9e9b1ad68e60d4049fe08f0c4d9daae997df7d0bf2a3e0143e",
+      "model": "U-Net/EfficientNet-B0",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": "6f417583897f08ca5873e2f974174089d4d78d8cb650c7b31ed09ec2ea1bdc91",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/smp_unet_efficientnetb0_seed4242.yaml",
+      "config_sha256": "d25af97f92a51eba9b74d89add05f2cb3e0b0d4bb741d64b1ff3771925485439",
+      "experiment_name": "mixed_binary_traversability_smp_unet_efficientnetb0_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1528816,
+          "fp": 1974478,
+          "tn": 94660040,
+          "tp": 35530106
+        },
+        "confusion_matrix": [
+          [
+            94660040,
+            1974478
+          ],
+          [
+            1528816,
+            35530106
+          ]
+        ],
+        "f1_traversable": 0.953015970037675,
+        "false_block_rate": 0.041253655462509135,
+        "false_safe_rate": 0.020432429745238654,
+        "fbr_traversable": 0.041253655462509135,
+        "iou_traversable": 0.9102488125554012,
+        "iou_untraversable": 0.9643115829786303,
+        "mIoU": 0.9372801977670158,
+        "precision_traversable": 0.9473536888184122,
+        "recall_traversable": 0.9587463445374909
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_smp_unet_efficientnetb0_seed4242/test_metrics.json",
+      "metrics_sha256": "310023b16ec809a0b64f707217b3fb09d05eb28250dfe50b752b41898af925dd",
+      "model": "U-Net/EfficientNet-B0",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue/checkpoints/best.pt",
+      "checkpoint_sha256": "25254326e45006cd9093adc8ddfe9e0ec28a6f23a8f6c8b24c35d733400315c6",
+      "config_path": "realtime_comparison_results/configs/segformer_b0_cat_blue.yaml",
+      "config_sha256": "4c5c3f70cfd9f084e9a9080cd1ce97e5ce89db2644759bf2109a574e459b93df",
+      "experiment_name": "mixed_binary_traversability_segformer_b0_blue",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1897352,
+          "fp": 2152864,
+          "tn": 94481654,
+          "tp": 35161570
+        },
+        "confusion_matrix": [
+          [
+            94481654,
+            2152864
+          ],
+          [
+            1897352,
+            35161570
+          ]
+        ],
+        "f1_traversable": 0.9455421105375426,
+        "false_block_rate": 0.05119825126051967,
+        "false_safe_rate": 0.02227841608316399,
+        "fbr_traversable": 0.05119825126051967,
+        "iou_traversable": 0.896709219008795,
+        "iou_untraversable": 0.9588943557044031,
+        "mIoU": 0.927801787356599,
+        "precision_traversable": 0.9423047928316426,
+        "recall_traversable": 0.9488017487394803
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue/test_metrics.json",
+      "metrics_sha256": "7ec28d73e5869f0bbe7751a7d59dd9510e556823db55e441e3931c56aced2cc5",
+      "model": "SegFormer-B0",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": "5f4de23f1938f727d67b94db4c49b64d7d62ad7271d6879c60325c3a360e9020",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/segformer_b0_cat_blue_seed2027.yaml",
+      "config_sha256": "ea5f965466da3bd9c85a2ef949206bd8ed78d87c9140682be1a1f0fa65fc8aee",
+      "experiment_name": "mixed_binary_traversability_segformer_b0_blue_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1919655,
+          "fp": 1973492,
+          "tn": 94661026,
+          "tp": 35139267
+        },
+        "confusion_matrix": [
+          [
+            94661026,
+            1973492
+          ],
+          [
+            1919655,
+            35139267
+          ]
+        ],
+        "f1_traversable": 0.947511679019382,
+        "false_block_rate": 0.051800076645510625,
+        "false_safe_rate": 0.020422226351871492,
+        "fbr_traversable": 0.051800076645510625,
+        "iou_traversable": 0.9002586158263233,
+        "iou_untraversable": 0.9604973906077016,
+        "mIoU": 0.9303780032170124,
+        "precision_traversable": 0.9468244330743505,
+        "recall_traversable": 0.9481999233544893
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue_seed2027/test_metrics.json",
+      "metrics_sha256": "6ee6d747e4e54e7e2ae3c2a2402c735377a90cb9ecdc39934652509647d56591",
+      "model": "SegFormer-B0",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": "f4eca55c19a2f0a1aaf14fd1bd8895cf390cb440bdb8ba98a859637bd63ee42e",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/segformer_b0_cat_blue_seed4242.yaml",
+      "config_sha256": "f5aba5f180f863d975a00d3f2d40d7571095020e82d9236fd1107477880e74d1",
+      "experiment_name": "mixed_binary_traversability_segformer_b0_blue_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 1995913,
+          "fp": 2066748,
+          "tn": 94567770,
+          "tp": 35063009
+        },
+        "confusion_matrix": [
+          [
+            94567770,
+            2066748
+          ],
+          [
+            1995913,
+            35063009
+          ]
+        ],
+        "f1_traversable": 0.9452388011922951,
+        "false_block_rate": 0.053857826733330234,
+        "false_safe_rate": 0.021387264538329873,
+        "fbr_traversable": 0.053857826733330234,
+        "iou_traversable": 0.8961637973228318,
+        "iou_untraversable": 0.9588092543162465,
+        "mIoU": 0.9274865258195392,
+        "precision_traversable": 0.9443371525431745,
+        "recall_traversable": 0.9461421732666697
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_segformer_b0_blue_seed4242/test_metrics.json",
+      "metrics_sha256": "24b68fd6fb8a8946d34f8503fa3b3afd298047099c18d41d4b8ccf74b3a4d314",
+      "model": "SegFormer-B0",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue/checkpoints/best.pt",
+      "checkpoint_sha256": "079d1d61b788e316dbd4362984d017dc58679959505532a425595320ed28b4bc",
+      "config_path": "realtime_comparison_results/configs/ddrnet23_slim_cat_blue.yaml",
+      "config_sha256": "ac05fc51dadc11d3a5cdee3e7101f39850b39cac7f48e819c955159061477008",
+      "experiment_name": "mixed_binary_traversability_ddrnet23_slim_blue",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 4021234,
+          "fp": 3442373,
+          "tn": 93192145,
+          "tp": 33037688
+        },
+        "confusion_matrix": [
+          [
+            93192145,
+            3442373
+          ],
+          [
+            4021234,
+            33037688
+          ]
+        ],
+        "f1_traversable": 0.89850815587156,
+        "false_block_rate": 0.10850920056444167,
+        "false_safe_rate": 0.0356226022672354,
+        "fbr_traversable": 0.10850920056444167,
+        "iou_traversable": 0.8157192998396718,
+        "iou_untraversable": 0.9258501689997806,
+        "mIoU": 0.8707847344197261,
+        "precision_traversable": 0.9056368628330966,
+        "recall_traversable": 0.8914907994355583
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue/test_metrics.json",
+      "metrics_sha256": "9b39499cfc951670854cd37fba7f23c8e3d747b1bd25e52e969077448e3bf0f3",
+      "model": "DDRNet-23-Slim",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": "eb73edbac90d134eda1acc45021e166283704bc6e7176ee0cc34103d09da97e5",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/ddrnet23_slim_cat_blue_seed2027.yaml",
+      "config_sha256": "f6394137f3b04fdcfc755e2200ef491cdfd2eb7a2b30a92e0fdb7dcc8e088485",
+      "experiment_name": "mixed_binary_traversability_ddrnet23_slim_blue_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 3699817,
+          "fp": 3732383,
+          "tn": 92902135,
+          "tp": 33359105
+        },
+        "confusion_matrix": [
+          [
+            92902135,
+            3732383
+          ],
+          [
+            3699817,
+            33359105
+          ]
+        ],
+        "f1_traversable": 0.8997685919740699,
+        "false_block_rate": 0.09983606646734085,
+        "false_safe_rate": 0.038623703799091746,
+        "fbr_traversable": 0.09983606646734085,
+        "iou_traversable": 0.8177994060253773,
+        "iou_untraversable": 0.9259256564564862,
+        "mIoU": 0.8718625312409317,
+        "precision_traversable": 0.8993735975218896,
+        "recall_traversable": 0.9001639335326591
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue_seed2027/test_metrics.json",
+      "metrics_sha256": "961791e6056e855f3f0172b175985bc4048ea5f245e693a82302c6ed0d10b638",
+      "model": "DDRNet-23-Slim",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": "455144ea74477e02593a52d5f807fafa829d5f985ca5d434b11ead9a10387c9e",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/ddrnet23_slim_cat_blue_seed4242.yaml",
+      "config_sha256": "a8fab0e75e30df53df198f70efd16506440fa06678805e10e45571d038d36e95",
+      "experiment_name": "mixed_binary_traversability_ddrnet23_slim_blue_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 2988225,
+          "fp": 3970632,
+          "tn": 92663886,
+          "tp": 34070697
+        },
+        "confusion_matrix": [
+          [
+            92663886,
+            3970632
+          ],
+          [
+            2988225,
+            34070697
+          ]
+        ],
+        "f1_traversable": 0.9073390979745194,
+        "false_block_rate": 0.08063442859994686,
+        "false_safe_rate": 0.04108916857224869,
+        "fbr_traversable": 0.08063442859994686,
+        "iou_traversable": 0.8303940374297025,
+        "iou_untraversable": 0.9301479080936368,
+        "mIoU": 0.8802709727616697,
+        "precision_traversable": 0.895623204962161,
+        "recall_traversable": 0.9193655714000531
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_ddrnet23_slim_blue_seed4242/test_metrics.json",
+      "metrics_sha256": "d3fa6746b88fad32069f2d94743823a9150feeb0998c2146f04055c6fa5659b6",
+      "model": "DDRNet-23-Slim",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue/checkpoints/best.pt",
+      "checkpoint_sha256": "808ca5f52eb7c79d931346f6d66c81ea371effa692169aeac68e2dfb3e421d06",
+      "config_path": "realtime_comparison_results/configs/bisenetv2_cat_blue.yaml",
+      "config_sha256": "d25d3ee887233c57c914a5d7fea80fcab59a9a917dfaaa0abe8cb7fe72cebb49",
+      "experiment_name": "mixed_binary_traversability_bisenetv2_blue",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 2979496,
+          "fp": 3672396,
+          "tn": 92962122,
+          "tp": 34079426
+        },
+        "confusion_matrix": [
+          [
+            92962122,
+            3672396
+          ],
+          [
+            2979496,
+            34079426
+          ]
+        ],
+        "f1_traversable": 0.9110837341759359,
+        "false_block_rate": 0.080398884781376,
+        "false_safe_rate": 0.0380029421784874,
+        "fbr_traversable": 0.080398884781376,
+        "iou_traversable": 0.8366885157018489,
+        "iou_untraversable": 0.9332233314079683,
+        "mIoU": 0.8849559235549086,
+        "precision_traversable": 0.9027226818350648,
+        "recall_traversable": 0.919601115218624
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue/test_metrics.json",
+      "metrics_sha256": "09c7cd52ece556fd2d479232fba528b88ad2dba5669432fd87b6ef9b79c40aeb",
+      "model": "BiSeNetV2",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": "03e6180621fa3321416e2b2a7c8018aca23ada40cdfcd8e81bfbf081438b72ed",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/bisenetv2_cat_blue_seed2027.yaml",
+      "config_sha256": "c28413ef2b55ba6e1c18d3427821023dc4bbf10fc0af46e08f6328f1a1d2135c",
+      "experiment_name": "mixed_binary_traversability_bisenetv2_blue_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 3120555,
+          "fp": 3131033,
+          "tn": 93503485,
+          "tp": 33938367
+        },
+        "confusion_matrix": [
+          [
+            93503485,
+            3131033
+          ],
+          [
+            3120555,
+            33938367
+          ]
+        ],
+        "f1_traversable": 0.9156653242467838,
+        "false_block_rate": 0.08420522863563058,
+        "false_safe_rate": 0.0324007721547284,
+        "fbr_traversable": 0.08420522863563058,
+        "iou_traversable": 0.8444489922917306,
+        "iou_untraversable": 0.9373306257818086,
+        "mIoU": 0.8908898090367696,
+        "precision_traversable": 0.9155359137185927,
+        "recall_traversable": 0.9157947713643694
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue_seed2027/test_metrics.json",
+      "metrics_sha256": "9e7a0089b6070ba90c8114b173817cb70ca85e61b5a193b992536ddeea63183e",
+      "model": "BiSeNetV2",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": true,
+      "checkpoint_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": "4751e0dea28c280ec30e4b87aa6e045899c54fc9727bf227f7d8bb60f931c2db",
+      "config_path": "realtime_comparison_results/configs/generated/realtime/bisenetv2_cat_blue_seed4242.yaml",
+      "config_sha256": "1b9456a320111133903e0bb8f06d10d4b6710155f282e595929e0d7c059c5036",
+      "experiment_name": "mixed_binary_traversability_bisenetv2_blue_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 2662889,
+          "fp": 3716961,
+          "tn": 92917557,
+          "tp": 34396033
+        },
+        "confusion_matrix": [
+          [
+            92917557,
+            3716961
+          ],
+          [
+            2662889,
+            34396033
+          ]
+        ],
+        "f1_traversable": 0.9151298737682835,
+        "false_block_rate": 0.07185554399018947,
+        "false_safe_rate": 0.038464112792490984,
+        "fbr_traversable": 0.07185554399018947,
+        "iou_traversable": 0.8435386426824896,
+        "iou_untraversable": 0.9357500845918363,
+        "mIoU": 0.8896443636371629,
+        "precision_traversable": 0.9024752293141809,
+        "recall_traversable": 0.9281444560098105
+      },
+      "metrics_integrity": true,
+      "metrics_path": "realtime_comparison_results/outputs/mixed_binary_traversability_bisenetv2_blue_seed4242/test_metrics.json",
+      "metrics_sha256": "8564db1e3517419d748de484f7a668d23337aa283f5d8c4afd13e44344c3dd19",
+      "model": "BiSeNetV2",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": false,
+      "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware/checkpoints/best.pt",
+      "checkpoint_sha256": null,
+      "config_path": "rod_suite_results/configs/pidnet_cat_blue.yaml",
+      "config_sha256": "cfb9474515782999d1452ed7844e4e968de8b23265bb2f8655d61bf8cc699982",
+      "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 3348439,
+          "fp": 3527875,
+          "tn": 93106643,
+          "tp": 33710483
+        },
+        "confusion_matrix": [
+          [
+            93106643,
+            3527875
+          ],
+          [
+            3348439,
+            33710483
+          ]
+        ],
+        "f1_traversable": 0.907448644149557,
+        "false_block_rate": 0.09035446308988697,
+        "false_safe_rate": 0.03650739997482059,
+        "fbr_traversable": 0.09035446308988697,
+        "iou_traversable": 0.8305775644232286,
+        "iou_untraversable": 0.9312251387003887,
+        "mIoU": 0.8809013515618087,
+        "precision_traversable": 0.9052623372921008,
+        "recall_traversable": 0.9096455369101131
+      },
+      "metrics_integrity": true,
+      "metrics_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware/test_metrics.json",
+      "metrics_sha256": "6c922f9861adc651830741fa9b40bf306f1915bb7f6f959e1f19b14b631ceff2",
+      "model": "PIDNet-S",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": false,
+      "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": null,
+      "config_path": "rod_suite_results/configs/generated/pidnet_blue_only_seed2027.yaml",
+      "config_sha256": "00b263da732d66bec43cef86a539a56910a89916863621fe57c200eb491b756b",
+      "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 3135051,
+          "fp": 3513935,
+          "tn": 93120583,
+          "tp": 33923871
+        },
+        "confusion_matrix": [
+          [
+            93120583,
+            3513935
+          ],
+          [
+            3135051,
+            33923871
+          ]
+        ],
+        "f1_traversable": 0.9107479458695154,
+        "false_block_rate": 0.08459638950102218,
+        "false_safe_rate": 0.03636314510307797,
+        "fbr_traversable": 0.08459638950102218,
+        "iou_traversable": 0.8361223120176131,
+        "iou_untraversable": 0.9333565728844634,
+        "mIoU": 0.8847394424510382,
+        "precision_traversable": 0.9061393982328986,
+        "recall_traversable": 0.9154036104989778
+      },
+      "metrics_integrity": true,
+      "metrics_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed2027/test_metrics.json",
+      "metrics_sha256": "9b39f737c788584c73180ef500155069ea6387a3178858a63505f223f05b3de1",
+      "model": "PIDNet-S",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": false,
+      "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": null,
+      "config_path": "rod_suite_results/configs/generated/pidnet_blue_only_seed4242.yaml",
+      "config_sha256": "5803fbe1b399711329713d6ae0da187521f2fe93c8b2e7d0f6d591b1df00b0aa",
+      "experiment_name": "mixed_binary_traversability_pidnet_blue_hardware_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 3484820,
+          "fp": 3184600,
+          "tn": 93449918,
+          "tp": 33574102
+        },
+        "confusion_matrix": [
+          [
+            93449918,
+            3184600
+          ],
+          [
+            3484820,
+            33574102
+          ]
+        ],
+        "f1_traversable": 0.9096500315426029,
+        "false_block_rate": 0.09403457553352469,
+        "false_safe_rate": 0.03295509788748571,
+        "fbr_traversable": 0.09403457553352469,
+        "iou_traversable": 0.8342734515135132,
+        "iou_untraversable": 0.9333852966546783,
+        "mIoU": 0.8838293740840957,
+        "precision_traversable": 0.9133647319755741,
+        "recall_traversable": 0.9059654244664753
+      },
+      "metrics_integrity": true,
+      "metrics_path": "rod_suite_results/outputs/mixed_binary_traversability_pidnet_blue_hardware_seed4242/test_metrics.json",
+      "metrics_sha256": "bd73821a2bba63a2929d1dd5b3d7f73205b6fae37f3fa0248adc3062ecc6d82d",
+      "model": "PIDNet-S",
+      "seed": 4242
+    },
+    {
+      "checkpoint_available": false,
+      "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue/checkpoints/best.pt",
+      "checkpoint_sha256": null,
+      "config_path": "rod_suite_results/configs/rod_vits_cat_blue.yaml",
+      "config_sha256": "690bb41319aa5fd950df7c2b6f4a8c2d775757fb5cc404240e07c5187c2bf3be",
+      "experiment_name": "mixed_binary_traversability_rod_vits_blue",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 2128111,
+          "fp": 2400125,
+          "tn": 94234393,
+          "tp": 34930811
+        },
+        "confusion_matrix": [
+          [
+            94234393,
+            2400125
+          ],
+          [
+            2128111,
+            34930811
+          ]
+        ],
+        "f1_traversable": 0.9391283150453116,
+        "false_block_rate": 0.05742506487371651,
+        "false_safe_rate": 0.024837139457766014,
+        "fbr_traversable": 0.05742506487371651,
+        "iou_traversable": 0.8852421347124779,
+        "iou_untraversable": 0.9541503092227324,
+        "mIoU": 0.9196962219676051,
+        "precision_traversable": 0.935706808958661,
+        "recall_traversable": 0.9425749351262835
+      },
+      "metrics_integrity": true,
+      "metrics_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue/test_metrics.json",
+      "metrics_sha256": "cb85a21bf7dece580c1be5c145a188e8549823c51ef670425b8c3de1a9590a4b",
+      "model": "ROD ViT-S",
+      "seed": 1337
+    },
+    {
+      "checkpoint_available": false,
+      "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed2027/checkpoints/best.pt",
+      "checkpoint_sha256": null,
+      "config_path": "rod_suite_results/configs/generated/rod_blue_only_seed2027.yaml",
+      "config_sha256": "e2c5d40c2f79ea4b9c80ef6e3166a3feb73adc0f9c032179735f09f98a2d2fac",
+      "experiment_name": "mixed_binary_traversability_rod_vits_blue_seed2027",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 2213903,
+          "fp": 2157626,
+          "tn": 94476892,
+          "tp": 34845019
+        },
+        "confusion_matrix": [
+          [
+            94476892,
+            2157626
+          ],
+          [
+            2213903,
+            34845019
+          ]
+        ],
+        "f1_traversable": 0.9409743922917536,
+        "false_block_rate": 0.059740080944610315,
+        "false_safe_rate": 0.022327694540785106,
+        "fbr_traversable": 0.059740080944610315,
+        "iou_traversable": 0.8885284599756205,
+        "iou_untraversable": 0.9557754291290096,
+        "mIoU": 0.922151944552315,
+        "precision_traversable": 0.9416899521642305,
+        "recall_traversable": 0.9402599190553896
+      },
+      "metrics_integrity": true,
+      "metrics_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed2027/test_metrics.json",
+      "metrics_sha256": "eeb561bfec25ee7ea55739412c34ffa9cdca13cb6668a30f18cc940818685121",
+      "model": "ROD ViT-S",
+      "seed": 2027
+    },
+    {
+      "checkpoint_available": false,
+      "checkpoint_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed4242/checkpoints/best.pt",
+      "checkpoint_sha256": null,
+      "config_path": "rod_suite_results/configs/generated/rod_blue_only_seed4242.yaml",
+      "config_sha256": "2eb66d17d10ca2bcca55ba6d20bd7dc01b68445d728ee9d4588b63c2f6fa7c2e",
+      "experiment_name": "mixed_binary_traversability_rod_vits_blue_seed4242",
+      "metrics": {
+        "confusion_count_definition": "For traversable as positive: TP=gt1/pred1, FP=gt0/pred1, TN=gt0/pred0, FN=gt1/pred0; FBR=FN/(FN+TP).",
+        "confusion_counts_traversable": {
+          "fn": 2297149,
+          "fp": 2114583,
+          "tn": 94519935,
+          "tp": 34761773
+        },
+        "confusion_matrix": [
+          [
+            94519935,
+            2114583
+          ],
+          [
+            2297149,
+            34761773
+          ]
+        ],
+        "f1_traversable": 0.9403298111626766,
+        "false_block_rate": 0.06198639561075198,
+        "false_safe_rate": 0.021882273992405075,
+        "fbr_traversable": 0.06198639561075198,
+        "iou_traversable": 0.8873796970682097,
+        "iou_untraversable": 0.9554062704715165,
+        "mIoU": 0.9213929837698631,
+        "precision_traversable": 0.9426574849206901,
+        "recall_traversable": 0.938013604389248
+      },
+      "metrics_integrity": true,
+      "metrics_path": "rod_suite_results/outputs/mixed_binary_traversability_rod_vits_blue_seed4242/test_metrics.json",
+      "metrics_sha256": "4af32220bd859acf5593be65769a778c9a7181ba055fc7aa049f004285e0aad1",
+      "model": "ROD ViT-S",
+      "seed": 4242
+    }
+  ],
+  "seeds": [
+    1337,
+    2027,
+    4242
+  ],
+  "test_images": 544
+}
