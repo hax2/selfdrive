@@ -318,9 +318,12 @@ Vision-based approaches complement geometric methods by leveraging appearance cu
 Classical methods used hand-crafted features (colour histograms, texture descriptors) with classifiers such as SVMs or random forests.
 Modern approaches use deep semantic segmentation networks, which learn to map raw pixels to traversability classes end-to-end.
 
-Self-supervised traversability learning, where the robot's own driving experience provides training signal, has gained attention in recent years (e.g., WayFAST, BADGR, ViNT).
-However, these methods require extensive teleoperation data and do not generalise easily across vehicle platforms.
-Supervised segmentation on curated datasets remains the most practical approach for initial model development and benchmarking.
+An alternative line of work derives supervision from robot trajectories,
+interventions, or geometric sensors. Those signals can adapt perception to a
+specific platform, although their labels depend on vehicle interaction,
+coverage, and sensor assumptions. This thesis uses supervised segmentation so
+all architectures receive identical pixel labels and can be compared through a
+fixed held-out protocol.
 
 \section{Off-Road Segmentation Datasets}
 
@@ -336,7 +339,7 @@ Several datasets target off-road semantic segmentation:
 \textbf{Dataset} & \textbf{Year} & \textbf{Images} & \textbf{Classes} & \textbf{Environment} \\
 \midrule
 RUGD~\cite{wigness2019rugd}          & 2019 & 7{,}453  & 24 & Unstructured outdoor trails \\
-RELLIS-3D~\cite{jiang2021rellis}     & 2021 & 13{,}556 & 20 & Off-road military proving ground \\
+RELLIS-3D~\cite{jiang2021rellis}     & 2021 & 6{,}235 & 20 & Off-road military proving ground \\
 \textbf{CaT}  & \textbf{2022} & \textbf{1{,}812} & \textbf{4} & \textbf{Off-road trails (CAVS)} \\
 TartanDrive~\cite{triest2022tartandrive} & 2022 & --- & --- & Off-road driving (multimodal) \\
 ORFD~\cite{min2022orfd}          & 2022 & 12{,}198 & 3  & Freespace detection \\
@@ -344,29 +347,72 @@ ORFD~\cite{min2022orfd}          & 2022 & 12{,}198 & 3  & Freespace detection \\
 \end{tabular}
 \end{table}
 
+RELLIS-3D also provides 13{,}556 annotated LiDAR scans; the corrected image
+count in Table~\ref{tab:offroad_datasets} is 6{,}235. WildScenes
+~\cite{vidanapathirana2025wildscenes} extends natural-environment benchmarking
+with calibrated image and LiDAR sequences collected across repeated traversals
+over six months, supporting 2D, 3D, and domain-adaptation evaluation. These
+larger multimodal datasets offer stronger tests of environmental generalisation
+than CaT, although their semantic terrain labels do not reproduce CaT's nested
+vehicle-capability definition.
+
 The CaT dataset is distinctive in defining classes by vehicle-type traversability rather than terrain type.
 Its 4-class scheme (background, sedan, pickup, off-road) directly encodes operational constraints, making it well-suited for vehicle-specific autonomy.
 However, with 1{,}812 images it is relatively small, increasing the risk of overfitting and making data-efficient training strategies important.
 
 \section{Semantic Segmentation Architectures}
 
-Modern semantic segmentation architectures can be broadly categorised into:
-\begin{itemize}[nosep]
-  \item \textbf{Encoder-decoder architectures} (U-Net, SegNet): use skip connections to combine low-level spatial detail with high-level semantic features.
-  \item \textbf{Dilated/atrous convolution architectures} (DeepLabv3+): use dilated convolutions and Atrous Spatial Pyramid Pooling (ASPP) to capture multi-scale context without reducing resolution.
-  \item \textbf{Real-time architectures} (BiSeNet, DDRNet, PIDNet): use multi-branch designs to separate spatial detail from semantic context, achieving high throughput with competitive accuracy.
-  \item \textbf{Transformer-based architectures} (SegFormer, EfficientViT): use self-attention mechanisms to model long-range dependencies, achieving strong accuracy but typically at higher computational cost.
-\end{itemize}
+The models evaluated in this thesis represent three important design families:
+generic encoder--decoder systems, purpose-built real-time multi-resolution
+networks, and compact transformer-based segmentation.
 
-For this thesis, we selected \textbf{PIDNet}~\cite{xu2023pidnet}, a three-branch real-time segmentation architecture inspired by PID control theory.
-PIDNet maintains separate branches for:
+\subsection{Encoder--Decoder Systems and Compact Encoders}
+
+U-Net~\cite{ronneberger2015unet} introduced a contracting path followed by a
+symmetric expanding path, with skip connections restoring spatial detail from
+matching encoder stages. Its decoder remains widely used because it can be
+paired with different feature encoders. FPN~\cite{lin2017fpn} instead constructs
+a top-down pyramid and merges it with lateral features, producing semantically
+strong representations at several spatial scales. Although introduced for
+object detection, FPN is also used as a compact semantic-segmentation decoder.
+
+MobileNetV2~\cite{sandler2018mobilenetv2} reduces computation through depthwise
+convolutions, inverted residual blocks, and linear bottlenecks. EfficientNet
+~\cite{tan2019efficientnet} scales depth, width, and resolution jointly;
+EfficientNet-B0 is its smallest baseline. Pairing both encoders with both
+decoders yields the $2\times2$ design used here. This design distinguishes
+decoder effects from encoder effects, which a comparison of two unmatched
+encoder--decoder packages cannot do.
+
+\subsection{Purpose-Built Real-Time Networks}
+
+BiSeNetV2~\cite{yu2021bisenetv2} assigns fine spatial detail and high-level
+semantics to separate branches, then combines them through guided aggregation.
+DDRNet~\cite{hong2022ddrnet} maintains coupled high- and low-resolution streams
+with repeated bilateral exchange; DDRNet-23-Slim targets the high-throughput
+end of that family. PIDNet~\cite{xu2023pidnet} extends multi-branch reasoning
+with an analogy to proportional, integral, and derivative control:
 \begin{itemize}[nosep]
-  \item \textbf{P (Proportional) branch}: captures fine spatial detail at high resolution.
-  \item \textbf{I (Integral) branch}: captures semantic context through deep feature aggregation.
-  \item \textbf{D (Derivative) branch}: captures boundary information via feature differences.
+  \item the P branch preserves high-resolution spatial detail;
+  \item the I branch aggregates low-resolution semantic context;
+  \item the D branch emphasises boundaries and corrects detail loss during fusion.
 \end{itemize}
-The branches are fused through learned attention mechanisms (PagFM, Bag/Light\_Bag modules) and a Detail Aggregation Pyramid Pooling Module (DAPPM/PAPPM).
-PIDNet-S, the small variant, uses \texttt{planes=32} and achieves ${\sim}7.6$M parameters with ${\sim}78.6$\% mIoU on Cityscapes at real-time speeds.
+PIDNet-S uses approximately 7.6M parameters. Its paper reports 78.6\% mIoU on
+the Cityscapes test set at 93.2 FPS under the authors' measurement setup. Such
+published FPS values depend on hardware, resolution, software, and timing
+scope, so this thesis remeasures every candidate under common H100 and Ryzen
+protocols instead of comparing literature FPS directly.
+
+\subsection{Compact Transformer Segmentation}
+
+SegFormer~\cite{xie2021segformer} uses a hierarchical Mix Transformer encoder
+and a lightweight MLP decoder. Its encoder avoids fixed positional encodings,
+and its multi-scale features provide both local detail and broader context.
+The B0 variant is included as the compact transformer candidate. Transformer
+parameter count alone does not determine deployment speed; attention, tensor
+layout, memory access, and runtime optimisation can substantially affect CPU
+and GPU latency. This motivates measuring eager and compiled CPU execution in
+addition to server-GPU throughput.
 
 \subsection{ROD and EfficientSAM Transfer}
 
@@ -385,8 +431,10 @@ hardware-matched measurements in this thesis.
 \section{CaT Dataset Literature and Baselines}
 \label{sec:cat_literature}
 
-To date, \textbf{three publications} have reported quantitative segmentation
-results using the CaT dataset.
+The focused literature review identified three publications that report
+quantitative CaT segmentation results and provide the most directly relevant
+baselines for this thesis. This count describes the reviewed comparison set
+rather than claiming an exhaustive census of every use of CaT.
 
 \subsection{Sharma et al.\ (IEEE Access, 2022)}
 
@@ -492,6 +540,27 @@ Our binary formulation directly maps onto specific vehicle categories:
 \end{itemize}
 The per-class sedan IoU comparison is valid because both measure the same quantity: how well the model identifies the sedan-traversable region against everything else, on the same pixels, same images, and same train/test split.
 The overall mIoU values are \emph{not} directly comparable (different number of classes, different denominators).
+
+\section{Research Gap and Position of This Thesis}
+
+The reviewed CaT studies use different class merges, model capacities, data
+counts, split descriptions, and metric definitions. The original paper reports
+four-class PSPNet baselines; the EfficientViT study reports three-class means
+under a split that cannot be reconstructed from a public manifest; and the
+depth-aided study reports a permissive merged-road class after training on a
+much larger generated dataset. These results provide context, although they do
+not answer which compact architecture gives the strongest safety--accuracy--
+latency trade-off under one fixed CaT protocol.
+
+This thesis addresses that gap through nine model families, two explicit
+vehicle-capability policies, three matched seeds, one deterministic split, and
+common safety metrics. The complete FPN/U-Net by MobileNetV2/EfficientNet-B0
+design supports component-level analysis inside the generic encoder--decoder
+family. Hardware-matched H100 measurements and eager/compiled Ryzen CPU
+measurements establish deployment trade-offs without borrowing incompatible
+FPS values from architecture papers. The contribution is an empirical CaT
+benchmark with reproducible artifacts; conclusions are restricted to this
+dataset and protocol.
 
 \section{Safety Metrics in Traversability Segmentation}
 
@@ -1627,7 +1696,7 @@ post-hoc analyses of saved checkpoints.
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliographystyle{IEEEtranN}
 % Inline bibliography since .bib file may not exist yet.
-\begin{thebibliography}{19}
+\begin{thebibliography}{20}
 
 \bibitem[Sharma et~al.(2022)]{sharma2022cat}
 S.~Sharma, J.~E. Ball, B.~Tang, D.~W. Carruth, M.~Doude, and M.~A. Islam.
@@ -1740,6 +1809,15 @@ C.~Yu, C.~Gao, J.~Wang, G.~Yu, C.~Shen, and N.~Sang.
 \newblock BiSeNet V2: Bilateral Network with Guided Aggregation for Real-Time
 Semantic Segmentation.
 \newblock \emph{International Journal of Computer Vision}, 129:3051--3068, 2021.
+
+\bibitem[Vidanapathirana et~al.(2025)]{vidanapathirana2025wildscenes}
+K.~Vidanapathirana, J.~Knights, S.~Hausler, M.~Cox, M.~Ramezani,
+J.~Jooste, E.~Griffiths, S.~Mohamed, S.~Sridharan, C.~Fookes, and
+P.~Moghadam.
+\newblock WildScenes: A Benchmark for 2D and 3D Semantic Segmentation in
+Large-scale Natural Environments.
+\newblock \emph{The International Journal of Robotics Research},
+44(4):532--549, 2025.
 
 \end{thebibliography}
 
