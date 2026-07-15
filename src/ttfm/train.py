@@ -73,6 +73,11 @@ def _run_epoch(
             loss = ce_loss_weight * ce_loss(logits, masks) + dice_loss_weight * dice_loss(logits, masks)
             if false_safe_penalty_weight > 0:
                 loss = loss + false_safe_penalty_weight * false_safe_penalty_loss(logits, masks)
+        if not torch.isfinite(loss).item():
+            raise FloatingPointError(
+                f"Non-finite {'training' if training else 'validation'} loss "
+                f"at batch {batch_index}: {loss.detach().cpu().item()}"
+            )
         if training:
             remainder = len(loader) % gradient_accumulation_steps
             final_group_size = remainder or gradient_accumulation_steps
@@ -192,6 +197,25 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
 
     best_metric = -1.0
     history: list[dict[str, Any]] = []
+    early_stopping_cfg = config["training"].get("early_stopping", {})
+    early_stopping_enabled = bool(early_stopping_cfg.get("enabled", False))
+    early_stopping_metric = str(early_stopping_cfg.get("metric", "mIoU"))
+    early_stopping_mode = str(early_stopping_cfg.get("mode", "max"))
+    early_stopping_patience = int(early_stopping_cfg.get("patience", 8))
+    early_stopping_min_delta = float(early_stopping_cfg.get("min_delta", 0.0))
+    early_stopping_min_epochs = int(early_stopping_cfg.get("min_epochs", 1))
+    if early_stopping_mode not in {"min", "max"}:
+        raise ValueError("training.early_stopping.mode must be 'min' or 'max'")
+    if early_stopping_patience < 1:
+        raise ValueError("training.early_stopping.patience must be at least 1")
+    if early_stopping_min_epochs < 1:
+        raise ValueError("training.early_stopping.min_epochs must be at least 1")
+    if early_stopping_min_delta < 0:
+        raise ValueError("training.early_stopping.min_delta must be non-negative")
+    early_stopping_best = math.inf if early_stopping_mode == "min" else -math.inf
+    epochs_without_improvement = 0
+    stopped_early = False
+    stop_reason: str | None = None
 
     for epoch in range(1, epochs + 1):
         train_dataset.set_epoch(epoch)
@@ -223,6 +247,20 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             ce_loss_weight,
             dice_loss_weight,
         )
+        if early_stopping_metric == "loss":
+            monitored_value = float(val_loss)
+        else:
+            if early_stopping_metric not in val_metrics:
+                available = ", ".join(sorted(val_metrics))
+                raise ValueError(
+                    f"Unknown early-stopping metric '{early_stopping_metric}'. "
+                    f"Use 'loss' or one of: {available}"
+                )
+            monitored_value = float(val_metrics[early_stopping_metric])
+        if not math.isfinite(monitored_value):
+            raise FloatingPointError(
+                f"Non-finite validation metric '{early_stopping_metric}' at epoch {epoch}: {monitored_value}"
+            )
         if not scheduler_steps_per_batch:
             scheduler.step()
         epoch_record = {
@@ -256,6 +294,25 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             for example in examples[:4]:
                 save_triptych(example["image"], example["gt"], example["pred"], viz_dir / f"val_best_{example['name']}.png")
 
+        if early_stopping_enabled:
+            if early_stopping_mode == "max":
+                meaningful_improvement = monitored_value > early_stopping_best + early_stopping_min_delta
+            else:
+                meaningful_improvement = monitored_value < early_stopping_best - early_stopping_min_delta
+            if meaningful_improvement:
+                early_stopping_best = monitored_value
+                epochs_without_improvement = 0
+            else:
+                epochs_without_improvement += 1
+            if epoch >= early_stopping_min_epochs and epochs_without_improvement >= early_stopping_patience:
+                stopped_early = True
+                stop_reason = (
+                    f"validation {early_stopping_metric} did not improve by at least "
+                    f"{early_stopping_min_delta:g} for {early_stopping_patience} epochs"
+                )
+                print(f"early_stop epoch={epoch}: {stop_reason}", flush=True)
+                break
+
     summary = {
         "experiment_name": config["experiment_name"],
         "device": str(device),
@@ -272,6 +329,19 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
         "val_batch_size": val_batch_size,
         "lr_scheduler": scheduler_name,
         "best_val_mIoU": best_metric,
+        "epochs_completed": len(history),
+        "maximum_epochs": epochs,
+        "stopped_early": stopped_early,
+        "stop_reason": stop_reason,
+        "early_stopping": {
+            "enabled": early_stopping_enabled,
+            "metric": early_stopping_metric,
+            "mode": early_stopping_mode,
+            "patience": early_stopping_patience,
+            "min_delta": early_stopping_min_delta,
+            "min_epochs": early_stopping_min_epochs,
+            "best_monitored_value": early_stopping_best if early_stopping_enabled else None,
+        },
         "history": history,
     }
     save_json(output_root / "train_summary.json", summary)

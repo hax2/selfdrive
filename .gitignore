@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+.venv-orfd/
 .env
 .codex
 
@@ -8,6 +9,8 @@ __pycache__/
 CAT/
 CaT/
 cat/
+datasets/
+downloads/
 data_processed*/
 weights/
 *.tar.gz

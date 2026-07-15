@@ -116,3 +116,45 @@ The suite is resumable: experiments with an existing `test_metrics.json` are ski
 - Forward-pass benchmarks over 128 test images with 5 warmups and 10 repeats.
 
 When complete, download `rod_suite_results.zip`. It contains aggregate JSON/Markdown reports, individual metrics and histories, exact generated configs, benchmarks, the suite log, and both paper-recipe best checkpoints. Other repeat-seed checkpoints remain on the server to avoid an unnecessarily large archive.
+
+## ORFD ROD vs FPN Comparison
+
+After pulling the repository on a CUDA server, the complete controlled ORFD
+comparison is one command:
+
+```bash
+nohup bash scripts/run_orfd_comparison.sh > orfd_comparison.log 2>&1 < /dev/null &
+echo $! > orfd_comparison.pid
+tail -f orfd_comparison.log
+```
+
+The script creates `.venv-orfd`, installs the Python dependencies, downloads
+only ORFD RGB images and ground-truth masks from the Academic Torrents release
+(about 16.8 GB), downloads EfficientSAM ViT-S, validates and preprocesses the
+available train/validation/test partition, trains ROD ViT-S and
+FPN/EfficientNet-B0 for seeds
+1337, 2027, and 4242, evaluates their best checkpoints, benchmarks batch-one
+CUDA inference, and writes `reports/orfd/comparison.md` and `.json`.
+
+Training uses a maximum safety cap of 60 epochs, not a fixed 60-epoch budget.
+It stops after validation mIoU fails to improve by at least 0.0005 for eight
+epochs, after a minimum of 15 epochs. Non-finite training/validation loss or
+metrics abort the run immediately. Completed runs and downloaded files are
+reused when the script is restarted.
+
+For a single-seed validation run before committing to the full comparison:
+
+```bash
+ORFD_SEEDS=1337 bash scripts/run_orfd_comparison.sh
+```
+
+This is a controlled comparison at 640 by 384 with a matched optimization
+recipe. The Academic Torrents mirror contains 8,392/1,245/2,193 usable pairs,
+whereas the paper reports 8,398/1,245/2,555. The preprocessing step labels this
+as the known incomplete mirror and refuses any unrecognised partial download.
+If the complete dataset is already present under `datasets/ORFD`, it detects
+and uses the full profile; set `ORFD_SKIP_DOWNLOAD=1` to avoid fetching the
+mirror in that case, and set `ORFD_RAW_ROOT` if it lives elsewhere. A
+mirror-based result must not be described as an
+exact reproduction of ROD's published score; the paper also does not disclose
+its epoch budget or complete timing procedure.

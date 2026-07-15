@@ -1,0 +1,38 @@
+seed: 1337
+processed_root: data_processed_orfd
+reports_dir: reports/orfd
+configs_dir: configs
+outputs_dir: outputs/orfd
+dataset_name: ORFD
+experiment_name: orfd_rod_vits_seed1337
+
+# Controlled ORFD comparison: both models use the same images, optimizer,
+# objective, batch size, stopping rule, threshold, and evaluation code.
+training:
+  model_name: rod-vits
+  rod_encoder_checkpoint: weights/efficient_sam_vits.pt
+  rod_encoder_image_size: 1024
+  input_size: [640, 384]
+  batch_size: 8
+  val_batch_size: 8
+  epochs: 60  # safety cap; validation-based early stopping normally ends first
+  learning_rate: 0.001
+  weight_decay: 0.01
+  lr_scheduler: poly
+  poly_power: 0.9
+  mixed_precision: bf16
+  num_workers: 8
+  augment: false
+  class_weights: [1.0, 1.0]
+  ce_loss_weight: 1.0
+  dice_loss_weight: 0.0
+  early_stopping:
+    enabled: true
+    metric: mIoU
+    mode: max
+    min_epochs: 15
+    patience: 8
+    min_delta: 0.0005
+
+postprocessing:
+  traversable_threshold: 0.5

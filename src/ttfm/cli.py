@@ -21,9 +21,15 @@ def _load_config(path: Path) -> dict:
 
 
 def _print_pretrain_summary(config: dict) -> None:
+    processed_summary = json.loads((Path(config["processed_root"]) / "summary.json").read_text())
+    if "preprocessing" not in config:
+        print("Dataset:", processed_summary.get("dataset_name", "unknown"))
+        print("Sample counts:", processed_summary["split_counts"])
+        print("Positive class:", processed_summary.get("positive_class", "traversable"))
+        print("Mask rule:", processed_summary.get("mask_rule", "recorded in processed manifest"))
+        return
     mapping_filename = config.get("preprocessing", {}).get("mapping_filename", "discovered_mapping.yaml")
     mapping = load_yaml(Path(config["configs_dir"]) / mapping_filename)
-    processed_summary = json.loads((Path(config["processed_root"]) / "summary.json").read_text())
     print("Chosen supervision source:", mapping["chosen_supervision_source"])
     print("Unique raw class IDs:", mapping["global_unique_int_map_ids"])
     print("Inferred color-to-ID correspondence:")
