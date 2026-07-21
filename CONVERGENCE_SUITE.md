@@ -1,8 +1,10 @@
 # Convergence-aware architecture suite
 
 This suite retrains all nine CaT architectures for seeds 1337, 2027, and 4242
-under both blue+green and blue-only policies. The default command creates 54
+under the thesis's principal blue+green policy. The default command creates 27
 independent experiments and runs at most two GPU processes concurrently.
+Passing `--policy both` remains available if a later run also needs the
+blue-only policy.
 
 The maximum duration and learning-rate schedule are deliberately separate:
 
@@ -28,17 +30,17 @@ python -c "import torch; print(torch.__version__, torch.cuda.get_device_name(0))
 python scripts/run_convergence_suite.py --prepare-only
 
 nohup python scripts/run_convergence_suite.py \
-  --policy both \
+  --policy blue-green \
   --jobs 2 \
   > convergence_suite.log 2>&1 < /dev/null &
 echo $! > convergence_suite.pid
 ```
 
-The real launch performs a strict preflight for both processed datasets, their
-mapping files, and the EfficientSAM weight used by ROD. If the server is
-missing a policy dataset, prepare it first with `make prepare-rod`
-(blue+green) and/or `make prepare-rod-blue` (blue-only). `--prepare-only`
-does not require those large local artifacts; it checks config generation.
+The real launch performs a strict preflight for the selected processed dataset,
+its mapping file, and the EfficientSAM weight used by ROD. If the server is
+missing the blue+green dataset, prepare it first with `make prepare-rod`.
+`--prepare-only` does not require those large local artifacts; it checks
+config generation.
 
 Follow the live suite log:
 
@@ -49,22 +51,22 @@ tail -f convergence_suite.log
 Print the latest saved status without attaching to the running process:
 
 ```bash
-python scripts/run_convergence_suite.py --policy both --status-only
+python scripts/run_convergence_suite.py --policy blue-green --status-only
 ```
 
 The runner writes:
 
-- `outputs/convergence_both_e300_c60_m60_p25/status.json`: per-job progress and
+- `outputs/convergence_blue_green_e300_c60_m60_p25/status.json`: per-job progress and
   ETA estimates;
-- `outputs/convergence_both_e300_c60_m60_p25/results.csv`: completed test
+- `outputs/convergence_blue_green_e300_c60_m60_p25/results.csv`: completed test
   metrics in spreadsheet form;
-- `outputs/convergence_both_e300_c60_m60_p25/results.json`: the same completed
+- `outputs/convergence_blue_green_e300_c60_m60_p25/results.json`: the same completed
   results as JSON;
-- `outputs/convergence_both_e300_c60_m60_p25/summary.csv`: model/policy means
+- `outputs/convergence_blue_green_e300_c60_m60_p25/summary.csv`: model means
   and standard deviations across the completed seeds;
-- `outputs/convergence_both_e300_c60_m60_p25/summary.json`: the same aggregate
+- `outputs/convergence_blue_green_e300_c60_m60_p25/summary.json`: the same aggregate
   summary as JSON;
-- `outputs/convergence_both_e300_c60_m60_p25/logs/`: one append-only log per
+- `outputs/convergence_blue_green_e300_c60_m60_p25/logs/`: one append-only log per
   experiment;
 - `outputs/<experiment>/training_progress.json`: current epoch, best epoch,
   rolling seconds per epoch, patience counter, and per-run ETA bounds.

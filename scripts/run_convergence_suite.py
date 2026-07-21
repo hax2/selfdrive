@@ -528,7 +528,12 @@ def print_saved_status(suite_root: Path) -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--policy", choices=("blue-green", "blue", "both"), default="both")
+    parser.add_argument(
+        "--policy",
+        choices=("blue-green", "blue", "both"),
+        default="blue-green",
+        help="Label policy to run; defaults to the thesis's principal blue+green policy",
+    )
     parser.add_argument("--models", default="all", help="Comma-separated model slugs, or 'all'")
     parser.add_argument("--seeds", default=",".join(str(seed) for seed in SEEDS))
     parser.add_argument("--jobs", type=int, default=2, help="Maximum concurrent GPU processes")
