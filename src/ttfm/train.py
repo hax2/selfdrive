@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import math
+from datetime import datetime, timezone
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 import torch
@@ -16,6 +18,23 @@ from .metrics import metrics_from_confusion, predict_from_logits, update_confusi
 from .model import build_model
 from .utils import ensure_dir, save_json, set_seed
 from .visualize import save_triptych
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _format_duration(seconds: float | None) -> str:
+    if seconds is None or not math.isfinite(seconds):
+        return "unknown"
+    seconds = max(int(round(seconds)), 0)
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours:
+        return f"{hours:d}h{minutes:02d}m"
+    if minutes:
+        return f"{minutes:d}m{seconds:02d}s"
+    return f"{seconds:d}s"
 
 
 def dice_loss(logits: torch.Tensor, targets: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
@@ -143,6 +162,8 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
     ce_loss_weight = float(config["training"].get("ce_loss_weight", 1.0))
     dice_loss_weight = float(config["training"].get("dice_loss_weight", 1.0))
     gradient_accumulation_steps = int(config["training"].get("gradient_accumulation_steps", 1))
+    save_last_checkpoint = bool(config["training"].get("save_last_checkpoint", True))
+    save_optimizer_state = bool(config["training"].get("save_optimizer_state", True))
 
     max_train_samples = config["training"].get("max_train_samples")
     max_val_samples = config["training"].get("max_val_samples")
@@ -177,6 +198,7 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
     optimizer = AdamW(model.parameters(), lr=learning_rate, weight_decay=float(config["training"]["weight_decay"]))
     scheduler_name = str(config["training"].get("lr_scheduler", "cosine"))
     scheduler_steps_per_batch = scheduler_name == "poly"
+    cosine_decay_epochs: int | None = None
     if scheduler_steps_per_batch:
         optimizer_steps_per_epoch = math.ceil(len(train_loader) / gradient_accumulation_steps)
         total_optimizer_steps = max(optimizer_steps_per_epoch * epochs, 1)
@@ -186,9 +208,12 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             lr_lambda=lambda step: (1.0 - min(step, total_optimizer_steps) / total_optimizer_steps) ** poly_power,
         )
     elif scheduler_name == "cosine":
+        cosine_decay_epochs = int(config["training"].get("cosine_decay_epochs", epochs))
+        if cosine_decay_epochs < 1:
+            raise ValueError("training.cosine_decay_epochs must be at least 1")
         scheduler = CosineAnnealingLR(
             optimizer,
-            T_max=epochs,
+            T_max=cosine_decay_epochs,
             eta_min=float(config["training"].get("min_learning_rate", 1e-5)),
         )
     else:
@@ -216,9 +241,26 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
     epochs_without_improvement = 0
     stopped_early = False
     stop_reason: str | None = None
+    best_epoch: int | None = None
+    run_started_at = _utc_now()
+    run_start = perf_counter()
+    progress_path = output_root / "training_progress.json"
+    save_json(
+        progress_path,
+        {
+            "status": "running",
+            "experiment_name": config["experiment_name"],
+            "started_at": run_started_at,
+            "current_epoch": 0,
+            "maximum_epochs": epochs,
+            "cosine_decay_epochs": cosine_decay_epochs,
+        },
+    )
 
     for epoch in range(1, epochs + 1):
+        epoch_start = perf_counter()
         train_dataset.set_epoch(epoch)
+        train_start = perf_counter()
         train_loss, train_metrics, _ = _run_epoch(
             model,
             train_loader,
@@ -233,8 +275,10 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             gradient_accumulation_steps,
             scheduler if scheduler_steps_per_batch else None,
         )
+        train_seconds = perf_counter() - train_start
         if device.type == "cuda":
             torch.cuda.empty_cache()
+        validation_start = perf_counter()
         val_loss, val_metrics, examples = _run_epoch(
             model,
             val_loader,
@@ -247,6 +291,7 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             ce_loss_weight,
             dice_loss_weight,
         )
+        validation_seconds = perf_counter() - validation_start
         if early_stopping_metric == "loss":
             monitored_value = float(val_loss)
         else:
@@ -261,39 +306,30 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
             raise FloatingPointError(
                 f"Non-finite validation metric '{early_stopping_metric}' at epoch {epoch}: {monitored_value}"
             )
-        if not scheduler_steps_per_batch:
+        if not scheduler_steps_per_batch and (
+            scheduler_name != "cosine" or cosine_decay_epochs is None or epoch <= cosine_decay_epochs
+        ):
             scheduler.step()
-        epoch_record = {
-            "epoch": epoch,
-            "train_loss": train_loss,
-            "val_loss": val_loss,
-            "learning_rate": optimizer.param_groups[0]["lr"],
-            "train_metrics": train_metrics,
-            "val_metrics": val_metrics,
-        }
-        history.append(epoch_record)
-        save_json(output_root / "history.json", history)
-        print(
-            f"epoch={epoch}/{epochs} train_loss={train_loss:.4f} val_loss={val_loss:.4f} "
-            f"val_mIoU={val_metrics['mIoU']:.4f}",
-            flush=True,
-        )
 
         checkpoint = {
             "model_state": model.state_dict(),
-            "optimizer_state": optimizer.state_dict(),
             "epoch": epoch,
             "config": config,
             "class_weights": class_weights.cpu(),
         }
-        torch.save(checkpoint, checkpoints_dir / "last.pt")
+        if save_optimizer_state:
+            checkpoint["optimizer_state"] = optimizer.state_dict()
+        if save_last_checkpoint:
+            torch.save(checkpoint, checkpoints_dir / "last.pt")
 
         if val_metrics["mIoU"] > best_metric:
             best_metric = float(val_metrics["mIoU"])
+            best_epoch = epoch
             torch.save(checkpoint, checkpoints_dir / "best.pt")
             for example in examples[:4]:
                 save_triptych(example["image"], example["gt"], example["pred"], viz_dir / f"val_best_{example['name']}.png")
 
+        should_stop = False
         if early_stopping_enabled:
             if early_stopping_mode == "max":
                 meaningful_improvement = monitored_value > early_stopping_best + early_stopping_min_delta
@@ -306,13 +342,79 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
                 epochs_without_improvement += 1
             if epoch >= early_stopping_min_epochs and epochs_without_improvement >= early_stopping_patience:
                 stopped_early = True
+                should_stop = True
                 stop_reason = (
                     f"validation {early_stopping_metric} did not improve by at least "
                     f"{early_stopping_min_delta:g} for {early_stopping_patience} epochs"
                 )
-                print(f"early_stop epoch={epoch}: {stop_reason}", flush=True)
-                break
+        epoch_seconds = perf_counter() - epoch_start
+        recent_epoch_seconds = [
+            float(item.get("timing", {}).get("epoch_seconds", epoch_seconds)) for item in history[-4:]
+        ] + [epoch_seconds]
+        rolling_epoch_seconds = sum(recent_epoch_seconds) / len(recent_epoch_seconds)
+        eta_to_max_seconds = rolling_epoch_seconds * max(epochs - epoch, 0)
+        eta_to_early_stop_seconds: float | None = None
+        if early_stopping_enabled:
+            epochs_until_minimum = max(early_stopping_min_epochs - epoch, 0)
+            epochs_until_patience = max(early_stopping_patience - epochs_without_improvement, 0)
+            planned_remaining_epochs = min(
+                max(epochs_until_minimum, epochs_until_patience),
+                max(epochs - epoch, 0),
+            )
+            eta_to_early_stop_seconds = rolling_epoch_seconds * planned_remaining_epochs
 
+        epoch_record = {
+            "epoch": epoch,
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            "learning_rate": optimizer.param_groups[0]["lr"],
+            "train_metrics": train_metrics,
+            "val_metrics": val_metrics,
+            "timing": {
+                "train_seconds": train_seconds,
+                "validation_seconds": validation_seconds,
+                "epoch_seconds": epoch_seconds,
+                "rolling_epoch_seconds": rolling_epoch_seconds,
+                "elapsed_seconds": perf_counter() - run_start,
+                "eta_to_early_stop_seconds": eta_to_early_stop_seconds,
+                "eta_to_max_seconds": eta_to_max_seconds,
+            },
+        }
+        history.append(epoch_record)
+        save_json(output_root / "history.json", history)
+        save_json(
+            progress_path,
+            {
+                "status": "stopping" if should_stop else "running",
+                "experiment_name": config["experiment_name"],
+                "started_at": run_started_at,
+                "updated_at": _utc_now(),
+                "current_epoch": epoch,
+                "maximum_epochs": epochs,
+                "cosine_decay_epochs": cosine_decay_epochs,
+                "best_epoch": best_epoch,
+                "best_val_mIoU": best_metric,
+                "current_val_mIoU": float(val_metrics["mIoU"]),
+                "current_learning_rate": float(optimizer.param_groups[0]["lr"]),
+                "epochs_without_improvement": epochs_without_improvement,
+                "early_stopping_patience": early_stopping_patience if early_stopping_enabled else None,
+                **epoch_record["timing"],
+            },
+        )
+        print(
+            f"epoch={epoch}/{epochs} train_loss={train_loss:.4f} val_loss={val_loss:.4f} "
+            f"val_mIoU={val_metrics['mIoU']:.4f} best={best_metric:.4f}@{best_epoch} "
+            f"lr={optimizer.param_groups[0]['lr']:.3g} epoch_s={epoch_seconds:.1f} "
+            f"rolling_s={rolling_epoch_seconds:.1f} bad_epochs={epochs_without_improvement} "
+            f"eta_stop={_format_duration(eta_to_early_stop_seconds)} "
+            f"eta_cap={_format_duration(eta_to_max_seconds)}",
+            flush=True,
+        )
+        if should_stop:
+            print(f"early_stop epoch={epoch}: {stop_reason}", flush=True)
+            break
+
+    total_training_seconds = perf_counter() - run_start
     summary = {
         "experiment_name": config["experiment_name"],
         "device": str(device),
@@ -325,14 +427,22 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
         "dice_loss_weight": dice_loss_weight,
         "false_safe_penalty_weight": false_safe_penalty_weight,
         "gradient_accumulation_steps": gradient_accumulation_steps,
+        "save_last_checkpoint": save_last_checkpoint,
+        "save_optimizer_state": save_optimizer_state,
         "effective_batch_size": batch_size * gradient_accumulation_steps,
         "val_batch_size": val_batch_size,
         "lr_scheduler": scheduler_name,
+        "cosine_decay_epochs": cosine_decay_epochs,
         "best_val_mIoU": best_metric,
+        "best_epoch": best_epoch,
         "epochs_completed": len(history),
         "maximum_epochs": epochs,
         "stopped_early": stopped_early,
         "stop_reason": stop_reason,
+        "started_at": run_started_at,
+        "finished_at": _utc_now(),
+        "total_training_seconds": total_training_seconds,
+        "average_epoch_seconds": total_training_seconds / max(len(history), 1),
         "early_stopping": {
             "enabled": early_stopping_enabled,
             "metric": early_stopping_metric,
@@ -345,4 +455,24 @@ def run_training(config: dict[str, Any]) -> dict[str, Any]:
         "history": history,
     }
     save_json(output_root / "train_summary.json", summary)
+    save_json(
+        progress_path,
+        {
+            "status": "completed",
+            "experiment_name": config["experiment_name"],
+            "started_at": run_started_at,
+            "finished_at": summary["finished_at"],
+            "current_epoch": len(history),
+            "maximum_epochs": epochs,
+            "cosine_decay_epochs": cosine_decay_epochs,
+            "best_epoch": best_epoch,
+            "best_val_mIoU": best_metric,
+            "stopped_early": stopped_early,
+            "stop_reason": stop_reason,
+            "total_training_seconds": total_training_seconds,
+            "average_epoch_seconds": summary["average_epoch_seconds"],
+            "eta_to_early_stop_seconds": 0.0,
+            "eta_to_max_seconds": 0.0,
+        },
+    )
     return summary
