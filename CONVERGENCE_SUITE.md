@@ -91,3 +91,21 @@ artifacts are required.
 The launcher prevents two ROD training jobs from running simultaneously. If
 the H100 partition still runs out of memory, relaunch with `--jobs 1`; completed
 experiments will be retained.
+
+## Controlling adopted workers
+
+If multiple disjoint launchers are already running, the wave controller can
+keep a fixed number of their existing GPU stages runnable without restarting
+them. Excess processes retain model, optimizer, and epoch state under SIGSTOP
+and are resumed automatically as capacity becomes available:
+
+```bash
+nohup .venv/bin/python scripts/convergence_wave_controller.py \
+  --suite convergence_blue_green_e300_c60_m60_p25 \
+  --max-active 4 \
+  > convergence_controller.log 2>&1 < /dev/null &
+```
+
+The controller only adopts direct workers of `run_convergence_suite.py`; it
+does not launch experiments or signal launcher processes. Its latest view is
+written to `outputs/<suite>/wave_controller_status.json`.
