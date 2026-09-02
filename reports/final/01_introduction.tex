@@ -1,0 +1,229 @@
+% ============================================================
+\chapter{Introduction}
+\label{ch:introduction}
+% ============================================================
+
+\section{Motivation}
+
+Autonomous driving on a paved road is supported by a set of regularities:
+lanes have conventional widths, curbs provide visible boundaries, signs encode
+rules, and the road surface is designed for ordinary vehicles. An off-road
+vehicle encounters none of these guarantees. A pale strip in an image may be
+compacted gravel, loose soil, shallow water, or a patch of dry vegetation.
+The border between a track and its surroundings can be gradual, interrupted,
+or hidden by shadow. Even if the surface category were recognised perfectly,
+the answer to ``can the vehicle cross it?'' would still depend on clearance,
+traction, wheelbase, mass, slope, and current conditions.
+
+Traversability is therefore an \emph{affordance}: it describes what a particular
+platform can do in a scene. The same region may be accessible to a pickup,
+outside a sedan's capability, and trivial for a dedicated off-road vehicle. This
+vehicle dependence makes traversability more operational than ordinary
+terrain classification. It also creates a demanding perception problem,
+because some of the relevant physical properties are not directly observable
+from one RGB frame~\cite{islam2022review,sevastopoulos2022survey}.
+
+The practical output considered in this thesis is a dense binary mask. Every
+image pixel is labelled either traversable or untraversable for a declared
+vehicle-capability policy. A mask is convenient for downstream processing: a
+planner can intersect it with a projected footprint, inflate blocked regions,
+or combine it with geometric and temporal estimates. Dense prediction also
+exposes the spatial structure of errors. A connected false-safe region directly
+in front of the vehicle has a different operational meaning from a handful of
+isolated pixels at the top of the image, even if both contribute the same
+number of errors to a global score.
+
+Two competing engineering requirements motivate the study. First, the mask
+must be accurate enough to represent narrow corridors and irregular
+boundaries. Second, it must be produced fast enough for an onboard navigation
+loop. A large pretrained transformer may supply strong visual features, while
+a purpose-built real-time network may offer far lower latency. The thesis
+therefore studies accuracy, asymmetric error rates, reproducibility, and
+hardware speed together rather than treating any one of them as a complete
+measure of success.
+
+\Needspace{0.42\textheight}
+\section{Problem Definition and Research Questions}
+
+For an RGB image
+\begin{equation}
+  x\in\mathbb{R}^{H\times W\times3},
+\end{equation}
+where $x$ is the input tensor, $H$ and $W$ are its height and width in pixels,
+the final dimension contains the red, green, and blue channels, and
+$\mathbb{R}$ denotes real-valued samples. The system estimates a traversable
+probability for each pixel and produces
+\begin{equation}
+  \hat y_{ij} =
+  \mathbb{1}\!\left[p(y_{ij}=1\mid x)\geq \tau\right],
+  \qquad
+  \hat y\in\{0,1\}^{H\times W},
+  \label{eq:intro_decision}
+\end{equation}
+Here, $i\in\{1,\ldots,H\}$ and $j\in\{1,\ldots,W\}$ index the pixel row and
+column; $y_{ij}$ is its target class; $p(y_{ij}=1\mid x)$ is the model's
+conditional probability of the traversable class; $\mathbb{1}[\cdot]$ is one
+when its condition is true and zero otherwise; and $\hat y_{ij}$ is the
+resulting binary prediction. Class 1 is traversable, class 0 is
+untraversable, and $\tau$ is the fixed decision threshold. The complete
+predicted mask $\hat y$ therefore has the same $H\times W$ spatial dimensions
+as the image. The main PIDNet-S development uses $\tau=0.50$ and the
+CaT blue+green policy: sedan- and pickup-traversable pixels are positive,
+while background and off-road-vehicle-only pixels are negative. The
+architecture experiment also evaluates the more conservative blue-only policy.
+
+This definition makes the two error directions explicit. A false positive
+opens a pixel that the annotation declares blocked; it is called a
+\emph{false safe}. A false negative rejects a pixel that the annotation
+declares traversable; it is called a \emph{false block}. The first can expose a
+planner to terrain outside the selected capability envelope. The second can
+remove a feasible route or cause unnecessary stopping. The costs are
+asymmetric, but they are not completely described by their pixel counts:
+location, connectedness, vehicle speed, and the planner all affect the
+consequence.
+
+The investigation is organised around four research questions:
+\begin{enumerate}
+  \item Can PIDNet-S provide a reproducible, real-time baseline for the CaT
+  binary task using only the official training partition?
+  \item Which of the tested training and postprocessing choices materially
+  change its accuracy, false-safe behaviour, and false-block behaviour?
+  \item How does frozen-encoder transfer in ROD compare with PIDNet-S under
+  matched seeds, and where do both systems lie among other compact
+  segmentation architectures?
+  \item How do the accuracy rankings change when inference latency, target
+  hardware, execution runtime, and timing scope are included?
+\end{enumerate}
+
+\section{Objectives}
+
+The investigation has four methodological objectives:
+\begin{enumerate}
+  \item define a reproducible binary task from the released CaT files,
+  including explicit vehicle policies and a development split that does not
+  draw from the official test partition;
+  \item determine how a compact PIDNet-S implementation responds to changes in
+  training objective, augmentation, class weighting, resolution, and
+  threshold, while preserving the complete record of the selected model;
+  \item compare that model with frozen-encoder ROD and a representative group
+  of compact convolutional and transformer systems under repeatable training
+  conditions;
+  \item relate overlap quality and asymmetric errors to observed latency on
+  CPU, H100, and TensorRT execution rather than using parameter count as a
+  proxy for deployability.
+\end{enumerate}
+
+\section{Research Design}
+
+The experiments were organised in two linked stages. The first stage treated
+PIDNet-S as an engineering reference. Building that model required decisions
+about file pairing, target conversion, augmentation, loss terms, validation,
+error reporting, and export. Exploratory runs exposed interactions between
+several of those choices; a subsequent single-factor study separated them.
+The selected checkpoint was retained unchanged so that its numerical,
+qualitative, and runtime measurements all refer to the same parameters.
+
+The second stage asked whether the conclusion depended on that initial
+architecture. ROD introduced a pretrained transformer whose encoder remained
+fixed during CaT training. A matched PIDNet--ROD experiment measured the
+difference over three seeds, after which seven additional systems supplied
+context for the pairwise result. The first matrix used a common 15-epoch
+budget under both label policies. Its validation histories showed that this
+was useful as a fixed-budget comparison but too early to represent the models'
+attainable performance. A convergence-aware follow-up therefore repeated the
+principal blue+green matrix with a longer ceiling and validation-based stopping.
+This order separates three questions that are often conflated: how one model
+was engineered into a reproducible system, how complete model recipes compare
+under equal training exposure, and how that ranking changes when each run is
+allowed to progress beyond the early fixed budget.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/research_progression.tex}}
+\caption[Experimental structure.]{Experimental structure. A fixed task
+definition connects model development, repeatability analysis, architectural
+comparison, and hardware measurement.}
+\label{fig:research_progression}
+\end{figure}
+
+Figure~\ref{fig:research_progression} summarises this progression from a fixed
+task definition to model development, comparison, and hardware evaluation.
+
+The validation-selected PIDNet-S checkpoint and the three-seed comparison are
+therefore reported separately. The former is an artifact-level result backed
+by exact reproduction and deployment measurements. The latter estimates
+between-run variation under a common recipe. Combining them into one average
+would erase the experimental conditions that give each number its meaning.
+
+\section{Contributions}
+
+The resulting contributions are:
+\begin{itemize}
+  \item an audited conversion of 1,812 underlying CaT samples to binary
+  traversability, with an unchanged 544-image official test partition excluded
+  from training and validation splitting and a
+  deterministic 1,002/266 train--validation split;
+  \item a detailed implementation of PIDNet-S for two-class prediction,
+  including its tensor shapes, objective, optimisation, decision threshold,
+  and controlled ablation history;
+  \item a 7,623,522-parameter PIDNet-S checkpoint with 0.893941 mIoU,
+  4.3176\% FSR, 7.0369\% FBR, and an exactly reproduced confusion matrix
+  covering 133,693,440 pixel decisions;
+  \item percentile-based and failure-ranked qualitative evidence that connects
+  the aggregate asymmetric error rates to visible spatial behaviour;
+  \item a CaT implementation of ROD with a frozen EfficientSAM ViT-S encoder
+  and an explicit reconstruction of the published training regime;
+  \item a nine-system, three-seed comparison under both blue-only and
+  blue+green policies, including a $2\times2$ FPN/U-Net by
+  MobileNetV2/EfficientNet-B0 design;
+  \item a convergence-aware three-seed follow-up for the principal blue+green
+  policy, with 27 validation-selected checkpoints, complete test records, and
+  checkpoint identities;
+  \item hardware measurements that distinguish forward-only CPU and H100
+  timing from a larger TensorRT preprocessing-to-returned-mask scope.
+\end{itemize}
+
+\section{Scope and Responsible Interpretation}
+
+This thesis studies monocular RGB segmentation. It does not estimate depth,
+slope, soil strength, wheel slip, water depth, or a dynamically feasible
+trajectory. The term \emph{safe} is retained in the metric name ``False Safe
+Rate'' because it describes the binary label convention, not because the
+network output certifies safe vehicle motion. A deployed system would require
+sensor fusion, uncertainty handling, planner constraints, and vehicle-level
+validation.
+
+The quantitative claims are restricted to CaT, the two stated binary policies,
+the declared seeds, and the saved protocols. Frames from the external ALICE
+mobile-robot sequences are used only for qualitative transfer because no
+ground truth is available. Hardware rates are not interchangeable: changing
+the processor, runtime, numerical precision, batch size, input resolution, or
+the start and end of the timer changes the meaning of FPS.
+
+The CaT labels are treated as the reference for scoring, but not as a perfect
+measurement of physical reality. Some boundaries are difficult to justify
+from RGB appearance alone and may depend on physical information or subjective
+vehicle-capability judgement unavailable to the model and thesis author.
+Specific examples and the limits of that observation are discussed in
+Chapters~\ref{ch:cat_pipeline},~\ref{ch:results}, and~\ref{ch:discussion}.
+
+\section{Thesis Organisation}
+
+Chapter~\ref{ch:background} introduces traversability perception, relevant
+datasets, segmentation architectures, and CaT literature.
+Chapter~\ref{ch:cat_pipeline} explains the CaT release, binary label policies,
+split, preprocessing, and common software pipeline.
+Chapter~\ref{ch:pidnet} presents the PIDNet-S implementation, exploratory
+experiments, and controlled ablation.
+Chapter~\ref{ch:rod_extension} introduces ROD and defines the comparative
+architecture study.
+Chapter~\ref{ch:protocols} defines training, evaluation, qualitative,
+reproducibility, and timing protocols.
+Chapters~\ref{ch:results} and~\ref{ch:hardware} report accuracy,
+safety-oriented error metrics,
+qualitative behaviour, and hardware speed.
+Chapter~\ref{ch:discussion} analyses the trade-offs, limitations, and future
+work; Chapter~\ref{ch:conclusions} summarises the evidence in relation to the
+research questions.
+Detailed configurations and reproduction commands are provided in the
+appendices.

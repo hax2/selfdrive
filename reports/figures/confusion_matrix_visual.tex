@@ -1,0 +1,36 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  cell/.style={draw=black!65,very thick,minimum width=3.05cm,
+    minimum height=1.78cm,align=center,inner sep=5pt},
+  metric/.style={draw,rounded corners=2pt,very thick,align=center,
+    text width=4.05cm,minimum height=1.62cm,inner sep=4pt,
+    font=\sffamily\footnotesize},
+  link/.style={-{Latex[length=2.2mm]},thick}
+]
+  \node[font=\bfseries] at (5.05,4.90) {Prediction};
+  \node[font=\bfseries,align=center] at (0.85,4.34) {Ground\\truth};
+  \node[font=\bfseries] at (3.45,4.30) {Untraversable};
+  \node[font=\bfseries] at (6.55,4.30) {Traversable};
+  \node[font=\bfseries,anchor=east] at (1.78,3.05) {Untraversable};
+  \node[font=\bfseries,anchor=east] at (1.78,0.65) {Traversable};
+
+  \node[cell,fill=good!16] (tn) at (3.45,3.05)
+    {\textbf{TN}\\correctly\\blocked};
+  \node[cell,fill=safety!15] (fp) at (6.55,3.05)
+    {\textbf{FP: false safe}\\blocked terrain\\opened};
+  \node[cell,fill=warn!18] (fn) at (3.45,0.65)
+    {\textbf{FN: false block}\\valid terrain\\removed};
+  \node[cell,fill=pidP!13] (tp) at (6.55,0.65)
+    {\textbf{TP}\\correctly\\traversable};
+
+  \node[draw=safety,dashed,rounded corners=2pt,fit=(tn)(fp),inner sep=3pt] (rowu) {};
+  \node[draw=warn!90!black,dashed,rounded corners=2pt,fit=(fn)(tp),inner sep=3pt] (rowt) {};
+  \node[metric,draw=safety,fill=safety!8] (fsr) at (11.65,3.05)
+    {\textbf{False-Safe Rate}\\$\FSR=FP/(FP+TN)$\\
+    fraction of truly blocked pixels opened};
+  \node[metric,draw=warn!90!black,fill=warn!10] (fbr) at (11.65,0.65)
+    {\textbf{False-Block Rate}\\$\FBR=FN/(FN+TP)$\\
+    fraction of truly valid pixels removed};
+  \draw[link,draw=safety] (rowu.east) -- (fsr.west);
+  \draw[link,draw=warn!90!black] (rowt.east) -- (fbr.west);
+\end{tikzpicture}

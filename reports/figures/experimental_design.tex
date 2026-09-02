@@ -1,0 +1,28 @@
+\begin{tikzpicture}[
+  node distance=0.58cm,
+  phase/.style={draw,rounded corners=2pt,text width=2.15cm,minimum height=1.2cm,
+    align=center,font=\small,inner sep=4pt},
+  control/.style={draw,dashed,rounded corners=2pt,text width=8.6cm,minimum height=0.8cm,
+    align=center,font=\footnotesize,inner sep=3pt},
+  arrow/.style={-{Latex[length=2.4mm]},thick,draw=azulUC3M}
+]
+\node[phase,fill=softblue] (explore) {\textbf{Phase 1}\\PIDNet exploratory development};
+\node[phase,fill=softgreen,right=of explore] (ablate) {\textbf{Phase 2}\\single-factor PIDNet ablations};
+\node[phase,fill=softorange,right=of ablate] (freeze) {\textbf{Phase 3}\\checkpoint audit and reproduction};
+\node[phase,fill=softpurple,right=of freeze] (rod) {\textbf{Phase 4}\\PIDNet--ROD repeatability};
+\node[phase,fill=softblue,below=1.1cm of rod] (wide) {\textbf{Phase 5}\\nine architectures, two policies};
+\node[phase,fill=softorange,left=of wide] (converge) {\textbf{Phase 6}\\blue+green convergence follow-up};
+\node[phase,fill=softgreen,left=of converge] (deploy) {\textbf{Phase 7}\\CPU, H100, TensorRT};
+\draw[arrow] (explore) -- (ablate);
+\draw[arrow] (ablate) -- (freeze);
+\draw[arrow] (freeze) -- (rod);
+\draw[arrow] (rod) -- (wide);
+\draw[arrow] (wide) -- (converge);
+\draw[arrow] (converge) -- (deploy);
+\node[control,below=0.55cm of converge] {
+  \textbf{Controls:} Phases 1--3 retain one task and split while the PIDNet
+  configuration is developed and audited. Phases 4--6 use matched splits,
+  objectives, seeds, and thresholds; Phase 6 replaces the early fixed budget
+  with a declared stopping rule.
+};
+\end{tikzpicture}

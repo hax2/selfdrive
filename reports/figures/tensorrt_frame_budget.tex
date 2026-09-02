@@ -1,0 +1,31 @@
+\begin{tikzpicture}[font=\sffamily\small]
+  \def\scale{0.39}
+  \def\budget{13.0}
+  \def\pid{3.664}
+  \def\rod{9.903}
+
+  \node[anchor=east,font=\bfseries] at (-0.25,2.35) {PIDNet-S};
+  \node[anchor=east,font=\bfseries] at (-0.25,0.85) {ROD ViT-S};
+
+  \fill[pidP!72] (0,1.85) rectangle (\pid,2.85);
+  \fill[good!26] (\pid,1.85) rectangle (\budget,2.85);
+  \draw[very thick] (0,1.85) rectangle (\budget,2.85);
+  \node[text=white,font=\bfseries\footnotesize,align=center] at ({\pid/2},2.35)
+    {measured pipeline\\9.396 ms};
+  \node[font=\footnotesize,align=center] at ({(\pid+\budget)/2},2.35)
+    {remaining 30-FPS budget\\23.937 ms};
+
+  \fill[pidD!72] (0,0.35) rectangle (\rod,1.35);
+  \fill[good!26] (\rod,0.35) rectangle (\budget,1.35);
+  \draw[very thick] (0,0.35) rectangle (\budget,1.35);
+  \node[text=white,font=\bfseries\footnotesize,align=center] at ({\rod/2},0.85)
+    {measured pipeline 25.392 ms};
+  \node[font=\footnotesize,align=center] at ({(\rod+\budget)/2},0.85)
+    {remaining\\7.941 ms};
+
+  \draw[safety,very thick,dashed] (\budget,-0.05) -- (\budget,3.25);
+  \node[anchor=west,font=\footnotesize,text=safety] at (\budget+0.12,3.05)
+    {33.33 ms = 30 FPS};
+  \node[anchor=west,font=\footnotesize] at (0,-0.30) {0 ms};
+  \node[anchor=east,font=\footnotesize] at (\budget,-0.30) {33.33 ms};
+\end{tikzpicture}

@@ -1,0 +1,32 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  block/.style={draw,rounded corners=2pt,very thick,align=center,
+    minimum height=1.22cm,inner sep=5pt},
+  flow/.style={-{Latex[length=2.4mm]},very thick,draw=azulUC3M},
+  sealed/.style={-{Latex[length=2.4mm]},very thick,dashed,draw=safety}
+]
+  \node[block,fill=softpurple,text width=2.15cm] (release) at (1.25,1.5)
+    {\textbf{CaT release}\\1,812 images};
+  \node[block,fill=softblue,text width=2.35cm] (dev) at (4.55,2.55)
+    {\textbf{Official training part}\\1,268 images};
+  \node[block,fill=safety!10,draw=safety,text width=2.25cm] (test) at (4.55,0.35)
+    {\textbf{Official test}\\544 images};
+  \node[block,fill=softorange,text width=2.55cm] (hash) at (8.0,2.55)
+    {\textbf{Deterministic hash}\\development split};
+  \node[block,fill=softgreen,text width=2.10cm,inner ysep=3pt] (train) at (11.35,4.10)
+    {\textbf{Train}\\1,002 images\\update weights};
+  \node[block,fill=softblue,text width=2.10cm,inner ysep=3pt] (val) at (11.35,1.75)
+    {\textbf{Validation}\\266 images\\select checkpoint};
+  \node[block,fill=safety!10,draw=safety,text width=2.25cm,inner ysep=3pt] (final) at (11.35,-0.60)
+    {\textbf{Final evaluation}\\test once fixed};
+
+  \draw[flow] (release) -- (dev);
+  \draw[sealed] (release) -- (test);
+  \draw[flow] (dev) -- (hash);
+  \draw[flow] (hash) -- (train);
+  \draw[flow] (hash) -- (val);
+  \draw[sealed] (test) -- (final);
+
+  \node[font=\footnotesize,align=center,text=safety] at (7.85,-1.88)
+    {No test image is used to train weights or choose a checkpoint.};
+\end{tikzpicture}

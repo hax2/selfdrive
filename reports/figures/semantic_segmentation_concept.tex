@@ -1,0 +1,59 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  flow/.style={-{Latex[length=2.4mm]},very thick,draw=azulUC3M},
+  feature/.style={draw=azulUC3M!75!black,very thick,fill=softblue},
+  skip/.style={-{Latex[length=1.8mm]},dashed,thick,draw=good!80!black}
+]
+  % Stylised RGB input.
+  \begin{scope}
+    \clip[rounded corners=2pt] (0,0) rectangle (3.0,3.5);
+    \fill[pidP!22] (0,1.55) rectangle (3.0,3.5);
+    \fill[good!35] (0,0) rectangle (3.0,1.65);
+    \fill[softorange] (1.04,0) -- (1.96,0) -- (2.30,1.65) -- (0.70,1.65) -- cycle;
+    \fill[black!18] (0,1.47) -- (3.0,1.47) -- (3.0,1.72) -- (0,1.61) -- cycle;
+    \fill[good!70!black] (0.25,1.45) circle (0.25);
+    \fill[good!70!black] (2.70,1.55) circle (0.30);
+    \fill[white!85!pidP] (0.45,2.85) ellipse (0.34 and 0.13);
+    \fill[white!85!pidP] (2.25,3.02) ellipse (0.44 and 0.15);
+  \end{scope}
+  \draw[rounded corners=2pt,very thick] (0,0) rectangle (3.0,3.5);
+  \node[font=\bfseries] at (1.5,-0.34) {RGB image};
+  \node[font=\footnotesize,align=center] at (1.5,-0.78) {three colour values\\at every pixel};
+
+  % Encoder and decoder feature hierarchy.
+  \draw[flow] (3.25,1.75) -- (3.85,1.75);
+  \node[feature,minimum width=0.62cm,minimum height=3.05cm] (e1) at (4.20,1.75) {};
+  \node[feature,minimum width=0.62cm,minimum height=2.45cm] (e2) at (5.15,1.75) {};
+  \node[feature,minimum width=0.62cm,minimum height=1.88cm] (e3) at (6.10,1.75) {};
+  \node[draw=pidI!85!black,very thick,fill=softorange,
+    minimum width=0.78cm,minimum height=1.25cm] (b) at (7.18,1.75) {};
+  \node[feature,minimum width=0.62cm,minimum height=1.88cm] (d3) at (8.26,1.75) {};
+  \node[feature,minimum width=0.62cm,minimum height=2.45cm] (d2) at (9.21,1.75) {};
+  \node[feature,minimum width=0.62cm,minimum height=3.05cm] (d1) at (10.16,1.75) {};
+
+  \draw[flow] (e1) -- (e2);
+  \draw[flow] (e2) -- (e3);
+  \draw[flow] (e3) -- (b);
+  \draw[flow] (b) -- (d3);
+  \draw[flow] (d3) -- (d2);
+  \draw[flow] (d2) -- (d1);
+  \draw[skip] (e1.north) to[bend left=34] node[above,font=\scriptsize,text=black]{skip connection} (d1.north);
+  \draw[skip] (e2.north) to[bend left=30] (d2.north);
+  \draw[skip] (e3.north) to[bend left=24] (d3.north);
+  \node[font=\bfseries] at (5.15,-0.34) {Encoder};
+  \node[font=\footnotesize,align=center] at (5.15,-0.78) {smaller grids;\\broader context};
+  \node[font=\bfseries] at (9.21,-0.34) {Decoder};
+  \node[font=\footnotesize,align=center] at (9.21,-0.78) {recover resolution;\\combine detail};
+  \node[font=\scriptsize,align=center] at (7.18,0.83) {deep\\features};
+
+  % Binary mask output.
+  \draw[flow] (10.55,1.75) -- (11.15,1.75);
+  \begin{scope}[shift={(11.38,0)}]
+    \clip[rounded corners=2pt] (0,0) rectangle (3.0,3.5);
+    \fill[black!32] (0,0) rectangle (3.0,3.5);
+    \fill[good!72] (1.04,0) -- (1.96,0) -- (2.30,2.65) -- (0.70,2.65) -- cycle;
+  \end{scope}
+  \draw[rounded corners=2pt,very thick] (11.38,0) rectangle (14.38,3.5);
+  \node[font=\bfseries] at (12.88,-0.34) {Binary mask};
+  \node[font=\footnotesize,align=center] at (12.88,-0.78) {green: traversable\\grey: untraversable};
+\end{tikzpicture}

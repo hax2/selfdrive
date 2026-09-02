@@ -1,0 +1,22 @@
+\begin{tikzpicture}[
+  box/.style={draw,rounded corners=2pt,minimum height=0.9cm,align=center,font=\small},
+  arrow/.style={-{Latex[length=2.4mm]},thick}
+]
+\node[box,fill=black!85,text=white,text width=2.35cm] (raw0) {ID 0: background / untraversable};
+\node[box,fill=red!75,text=white,text width=2.1cm,right=0.35cm of raw0] (raw3) {ID 3: off-road only};
+\node[box,fill=blue!65,text=white,text width=2.1cm,right=0.75cm of raw3] (raw1) {ID 1: sedan};
+\node[box,fill=green!60!black,text=white,text width=2.1cm,right=0.35cm of raw1] (raw2) {ID 2: pickup};
+
+\node[box,fill=safety!90,text=white,text width=3.7cm,below=1.4cm of $(raw0)!0.5!(raw3)$] (neg)
+  {\textbf{Binary 0: untraversable}\\raw IDs 0 and 3};
+\node[box,fill=good!90,text=white,text width=3.7cm,below=1.4cm of $(raw1)!0.5!(raw2)$] (pos)
+  {\textbf{Binary 1: traversable}\\raw IDs 1 and 2};
+
+\draw[arrow] (raw0.south) -- (neg.north west);
+\draw[arrow] (raw3.south) -- (neg.north east);
+\draw[arrow] (raw1.south) -- (pos.north west);
+\draw[arrow] (raw2.south) -- (pos.north east);
+
+\node[font=\footnotesize,align=center,below=0.25cm of neg] {blocked for the selected\\blue+green capability policy};
+\node[font=\footnotesize,align=center,below=0.25cm of pos] {inside the sedan/pickup\\capability envelope};
+\end{tikzpicture}

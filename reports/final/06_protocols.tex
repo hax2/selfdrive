@@ -1,0 +1,411 @@
+% ============================================================
+\chapter{Experimental Protocols and Evaluation Methods}
+\label{ch:protocols}
+% ============================================================
+
+\section{Experimental Phases}
+
+The complete experimental campaign is separated into seven phases so that an
+exploratory observation is not mistaken for controlled evidence.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/experimental_design.tex}}
+\caption[Experimental phases and controls.]{Experimental phases and their
+principal controls. Dataset identity, target policy, and metric definitions
+remain fixed as the question changes from configuration selection to model
+comparison and runtime measurement.}
+\label{fig:experimental_design}
+\end{figure}
+
+Figure~\ref{fig:experimental_design} provides the overview; the paragraphs
+below state the purpose and controls of each phase.
+
+\textbf{Phase 1: exploratory PIDNet development.} Five runs changed multiple
+settings to obtain a working pipeline and reveal promising or problematic
+directions. These runs guide questions; they do not isolate causal factors.
+
+\textbf{Phase 2: controlled PIDNet ablation.} A reference configuration and
+four one-factor variants test augmentation, false-safe penalty, resolution,
+and class weights. All other recorded settings are held fixed. One seed is
+used, so this is a controlled engineering comparison without a variance
+estimate.
+
+\textbf{Phase 3: checkpoint audit.} The validation-selected augmentation-off
+PIDNet checkpoint is identified, reevaluated, qualitatively ranked, and
+benchmarked. Subsequent measurements refer to these saved parameters.
+
+\textbf{Phase 4: PIDNet--ROD repeatability.} Both architectures are
+trained for seeds 1337, 2027, and 4242 under blue-only and blue+green policies
+with one controlled recipe. Separate ROD runs use the optimisation settings
+that can be reconstructed from the publication.
+
+\textbf{Phase 5: architecture matrix.} Seven additional systems complete a
+nine-model, three-seed, two-policy matrix. Every policy contains 27 scored
+model--seed records; together the two ledgers contain 54.
+
+\textbf{Phase 6: convergence-aware follow-up.} The nine-model, three-seed
+matrix is repeated for the principal blue+green policy with a 300-epoch
+ceiling, 60-epoch cosine decay, a 60-epoch minimum, and validation-based early
+stopping. This phase contains another 27 scored model--seed records.
+
+\textbf{Phase 7: runtime evaluation.} Models are timed on a Ryzen~5~5500 CPU
+and a common H100 MIG server protocol. The reference PIDNet checkpoint and the
+reconstructed ROD checkpoint are also exported to TensorRT and evaluated on an
+RTX~5060.
+
+All experiments exclude the official CaT test images from gradient updates and
+automatic checkpoint selection. The test set is nevertheless evaluated for
+multiple exploratory, ablation, and architecture runs over the lifetime of the
+project. It should therefore be understood as a consistently held-out
+benchmark partition, not as a single-use blinded set whose scores were hidden
+until every engineering decision was complete. Model checkpoints are selected
+by validation mIoU, but repeated human inspection of test reports remains a
+possible source of research-level selection bias.
+
+\section{Training Procedure}
+
+Each scored run follows the same operational sequence:
+\begin{enumerate}
+  \item load one complete YAML configuration and set the Python, NumPy, and
+  PyTorch random seeds;
+  \item construct training and validation datasets from the processed
+  manifest, enabling augmentation only for training when configured;
+  \item compute class weights from training masks only, or load explicit
+  neutral weights;
+  \item build the named two-class model and AdamW optimiser;
+  \item for every epoch, shuffle the training loader, compute the configured
+  loss, backpropagate, update weights, and advance the scheduler;
+  \item run an unaugmented validation pass, accumulating its confusion matrix;
+  \item write the epoch history and \texttt{last.pt}; replace
+  \texttt{best.pt} if validation mIoU exceeds the previous maximum;
+  \item after training, load \texttt{best.pt} in the evaluator and score the
+  complete test split without gradients or shuffling.
+\end{enumerate}
+
+Non-finite training loss or validation metrics raise an error rather than
+silently saving a checkpoint. Mixed precision uses bfloat16 when CUDA supports
+it and falls back to float16 otherwise. The ordinary 15-epoch experiments do
+not use early stopping; every model receives the same maximum number of
+training passes. This fixed budget improves protocol matching but is not
+necessarily optimal for every architecture.
+
+The convergence-aware blue+green follow-up uses the same operational sequence
+with three changes. The epoch ceiling is 300, cosine decay reaches the minimum
+learning rate at epoch 60 and then holds it constant, and early stopping is
+enabled only after epoch 60. The stopping counter requires an improvement of
+at least $10^{-4}$ in validation mIoU and has patience 25. Checkpoint saving
+uses any strict improvement, so it can record a slightly higher value that is
+too small to reset the patience counter. Every reported test result still
+comes from \texttt{best.pt}, never from the final in-memory epoch.
+
+The test evaluator computes weighted cross-entropy loss using the class weights
+stored in the checkpoint. Quality metrics are derived independently from
+thresholded predictions, so the test loss and mIoU need not rank models in the
+same order. The prediction interface is normalised to one full-resolution
+two-logit tensor even for third-party architectures that can expose auxiliary
+outputs.
+
+\section{Confusion Matrix Convention}
+
+Traversable is always the positive class. The aggregated confusion matrix is
+\begin{equation}
+\mathbf{C}=
+\begin{bmatrix}
+ \mathrm{TN} & \mathrm{FP}\\
+ \mathrm{FN} & \mathrm{TP}
+\end{bmatrix},
+\label{eq:confusion_convention}
+\end{equation}
+Here, $\mathbf{C}$ is the test-wide count matrix; TN, FP, FN, and TP denote
+true-negative, false-positive, false-negative, and true-positive pixel counts.
+Rows are ground truth and columns are prediction. This ordering is
+published because false-safe and false-block terminology can otherwise obscure
+which denominator is used.
+
+Figure~\ref{fig:confusion_matrix_visual} reads the same matrix as two
+operational questions. The upper ground-truth row contains all pixels that
+should be blocked and supplies the denominator of FSR. The lower row contains
+all pixels that should be traversable and supplies the denominator of FBR.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/confusion_matrix_visual.tex}}
+\caption[Visual interpretation of the binary confusion matrix.]{Visual
+interpretation of the binary confusion matrix and the two asymmetric error
+rates. A false safe opens annotated blocked terrain; a false block removes
+annotated traversable terrain. Original schematic drawn for this thesis.}
+\label{fig:confusion_matrix_visual}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Operational interpretation of the four binary outcomes.}
+\label{tab:confusion_interpretation}
+\small
+\begin{tabularx}{\textwidth}{@{}lllX@{}}
+\toprule
+\textbf{Ground truth} & \textbf{Prediction} & \textbf{Count} & \textbf{Interpretation} \\
+\midrule
+Untraversable & Untraversable & TN & Correctly preserves a blocked pixel \\
+Untraversable & Traversable & FP & False safe: opens a pixel outside the annotated capability envelope \\
+Traversable & Untraversable & FN & False block: removes an annotated feasible pixel \\
+Traversable & Traversable & TP & Correctly preserves a feasible pixel \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tab:confusion_interpretation} states the corresponding operational
+meaning of each matrix entry.
+
+All principal test metrics use one matrix accumulated over every pixel in the
+split. They are therefore micro-aggregated by pixel. An image with more pixels
+would contribute more decisions, although fixed evaluation resizing makes all
+544 test images equal in pixel count. Per-image metrics are used only for
+qualitative ranking.
+
+\section{Accuracy and Asymmetric Error Metrics}
+
+For class $c$, Intersection over Union is
+\begin{equation}
+ \operatorname{IoU}_c=
+ \frac{\operatorname{TP}_c}
+ {\operatorname{TP}_c+\operatorname{FP}_c+\operatorname{FN}_c}.
+\end{equation}
+Here, $c$ denotes one semantic class, and $\operatorname{TP}_c$,
+$\operatorname{FP}_c$, and $\operatorname{FN}_c$ count pixels treated as true
+positives, false positives, and false negatives when $c$ is considered the
+positive class. The operator $\operatorname{IoU}_c$ is therefore the
+intersection of prediction and target for $c$ divided by their union.
+For the binary convention this becomes
+\begin{align}
+ \operatorname{IoU}_{\mathrm{trav}}
+ &=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}+\mathrm{FN}},\\
+ \operatorname{IoU}_{\mathrm{untrav}}
+ &=\frac{\mathrm{TN}}{\mathrm{TN}+\mathrm{FP}+\mathrm{FN}},\\
+ \operatorname{mIoU}
+ &=\frac{\operatorname{IoU}_{\mathrm{trav}}
+ +\operatorname{IoU}_{\mathrm{untrav}}}{2}.
+\end{align}
+The subscripts $\mathrm{trav}$ and $\mathrm{untrav}$ denote traversable and
+untraversable. In the latter equation, TN becomes the intersection because the
+negative class in the global convention is treated as the class of interest.
+The unweighted mean prevents the more frequent class from completely
+determining the headline score.
+
+Traversable precision, recall, and F1 are
+\begin{align}
+ P&=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}},&
+ R&=\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FN}},&
+ F1&=\frac{2PR}{P+R}.
+\end{align}
+Here, $P$ is traversable precision, $R$ is traversable recall, and $F1$ is
+their harmonic mean. F1 describes positive-class overlap through precision
+and recall but does not
+describe true-negative performance. It is therefore reported beside rather
+than instead of mIoU.
+
+The two safety-oriented rates are
+\begin{align}
+ \FSR&=\frac{\mathrm{FP}}{\mathrm{FP}+\mathrm{TN}},
+ \label{eq:final_fsr}\\
+ \FBR&=\frac{\mathrm{FN}}{\mathrm{FN}+\mathrm{TP}}.
+\label{eq:final_fbr}
+\end{align}
+In these equations, $\FSR$ is False-Safe Rate and $\FBR$ is False-Block Rate;
+the four count symbols retain the definitions in
+Table~\ref{tab:confusion_interpretation}. FSR conditions on truly
+untraversable pixels and asks what fraction the model
+opens. FBR conditions on truly traversable pixels and asks what fraction the
+model blocks. FBR is equal to one minus traversable recall; it is retained as
+a named metric because its operational meaning is clearer in this task.
+
+The two errors matter differently. A connected false-safe area can allow a
+planner to consider terrain outside the vehicle's annotated capability, while
+a false block can make a feasible route disappear or cause a conservative
+stop. Reducing one by moving the threshold usually increases the other. A
+useful system must therefore report both. Neither rate includes distance from
+the vehicle, trajectory intersection, connected-component size, severity of
+terrain, prediction confidence, or actual vehicle outcomes. They are
+safety-oriented diagnostic metrics, not safety probabilities.
+
+\section{Multi-Seed Reporting}
+
+For the nine-model comparison, the metric for each model and policy is reported as
+mean $\pm$ population standard deviation over three fixed seeds. Population
+standard deviation is used because the purpose is to describe those three
+executed runs, not to estimate an unknown variance from a random sample.
+
+The seed set controls random initialisation, loader order, and deterministic
+augmentation sequences. It does not capture dataset-split uncertainty because
+all seeds use the same manifest assignment. It also does not capture
+hyperparameter uncertainty. A difference smaller than the observed run-to-run
+standard deviation is treated cautiously. In the 15-epoch blue+green matrix,
+the top FPN/EfficientNet-B0 and U-Net/EfficientNet-B0 means differ by only
+0.02 percentage points. In the convergence-aware follow-up,
+FPN/EfficientNet-B0 is higher in all three executed seeds and its mean lead is
+0.13 points. This is a consistent observed ordering for the declared suite,
+but three selected seeds still do not establish universal superiority or
+provide a confidence interval. The matched pairwise comparison shows the same
+complete consistency: ROD records higher test mIoU than PIDNet-S in all six of
+its policy--seed runs.
+
+\section{Qualitative Review Protocol}
+
+Aggregate metrics reveal how many pixels are wrong but not how those errors
+are arranged. The reference PIDNet checkpoint is therefore applied to all 544
+test images and each image is assigned:
+\begin{itemize}
+  \item per-image FSR;
+  \item per-image FBR;
+  \item combined error $\FSR+\FBR$ for distributional ranking;
+  \item boundary-band error.
+\end{itemize}
+
+The ground-truth boundary band is formed from the morphological difference
+between a two-pixel dilation and a two-pixel erosion. Boundary error is the
+fraction of pixels inside that band whose predicted class differs from the
+target. The band emphasises local contour placement but can be unstable for
+very thin regions and visually ambiguous annotations; it is a diagnostic, not
+an alternative headline metric.
+
+The representative-range panel uses mechanically selected images near the
+10th, 30th, 50th, 70th, and 90th percentiles of combined per-image error.
+Separate ranked panels select the maximum FSR, maximum FBR, and a severe
+boundary error. This procedure avoids selecting only visually attractive
+successes. The captions report identifiers and rates so the relationship
+between the visible mask and the numerical metric can be checked.
+
+The checkpoint is also applied to 130 frames from the external, unlabelled
+ALICE mobile-robot sequences (scenario~02, sequences~01--05). Four frames are
+displayed to span several path and illumination conditions. ALICE is not used
+for training, and no ground-truth masks are available in this study. The panel
+can show whether predictions are connected, responsive to scene change, or
+visibly implausible; it cannot measure accuracy, FSR, FBR, calibration, or
+domain generalisation.
+
+\section{CPU and H100 Timing Protocols}
+
+The CPU platform is an AMD Ryzen~5~5500 with six cores and twelve hardware
+threads. PyTorch uses six inference threads, batch size 1, and
+$640\times384$ input. Thirty-two test tensors are preloaded. Two complete
+warm-up rounds are excluded, followed by five measured repeats, for 160 timed
+inferences. Eager execution and \texttt{torch.compile} execution are measured
+for all nine comparison models. Compilation occurs during warm-up and is
+excluded from the timed samples.
+
+The CPU timer covers model forward, full-resolution logits, softmax, and
+thresholded prediction. It excludes image decoding, camera acquisition,
+visualisation, and disk output. The reference PIDNet and ROD results are tied
+to PyTorch 2.13.0, Python 3.12.12, and their exact checkpoints. ROD retains the
+common $640\times384$ external input but resizes it internally to
+$1024\times1024$ before its transformer encoder.
+
+The common server measurement uses one NVIDIA H100 NVL 3g.47GB MIG partition,
+eager PyTorch FP32, batch size 1, and $640\times384$ external input. The 128
+test tensors are preloaded. Five warm-up passes are excluded; ten repeats are
+measured with explicit CUDA synchronisation around every forward pass. The
+same partition and procedure are used for all nine models. These values
+control hardware within the architecture comparison, but an H100 MIG
+partition is not an embedded target.
+
+The convergence experiment changes learned parameter values but not the model
+graphs, external tensor shape, or prediction operations. Its accuracy values
+are therefore paired with the existing architecture-level CPU and H100 timing
+measurements rather than rerunning identical inference graphs. Training
+wall-clock fields from the convergence histories are excluded: workers were
+paused and resumed while sharing the MIG partition, which preserves model and
+optimiser state but contaminates elapsed-time measurements.
+
+\section{RTX 5060 TensorRT Protocol}
+
+The reference PIDNet checkpoint and the reconstructed blue+green ROD checkpoint
+are exported to the Open Neural Network Exchange (ONNX) format and converted
+to fixed-shape, batch-one TensorRT 10.16.1 engines. The builder enables FP16
+for eligible operations and retains FP32 for numerically sensitive reduction,
+softmax, normalisation, and selected unary operations. The result is described
+as FP16-enabled mixed precision rather than all-FP16 inference.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/timing_scopes.tex}}
+\caption[Timing scopes used for the RTX 5060 benchmark.]{Timing scopes used for
+the RTX~5060 benchmark. Grey stages are excluded. The device/forward scope
+starts from GPU-resident input; the measured pipeline starts from an already
+decoded host RGB array and returns a binary mask to host memory.}
+\label{fig:timing_scopes}
+\end{figure}
+
+Figure~\ref{fig:timing_scopes} makes the two reported timing boundaries
+explicit before their sample counts are introduced.
+
+Timing uses 64 preloaded native-resolution test frames, ten excluded warm-up
+passes, and five measured repeats, yielding 320 samples per model and scope.
+The \emph{device scope} includes a device-to-device buffer copy, TensorRT
+execution, softmax, and thresholding. It excludes host-to-device input and
+device-to-host mask transfer. The \emph{measured pipeline} includes CPU resize
+and normalisation, input transfer, TensorRT inference, softmax, thresholding,
+and return of the mask to CPU memory. Both exclude disk decode, camera-driver
+latency, visualisation, planning, actuation, and one-time engine construction.
+
+After timing, each engine is evaluated on all 544 official test images. This
+full accuracy pass is mandatory because mixed precision can move probabilities
+across the 0.50 threshold even when average numerical differences are small.
+TensorRT metrics are reported separately from the original PyTorch metrics.
+
+\section{Artifact Provenance and Reproduction}
+
+\noindent\textbf{Reproducibility repository:}\\
+\url{https://github.com/hax2/cat-pidnet-thesis-reproducibility}. This public
+repository is the companion artifact for the thesis. It contains the source
+code, exact configurations, split and label-conversion records, experiment
+launchers, checkpoint and metric evidence, audit scripts, and instructions
+needed to reproduce the reported workflows. The appendix provides direct
+commands and expected outputs so that the link is usable without having to
+infer the execution order from the source tree.
+
+A headline result is considered identified only when the following artifacts
+are named:
+\begin{enumerate}
+  \item the processed split manifest and binary mapping;
+  \item the complete YAML configuration;
+  \item the selected \texttt{best.pt} checkpoint;
+  \item the evaluator and metric implementation;
+  \item the saved JSON result and, where applicable, hardware report.
+\end{enumerate}
+
+The reference PIDNet chain includes SHA-256 identities for all five elements and
+for the qualitative review, CPU benchmark, ONNX model, TensorRT engine, and
+TensorRT report. The saved test confusion matrix was independently recomputed
+in a fresh CPU evaluation. Exact equality of the counts establishes
+\emph{evaluation reproducibility}: the same artifact and evaluator produce the
+same score. It is different from \emph{training repeatability}, which asks how
+new stochastic training runs vary and is addressed only by the separate
+three-seed studies.
+
+The blue-only fixed-budget architecture ledger contains all 27 configurations,
+metric records, and checkpoint hashes. The corresponding fixed-budget
+blue+green ledger contains all 27 configuration and metric chains and all
+confusion-derived integrity checks pass; 21 locally retained checkpoints have
+hashes. The six earlier controlled PIDNet-S and ROD blue+green checkpoints
+were not included in that download bundle.
+
+The newer convergence-aware ledger is complete at the identity level: it
+contains 27 configurations, histories, train summaries, test records, and
+server-computed checkpoint SHA-256 values. All 27 confusion matrices reproduce
+their reported metrics and each contains 133,693,440 evaluated pixels. The
+checkpoint binaries themselves were not copied locally, so the ledger proves
+their recorded server identity but does not permit local reevaluation without
+retrieving a selected file.
+
+The convergence campaign also records a software-stack limitation. PIDNet-S,
+ROD, DDRNet, and BiSeNet ran with PyTorch 2.7.1 and CUDA 12.6, while the FPN,
+U-Net, and SegFormer launcher used PyTorch 2.13.0 and CUDA 13.0 because its
+environment contained the required SMP dependency. All used the same H100 MIG
+partition, data, configurations, and metric implementation. The cross-model
+ranking is usable as a recipe-level comparison, but framework version is not
+fully controlled across architecture families.
+
+Appendix~\ref{app:reproduction} gives commands and expected outputs.
+Appendix~\ref{app:hashes} records the artifact identities. The repository ledgers
+provide the per-seed architecture paths and integrity status.

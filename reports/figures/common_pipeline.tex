@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+  node distance=0.52cm,
+  pipestep/.style={draw,rounded corners=2pt,text width=2.3cm,minimum height=1.15cm,
+    align=center,font=\small,inner sep=4pt},
+  artifact/.style={draw,dashed,rounded corners=2pt,text width=2.2cm,minimum height=0.75cm,
+    align=center,font=\footnotesize,inner sep=3pt},
+  arrow/.style={-{Latex[length=2.3mm]},thick,draw=azulUC3M}
+]
+\node[pipestep,fill=softblue] (audit) {\textbf{Audit}\\pair RGB, palette mask, integer map};
+\node[pipestep,fill=softgreen,right=of audit] (map) {\textbf{Convert}\\apply policy; write binary mask};
+\node[pipestep,fill=softorange,right=of map] (split) {\textbf{Split}\\hash development set; preserve test};
+\node[pipestep,fill=softpurple,right=of split] (load) {\textbf{Load}\\resize, scale, optional augmentation};
+\node[pipestep,fill=softblue,below=1.75cm of load] (train) {\textbf{Train}\\optimise; validate each epoch};
+\node[pipestep,fill=softgreen,left=of train] (select) {\textbf{Select}\\highest validation mIoU};
+\node[pipestep,fill=softorange,left=of select] (eval) {\textbf{Evaluate}\\fixed threshold; aggregate confusion};
+\node[pipestep,fill=softpurple,left=of eval] (review) {\textbf{Review and deploy}\\rank cases; benchmark};
+\draw[arrow] (audit) -- (map);
+\draw[arrow] (map) -- (split);
+\draw[arrow] (split) -- (load);
+\draw[arrow] (load) -- (train);
+\draw[arrow] (train) -- (select);
+\draw[arrow] (select) -- (eval);
+\draw[arrow] (eval) -- (review);
+
+\node[artifact,below=0.2cm of map] (manifest) {binary masks + manifest};
+\node[artifact,below=0.2cm of select] (checkpoint) {\texttt{best.pt}};
+\node[artifact,below=0.2cm of review] (reports) {metrics, figures, timing JSON};
+\draw[arrow,dashed] (map) -- (manifest);
+\draw[arrow,dashed] (select) -- (checkpoint);
+\draw[arrow,dashed] (review) -- (reports);
+\end{tikzpicture}

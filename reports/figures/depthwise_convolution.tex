@@ -1,0 +1,32 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  block/.style={draw,rounded corners=2pt,very thick,align=center,
+    minimum height=1.25cm,inner sep=5pt},
+  flow/.style={-{Latex[length=2.3mm]},very thick,draw=azulUC3M},
+  note/.style={align=center,font=\footnotesize,text=black!78}
+]
+  \node[font=\bfseries\large] at (6.55,5.05) {Standard convolution};
+  \node[block,fill=softblue,text width=1.75cm] (sin) at (1.25,3.85)
+    {input\\channels};
+  \node[block,fill=softorange,text width=3.55cm] (sdense) at (6.55,3.85)
+    {one dense operation mixes spatial and channel information};
+  \node[block,fill=softgreen,text width=1.75cm] (sout) at (11.85,3.85)
+    {output\\channels};
+  \draw[flow] (sin) -- (sdense);
+  \draw[flow] (sdense) -- (sout);
+
+  \draw[black!28] (0.10,2.95) -- (13.00,2.95);
+
+  \node[font=\bfseries\large] at (6.55,2.42) {Depthwise-separable convolution};
+  \node[block,fill=softblue,text width=1.75cm] (din) at (0.95,0.78)
+    {input\\channels};
+  \node[block,fill=softpurple,text width=3.00cm] (depth) at (4.25,0.78)
+    {spatial filtering\\performed separately\\in each channel};
+  \node[block,fill=softorange,text width=3.00cm] (point) at (8.75,0.78)
+    {$1\!\times\!1$ pointwise convolution\\mixes information\\across channels};
+  \node[block,fill=softgreen,text width=1.75cm] (dout) at (12.15,0.78)
+    {output\\channels};
+  \draw[flow] (din) -- (depth);
+  \draw[flow] (depth) -- (point);
+  \draw[flow] (point) -- (dout);
+\end{tikzpicture}

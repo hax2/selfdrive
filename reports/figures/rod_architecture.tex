@@ -1,0 +1,24 @@
+\begin{tikzpicture}[
+  node distance=0.5cm,
+  block/.style={draw,rounded corners=2pt,minimum height=1.15cm,text width=2.25cm,
+    align=center,font=\small,inner sep=4pt},
+  arrow/.style={-{Latex[length=2.4mm]},thick,draw=azulUC3M}
+]
+\node[block,fill=softblue] (rgb) {\textbf{RGB tensor}\\$3\times384\times640$};
+\node[block,fill=softorange,right=of rgb] (norm) {\textbf{Encoder input}\\resize $1024\times1024$; ImageNet normalise};
+\node[block,fill=softpurple,right=of norm] (vit) {\textbf{Frozen ViT-S}\\$16^2$ patches; 12 blocks; 384 channels};
+\node[block,fill=softgreen,right=of vit] (latent) {\textbf{Features}\\blocks 2--12 + 256-channel embedding};
+\node[block,fill=softorange,below=1.15cm of latent] (decoder) {\textbf{Trainable decoder}\\project, sequentially fuse, residual upsample};
+\node[block,fill=softgreen,left=of decoder] (multi) {\textbf{Multiscale fusion}\\four 256-channel scales};
+\node[block,fill=softblue,left=of multi] (head) {\textbf{Binary head}\\two logits; resize to $640\times384$};
+\node[block,fill=softpurple,left=of head] (mask) {\textbf{Decision}\\softmax and threshold};
+\draw[arrow] (rgb) -- (norm);
+\draw[arrow] (norm) -- (vit);
+\draw[arrow] (vit) -- (latent);
+\draw[arrow] (latent) -- (decoder);
+\draw[arrow] (decoder) -- (multi);
+\draw[arrow] (multi) -- (head);
+\draw[arrow] (head) -- (mask);
+\node[draw,dashed,fit=(vit)(latent),inner sep=7pt,label={[font=\footnotesize]above:22.35M fixed parameters}] {};
+\node[draw,dashed,fit=(decoder)(multi)(head),inner sep=7pt,label={[font=\footnotesize]below:6.75M trainable parameters}] {};
+\end{tikzpicture}

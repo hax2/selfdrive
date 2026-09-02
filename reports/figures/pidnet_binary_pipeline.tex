@@ -1,0 +1,28 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  >=Latex,
+  node distance=0.7cm,
+  stage/.style={draw, rounded corners=2pt, very thick, align=center,
+    minimum height=1.2cm, text width=2.8cm, inner sep=5pt},
+  data/.style={stage, fill=gray!12},
+  model/.style={stage, draw=pidP!80!black, fill=pidP!11},
+  operation/.style={stage, draw=pidI!85!black, fill=pidI!14},
+  output/.style={stage, draw=pidFuse!75!black, fill=pidFuse!13},
+  target/.style={stage, draw=pidD!80!black, fill=pidD!11},
+  flow/.style={->, very thick, draw=black!70},
+  trainflow/.style={->, thick, dashed, draw=pidD!80!black}
+]
+  \node[data] (rgb) {RGB tensor\\$3\times384\times640$};
+  \node[model, right=of rgb] (core) {\textbf{PIDNet-S core}\\P + I + D branches};
+  \node[operation, right=of core] (logits) {\textbf{Two-class logits}\\$2\times48\times80$\\bilinear resize to input};
+  \node[output, right=of logits] (mask) {\textbf{Deployment decision}\\softmax; $p_{\mathrm{trav}}\geq0.50$\\binary mask};
+
+  \draw[flow] (rgb) -- (core);
+  \draw[flow] (core) -- (logits);
+  \draw[flow] (logits) -- (mask);
+
+  \node[target, below=1.25cm of logits] (labels) {\textbf{CaT target}\\IDs 1,2 $\rightarrow$ traversable\\IDs 0,3 $\rightarrow$ untraversable};
+  \node[target, below=1.25cm of core] (loss) {\textbf{Training only}\\weighted cross-entropy\\+ Dice loss};
+  \draw[trainflow] (labels) -- (loss);
+  \draw[trainflow] (loss) -- node[left, align=right] {updates\\weights} (core);
+\end{tikzpicture}

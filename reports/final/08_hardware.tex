@@ -1,0 +1,304 @@
+% ============================================================
+\chapter{Hardware and Inference-Speed Analysis}
+\label{ch:hardware}
+% ============================================================
+
+\section{Why One FPS Number Is Insufficient}
+
+Inference speed is a property of a complete execution configuration, not only
+of a neural-network architecture. Processor, runtime, numerical precision,
+batch size, tensor shape, compiler support, memory transfer, warm-up, and the
+timer boundaries all affect the result. This chapter therefore keeps three
+questions separate:
+\begin{enumerate}
+  \item how fast does the saved model execute on a consumer CPU?
+  \item how do all nine architectures compare on one common server GPU?
+  \item what throughput is obtained after compiling the two deployed
+  checkpoints into fixed TensorRT engines and including preprocessing and mask
+  return?
+\end{enumerate}
+
+No speed value is borrowed from an architecture paper for ranking. Published
+Cityscapes or A6000 FPS figures use a different image size, model output, runtime, and
+hardware. Every table below names its own scope.
+
+\section{Ryzen 5 5500 CPU Results}
+
+Table~\ref{tab:cpu_comparison} reports batch-one forward throughput with six
+PyTorch threads. Eager PIDNet-S reaches 21.16 FPS with 47.25 ms mean latency
+for the reference checkpoint. Its median is 46.45 ms and P95 is 55.63 ms.
+This confirms GPU-free operation at a modest perception rate, but the timer
+does not include camera decode or planning.
+
+\begin{table}[H]
+\centering
+\caption{Ryzen~5~5500 batch-one throughput at $640\times384$. Values are
+forward and prediction only; compiled timing excludes compilation warm-up.}
+\label{tab:cpu_comparison}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Eager FPS} & \textbf{Compiled FPS} & \textbf{Compiled mean latency} \\
+\midrule
+DDRNet-23-Slim & 27.74 & \textbf{36.50} & 27.40 ms \\
+PIDNet-S & 21.16 & 27.04 & 36.98 ms \\
+BiSeNetV2 & 11.48 & 16.34 & 61.20 ms \\
+FPN/MobileNetV2 & 7.23 & 14.26 & 70.13 ms \\
+FPN/EfficientNet-B0 & 5.92 & 11.70 & 85.47 ms \\
+U-Net/MobileNetV2 & 7.10 & 10.15 & 98.52 ms \\
+U-Net/EfficientNet-B0 & 6.96 & 9.66 & 103.52 ms \\
+SegFormer-B0 & 4.38 & 8.23 & 121.51 ms \\
+ROD ViT-S & 0.41 & 0.46 & 2,195.96 ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Compiled DDRNet-23-Slim is the CPU throughput leader at 36.50 FPS. Its
+convergence-aware blue+green mIoU, however, is the lowest in the nine-model
+table at 0.9095. PIDNet-S is slower but reaches 0.9195.
+FPN/EfficientNet-B0 reaches only 11.70 compiled FPS but gives the highest mean
+accuracy, 0.9423. The CPU therefore presents a clear sequence of trade-offs
+rather than one winner. ROD reaches 0.41 eager FPS and 0.46 compiled FPS; its
+frozen encoder reduces training-time optimisation but the full internally
+resized $1024\times1024$ transformer remains active during inference.
+
+Compiler benefit is architecture-dependent. FPN/MobileNetV2 nearly doubles its
+throughput, and SegFormer-B0 improves substantially, while U-Net and PIDNet
+receive smaller gains. These differences show why floating-point-operation
+(FLOP) counts or parameter estimates cannot substitute for runtime
+measurements. Compilation raises ROD throughput by only 11.2\%, from 0.4094 to
+0.4554 FPS, leaving the current implementation unsuitable for CPU-rate
+perception loops.
+
+\section{Common H100 Results}
+
+The H100 protocol controls hardware and eager FP32 execution across all nine
+systems. PIDNet-S is fastest at 270.38 FPS. DDRNet-23-Slim follows at 245.17
+FPS, while ROD is slowest at 21.79 FPS. The frozen encoder reduces ROD training
+gradients but does not reduce inference work; the full transformer remains on
+the forward path.
+
+\begin{table}[H]
+\centering
+\caption{Parameter count and common H100 NVL 3g.47GB MIG batch-one
+forward throughput. External input is $640\times384$; execution is eager FP32.}
+\label{tab:h100_comparison}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Parameters} & \textbf{Mean FPS} & \textbf{Mean latency} \\
+\midrule
+PIDNet-S & 7.62 M & \textbf{270.38} & 3.70 ms \\
+DDRNet-23-Slim & 5.69 M & 245.17 & 4.08 ms \\
+BiSeNetV2 & 3.34 M & 167.80 & 5.96 ms \\
+FPN/MobileNetV2 & 4.22 M & 147.36 & 6.79 ms \\
+SegFormer-B0 & 3.71 M & 141.23 & 7.08 ms \\
+U-Net/MobileNetV2 & 6.63 M & 131.86 & 7.58 ms \\
+FPN/EfficientNet-B0 & 5.76 M & 131.40 & 7.61 ms \\
+U-Net/EfficientNet-B0 & 6.25 M & 101.24 & 9.88 ms \\
+ROD ViT-S & 29.11 M & 21.79 & 45.89 ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:h100_comparison} reports the measured H100 throughput and
+latency for every architecture under this common scope.
+
+On the same H100 protocol, PIDNet-S is approximately 12.4 times faster than
+ROD. Under convergence-aware training, ROD's blue+green mean is 1.36 points
+higher, so that accuracy improvement has a large latency price. In the
+nine-model table, ROD is also slower
+and less accurate than FPN/EfficientNet-B0 on this particular hardware and
+recipe. This does not make ROD universally inferior: a model-specific compiler,
+different training objective, memory constraint, or another dataset can change
+the decision. It does mean that the controlled H100 evidence does not place
+ROD on the observed accuracy--speed frontier.
+
+Parameter count again fails to determine speed. SegFormer-B0 has only 3.71
+million parameters but is much slower than PIDNet-S on CPU. BiSeNetV2 is the
+smallest system but not the fastest H100 model. Operator mix, feature-map size,
+attention, memory traffic, and kernel implementation matter alongside stored
+weights.
+
+\section{Accuracy--Speed Relationship}
+
+Figure~\ref{fig:accuracy_speed_h100} combines convergence-aware blue+green mean
+mIoU with the existing H100 throughput measurements. Moving upward improves
+accuracy; moving right improves speed. No model occupies the upper-right
+corner.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.92\textwidth,
+  height=8.0cm,
+  xmode=log,
+  xmin=18,xmax=320,
+  ymin=0.905,ymax=0.946,
+  xlabel={H100 eager FP32 throughput (FPS, log scale)},
+  ylabel={Blue+green mean mIoU},
+  grid=both,
+  grid style={line},
+  xtick={20,30,50,100,150,200,300},
+  xticklabels={20,30,50,100,150,200,300}
+]
+\addplot[only marks,mark=*,mark size=3pt,color=azulUC3M] coordinates {
+  (270.38,0.9195)
+  (245.17,0.9095)
+  (167.80,0.9149)
+  (147.36,0.9372)
+  (141.23,0.9341)
+  (131.86,0.9332)
+  (131.40,0.9423)
+  (101.24,0.9409)
+  (21.79,0.9331)
+};
+\node[font=\scriptsize,anchor=south west] at (axis cs:270.38,0.9195) {PID};
+\node[font=\scriptsize,anchor=north east] at (axis cs:245.17,0.9095) {DDR};
+\node[font=\scriptsize,anchor=north] at (axis cs:167.80,0.9149) {BiSe};
+\node[font=\scriptsize,anchor=south east] at (axis cs:147.36,0.9372) {FPN-M};
+\node[font=\scriptsize,anchor=north] at (axis cs:141.23,0.9341) {Seg};
+\node[font=\scriptsize,anchor=north east] at (axis cs:131.86,0.9332) {UNet-M};
+\node[font=\scriptsize,anchor=south west] at (axis cs:131.40,0.9423) {FPN-E};
+\node[font=\scriptsize,anchor=north east] at (axis cs:101.24,0.9409) {UNet-E};
+\node[font=\scriptsize,anchor=south west] at (axis cs:21.79,0.9331) {ROD};
+\end{axis}
+\end{tikzpicture}
+\caption[Blue+green accuracy versus H100 throughput.]{Blue+green mean mIoU
+versus common H100 throughput. E and M denote EfficientNet-B0 and
+MobileNetV2. FPN/EfficientNet-B0 supplies the highest accuracy, while PIDNet-S
+provides the highest throughput. Accuracy uses the convergence-aware
+blue+green suite; inference speed uses the unchanged architecture graphs.}
+\label{fig:accuracy_speed_h100}
+\end{figure}
+
+For a latency-first H100 deployment, PIDNet-S offers the most headroom. The FPN
+with MobileNetV2 adds 1.77 mIoU points while retaining 147.36 FPS. Replacing
+that encoder with EfficientNet-B0 adds another 0.50 points at 131.40 FPS and
+gives the highest observed accuracy mean. The EfficientNet-B0 U-Net is 0.13
+points lower and also has lower throughput in this runtime. The plotted means
+do not include latency variance or model-specific compiler tuning, so the
+frontier is specific to the declared protocol.
+
+The CPU frontier differs. Compiled DDRNet supplies the only measured rate above
+30 FPS, PIDNet-S offers a stronger accuracy point at 27.04 FPS, and
+FPN/EfficientNet-B0 provides the highest accuracy at 11.70 FPS. A robot with a
+10 Hz perception requirement may select a different model from one requiring
+30 Hz. Frame rate should therefore be treated as a constraint in the model
+choice, not as an isolated leaderboard.
+
+\section{RTX 5060 TensorRT Results}
+
+TensorRT changes the deployment picture for the two exported checkpoints.
+Table~\ref{tab:tensorrt_speed} reports both device and measured-pipeline
+scopes. PIDNet-S reaches 106.43 pipeline FPS with 9.396 ms mean latency. ROD
+reaches 39.38 pipeline FPS with 25.392 ms mean latency. ROD therefore crosses
+a nominal 30 FPS threshold for the measured pipeline after compilation,
+although the unmeasured camera and planning stages still consume part of a
+real 33.3 ms frame budget.
+
+\begin{table}[H]
+\centering
+\caption[TensorRT batch-one timing on the RTX 5060.]{FP16-enabled
+mixed-precision TensorRT batch-one timing on the
+RTX~5060. Each distribution contains 320 measured samples after warm-up.}
+\label{tab:tensorrt_speed}
+\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Model} & \textbf{Scope} & \textbf{Mean} & \textbf{P50} & \textbf{P95} & \textbf{FPS} \\
+\midrule
+\multirow{2}{*}{PIDNet-S}
+ & Device & 0.963 ms & 0.880 ms & 1.414 ms & 1,037.97 \\
+ & Measured pipeline & 9.396 ms & 9.178 ms & 10.943 ms & \textbf{106.43} \\
+\midrule
+\multirow{2}{*}{ROD ViT-S}
+ & Device & 17.401 ms & 17.397 ms & 17.669 ms & 57.47 \\
+ & Measured pipeline & 25.392 ms & 25.255 ms & 26.580 ms & \textbf{39.38} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:tensorrt_frame_budget} expresses the same result as a frame
+budget. At 30 FPS, one complete cycle may occupy at most 33.33 ms. The coloured
+segment is the measured TensorRT pipeline; the pale segment is only remaining
+time, not a measurement of the omitted camera, transport, planning, and control
+stages.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{\input{figures/tensorrt_frame_budget.tex}}
+\caption[TensorRT latency within a 30-FPS frame budget.]{Measured RTX~5060
+TensorRT pipeline latency within a nominal 30-FPS frame budget. PIDNet-S leaves
+substantially more unallocated time than ROD, but neither bar measures the
+remaining robot stack. Original graphic drawn from the results in
+Table~\ref{tab:tensorrt_speed}.}
+\label{fig:tensorrt_frame_budget}
+\end{figure}
+
+The gap between PIDNet's 0.963 ms device time and 9.396 ms pipeline time shows
+that host preprocessing and transfers dominate after the small network is
+compiled. ROD still spends most of its time in the engine, because the internal
+$1024\times1024$ transformer remains expensive. Improving CPU resize or transfer would
+therefore benefit PIDNet proportionally more than ROD.
+
+The TensorRT values should not be interpreted as a controlled speed-up over
+the H100 or Ryzen tables because the GPU, runtime, and precision all change.
+They answer a deployment question: what rate do the saved checkpoints achieve
+after hardware-specific compilation on the available local GPU?
+
+\section{Mixed-Precision Accuracy Verification}
+
+Full-test evaluation confirms that mixed-precision conversion does not materially change
+the operating points. Table~\ref{tab:tensorrt_accuracy} compares each engine
+with its source PyTorch checkpoint.
+
+\begin{table}[H]
+\centering
+\caption{Full 544-image comparison of each source PyTorch checkpoint with its
+mixed-precision TensorRT conversion.}
+\label{tab:tensorrt_accuracy}
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Model/runtime} & \textbf{mIoU} & \textbf{FSR} & \textbf{FBR} & \textbf{mIoU change} \\
+\midrule
+PIDNet-S PyTorch & 0.893941 & 4.3176\% & 7.0369\% & reference \\
+PIDNet-S TensorRT & 0.893764 & 4.3117\% & 7.0667\% & $-0.000177$ \\
+\midrule
+ROD PyTorch paper recipe & 0.923569 & 3.85\% & 3.97\% & reference \\
+ROD TensorRT & 0.923635 & 3.8508\% & 3.9574\% & $+0.000066$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+PIDNet changes by 0.0177 mIoU percentage points and ROD by 0.0066 points.
+Small positive or negative differences are expected when probabilities close
+to 0.50 cross the threshold after mixed-precision execution. The full confusion
+matrices, rather than a small image sample, support the claim that both
+conversions preserve accuracy at the precision used for architectural
+interpretation.
+
+\section{Deployment Meaning}
+
+Three distinct deployment candidates emerge:
+\begin{itemize}
+  \item \textbf{CPU-constrained:} compiled DDRNet maximises frame rate, while
+  PIDNet-S offers a more accurate near-real-time alternative. The
+  EfficientNet systems require a lower frame-rate budget, and the current ROD
+  implementation is not a practical CPU candidate.
+  \item \textbf{Powerful common GPU:} PIDNet-S maximises throughput;
+  FPN/EfficientNet-B0 provides the highest accuracy above 100 FPS on the H100
+  protocol, followed by U-Net/EfficientNet-B0.
+  \item \textbf{Available RTX TensorRT path:} the reference PIDNet model
+  exceeds 100 pipeline FPS, while the more accurate reconstructed ROD model
+  reaches 39.4 FPS.
+\end{itemize}
+
+None of these measurements includes sensor exposure, decode, inter-process
+transport, projection into vehicle coordinates, temporal filtering, path
+planning, or control. Power draw, thermal throttling, and embedded-GPU
+behaviour are also unmeasured. The results establish inference capacity and an
+accuracy--latency trade-off, not production readiness of a complete autonomous
+system.

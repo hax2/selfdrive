@@ -1,0 +1,503 @@
+% ============================================================
+\appendix
+\chapter{Configuration Reference}
+\label{app:configuration}
+% ============================================================
+
+\section{PIDNet-S Configuration}
+
+The portable YAML below is the configuration used for verified evaluation. It
+uses repository-relative paths; the training checkpoint contains the original
+full configuration.
+
+\begin{lstlisting}
+seed: 1337
+raw_root: CAT
+processed_root: data_processed_blue_green
+reports_dir: reports
+configs_dir: configs
+outputs_dir: outputs
+dataset_name: mixed
+experiment_name: controlled_ablation_augment_off
+
+preprocessing:
+  val_fraction: 0.2
+  traversable_palette_names: [blue, green]
+  mapping_filename: discovered_mapping_blue_green.yaml
+
+training:
+  model_name: pidnet-s
+  input_size: [640, 384]
+  batch_size: 4
+  epochs: 15
+  learning_rate: 0.00025
+  min_learning_rate: 0.00001
+  weight_decay: 0.0001
+  mixed_precision: bf16
+  num_workers: 0
+  augment: false
+  untraversable_weight_bias: 2.5
+  traversable_weight_bias: 0.75
+
+postprocessing:
+  traversable_threshold: 0.5
+\end{lstlisting}
+
+\section{Reconstructed ROD Configuration}
+
+\begin{lstlisting}
+seed: 1337
+raw_root: CAT
+processed_root: data_processed_blue_green
+reports_dir: reports
+configs_dir: configs
+outputs_dir: outputs
+dataset_name: mixed
+experiment_name: mixed_binary_traversability_rod_vits_paper
+
+preprocessing:
+  val_fraction: 0.2
+  traversable_palette_names: [blue, green]
+  mapping_filename: discovered_mapping_blue_green.yaml
+
+training:
+  model_name: rod-vits
+  rod_encoder_checkpoint: weights/efficient_sam_vits.pt
+  rod_encoder_image_size: 1024
+  input_size: [640, 384]
+  batch_size: 8
+  val_batch_size: 4
+  epochs: 15
+  learning_rate: 0.001
+  weight_decay: 0.01
+  lr_scheduler: poly
+  poly_power: 0.9
+  mixed_precision: bf16
+  num_workers: 4
+  augment: false
+  class_weights: [1.0, 1.0]
+  ce_loss_weight: 1.0
+  dice_loss_weight: 0.0
+
+postprocessing:
+  traversable_threshold: 0.5
+\end{lstlisting}
+
+\section{Common Fixed-Budget Architecture-Comparison Template}
+
+The model name, experiment name, seed, processed root, and mapping filename
+change by row and policy. The remaining controlled settings follow this
+template:
+
+\begin{lstlisting}
+training:
+  model_name: <architecture-specific name>
+  encoder_weights: <imagenet | null | model-specific>
+  input_size: [640, 384]
+  batch_size: 4
+  epochs: 15
+  learning_rate: 0.00025
+  min_learning_rate: 0.00001
+  weight_decay: 0.0001
+  mixed_precision: bf16
+  num_workers: 4
+  augment: true
+  untraversable_weight_bias: 2.5
+  traversable_weight_bias: 0.75
+postprocessing:
+  traversable_threshold: 0.5
+\end{lstlisting}
+
+Table~\ref{tab:appendix_model_names} maps each human-readable architecture
+name to the exact configuration string consumed by the model factory.
+
+\begin{table}[H]
+\centering
+\caption{Configuration model names used to construct each architecture-comparison
+system.}
+\label{tab:appendix_model_names}
+\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{System} & \textbf{\texttt{training.model\_name}} \\
+\midrule
+PIDNet-S & \texttt{pidnet-s} \\
+ROD ViT-S & \texttt{rod-vits} \\
+FPN/MobileNetV2 & \texttt{smp:FPN:mobilenet\_v2} \\
+FPN/EfficientNet-B0 & \texttt{smp:FPN:efficientnet-b0} \\
+U-Net/MobileNetV2 & \texttt{smp:Unet:mobilenet\_v2} \\
+U-Net/EfficientNet-B0 & \texttt{smp:Unet:efficientnet-b0} \\
+SegFormer-B0 & \texttt{smp:Segformer:mit\_b0} \\
+DDRNet-23-Slim & \texttt{ddrnet-23-slim} \\
+BiSeNetV2 & \texttt{bisenetv2} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Convergence-Aware Follow-Up Template}
+
+The convergence suite retains the model-specific fields and common settings
+above, but replaces the fixed horizon with the following schedule and stopping
+rule:
+
+\begin{lstlisting}
+training:
+  epochs: 300                 # ceiling, not claimed optimum
+  lr_scheduler: cosine
+  cosine_decay_epochs: 60     # then hold min_learning_rate
+  save_last_checkpoint: false
+  save_optimizer_state: false
+  early_stopping:
+    enabled: true
+    metric: mIoU
+    mode: max
+    patience: 25
+    min_epochs: 60
+    min_delta: 0.0001
+postprocessing:
+  traversable_threshold: 0.5
+\end{lstlisting}
+
+The complete 27 generated YAML files are stored under
+\path{configs/generated/convergence_blue_green_e300_c60_m60_p25/blue_green/}.
+They should be used instead of reconstructing a run from this shortened
+listing.
+
+% ============================================================
+\chapter{Reference Evaluation Record}
+\label{app:expected}
+% ============================================================
+
+The following values are sufficient to check an independent checkpoint
+evaluation. The confusion matrix is ordered by ground-truth row and predicted
+column.
+
+\begin{lstlisting}
+split: test
+checkpoint: outputs/controlled_ablation_augment_off/checkpoints/best.pt
+threshold: 0.5
+confusion_matrix:
+  - [73151244, 3300886]
+  - [4027996, 53213314]
+mIoU: 0.8939406948414585
+iou_untraversable: 0.9089355053942137
+iou_traversable: 0.8789458842887033
+precision_traversable: 0.9415919184912819
+recall_traversable: 0.9296313099752609
+f1_traversable: 0.9355733889285891
+false_safe_rate: 0.04317585396247299
+false_block_rate: 0.07036869002473913
+\end{lstlisting}
+
+The TensorRT PIDNet result is expected to differ slightly:
+
+\begin{lstlisting}
+confusion_matrix:
+  - [73155734, 3296396]
+  - [4045047, 53196263]
+mIoU: 0.8937640836927854
+false_safe_rate: 0.04311712440189698
+false_block_rate: 0.07066656930108693
+\end{lstlisting}
+
+The reconstructed ROD TensorRT full-test record is:
+
+\begin{lstlisting}
+confusion_matrix:
+  - [73508109, 2944021]
+  - [2265250, 54976060]
+mIoU: 0.9236346417584864
+false_safe_rate: 0.03850803110390776
+false_block_rate: 0.03957369249585658
+\end{lstlisting}
+
+% ============================================================
+\chapter{Reproduction Commands}
+\label{app:reproduction}
+% ============================================================
+
+\noindent\textbf{Reproducibility repository:}\\
+\url{https://github.com/hax2/cat-pidnet-thesis-reproducibility}. The repository
+contains the code, configurations, checkpoints and evidence records, and the
+instructions needed for reproduction. Run the commands in this appendix from
+its root. The convergence evidence was generated from source commit
+\texttt{865cda90}; later thesis-only edits do not alter the recorded training
+artifacts or metrics.
+
+\section{Audit and Preprocessing}
+
+From the repository root, the raw dataset can be audited and the main binary
+dataset regenerated with:
+
+\begin{lstlisting}
+PYTHONPATH=src python -m ttfm.cli \
+  --config configs/frozen_pidnet_cat.yaml audit
+
+PYTHONPATH=src python -m ttfm.cli \
+  --config configs/frozen_pidnet_cat.yaml preprocess
+\end{lstlisting}
+
+Preprocessing replaces the configured processed root, so the retained manifest
+identity should be checked before regenerating evidence.
+
+\section{PIDNet-S Evaluation}
+
+\begin{lstlisting}
+PYTHONPATH=src python -m ttfm.cli \
+  --config configs/frozen_pidnet_cat.yaml \
+  eval --split test
+\end{lstlisting}
+
+This command loads \texttt{best.pt}; it does not update weights. After
+processing the complete test manifest, it writes \path{test_metrics.json}.
+
+\section{Ranked Qualitative Review}
+
+\begin{lstlisting}
+PYTHONPATH=src python -m ttfm.cli \
+  --config configs/frozen_pidnet_cat.yaml \
+  review --split test --top-k 10
+\end{lstlisting}
+
+The ALICE panel is regenerated separately:
+
+\begin{lstlisting}
+PYTHONPATH=src python scripts/alice_preview.py \
+  --config configs/frozen_pidnet_cat.yaml \
+  --input-dir alice \
+  --output-dir outputs/alice_pidnet_frozen_preview \
+  --sample-count 12 \
+  --checkpoint best.pt
+\end{lstlisting}
+
+\section{TensorRT Benchmarks}
+
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+PYTHONPATH=src python scripts/edge_trt_benchmark.py \
+  --config configs/ablations/controlled_ablation_augment_off.yaml \
+  --checkpoint outputs/controlled_ablation_augment_off/checkpoints/best.pt \
+  --input-dir data_processed_blue_green/test/images \
+  --precision fp16 --limit 64 --warmup 10 --repeats 5 \
+  --accuracy-limit 0 \
+  --output reports/edge_pidnet_rtx5060_trt.json
+\end{lstlisting}
+
+\begin{lstlisting}[basicstyle=\ttfamily\tiny]
+PYTHONPATH=src python scripts/edge_trt_benchmark.py \
+  --config rod_suite_results/configs/rod_vits_cat_paper.yaml \
+  --checkpoint rod_suite_results/outputs/mixed_binary_traversability_rod_vits_paper/checkpoints/best.pt \
+  --input-dir data_processed_blue_green/test/images \
+  --precision fp16 --limit 64 --warmup 10 --repeats 5 \
+  --accuracy-limit 0 \
+  --output reports/edge_rod_rtx5060_trt.json
+\end{lstlisting}
+
+Both commands require a CUDA and TensorRT environment. Engine construction is
+recorded but excluded from inference timing. Exact latency is
+hardware- and runtime-dependent even when accuracy is reproducible.
+
+\section{Architecture Ledgers}
+
+The readable aggregate reports are:
+\begin{lstlisting}
+reports/blue_only_verified_summary.md
+reports/blue_green_verified_summary.md
+reports/convergence_blue_green_verified_summary.md
+\end{lstlisting}
+Their JSON ledgers contain per-seed configurations, metrics, confusion counts,
+artifact paths, and integrity checks. The convergence ledger additionally
+contains validation-selected epochs and server-recorded checkpoint identities.
+A selected run can be reevaluated after retrieving its checkpoint with:
+\begin{lstlisting}
+PYTHONPATH=src python -m ttfm.cli \
+  --config <exact-config.yaml> eval --split test
+\end{lstlisting}
+
+% ============================================================
+\chapter{Artifact Identities}
+\label{app:hashes}
+% ============================================================
+
+These SHA-256 values identify the evidence package at the time of verification.
+A different digest denotes a different artifact, even if its filename is
+unchanged.
+Table~\ref{tab:appendix_hashes} records the retained PIDNet evidence chain.
+
+\begin{longtable}{@{}p{0.46\textwidth}p{0.48\textwidth}@{}}
+\caption{SHA-256 identities for the PIDNet evidence chain.}\label{tab:appendix_hashes}\\
+\toprule
+\textbf{Artifact} & \textbf{SHA-256} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Artifact} & \textbf{SHA-256} \\
+\midrule
+\endhead
+\path{configs/frozen_pidnet_cat.yaml} &
+\texttt{\seqsplit{07b07bbb1bb9e6f0586df6598d2cf982f8af845fb3e16785810615c80ebdaa74}} \\
+\path{data_processed_blue_green/manifest.json} &
+\texttt{\seqsplit{198fef93fc45568e1dae49ae8780906fa6ef479548214d20244cd12e51201fa2}} \\
+\path{outputs/.../checkpoints/best.pt} &
+\texttt{\seqsplit{b9862fe49713c0622d760b94aa3fc055fdaf6549a67a4ee3492004d9c591f471}} \\
+\path{src/ttfm/eval.py} &
+\texttt{\seqsplit{f83a6da0902bec7226a0a23112c97fdf549ce493642a002b535285c7d18fdd78}} \\
+\path{src/ttfm/metrics.py} &
+\texttt{\seqsplit{84ee42f674b97ae7f14b04d68e09c9c899c89c8d528f178897ec67610d8662fc}} \\
+\path{src/ttfm/review.py} &
+\texttt{\seqsplit{678820d64404d8a3f5ed2b9c59a54ac63596c67acb4082df53bc1a78604c73ee}} \\
+\path{outputs/.../test_metrics.json} &
+\texttt{\seqsplit{f72f173c5c64bc2b4e5ff11bffc9184962db7f33fe2cc82136c661282bdd2263}} \\
+\path{outputs/.../test_review/summary.json} &
+\texttt{\seqsplit{bc0b0237acd555c4361540afa1ab0ad0b445734662877fb52fe77a37ebaca0b2}} \\
+\path{reports/cpu_pidnet_s_ryzen5500_torch213_idle.json} &
+\texttt{\seqsplit{4db19ce68688fcdca4a44924dfa64670d9045474448703feff3302c459f53f5b}} \\
+\path{configs/ablations/controlled_ablation_augment_off.yaml} &
+\texttt{\seqsplit{62869964e3fd30b3cba59d28f1799c6add73002c1a39af4dfb32641626d27928}} \\
+\path{scripts/edge_trt_benchmark.py} &
+\texttt{\seqsplit{0a1acc1a55659384208cbf067f3c90c7c5a304b47749bada65e7be6cc624f2a3}} \\
+\path{reports/.trt_scratch/pidnet-s_fp16.onnx} &
+\texttt{\seqsplit{15ac7c3ea859e8776b073aaafca76a5507f501cd62be992efc54d08276d43d91}} \\
+\path{reports/.trt_scratch/pidnet-s_fp16.engine} &
+\texttt{\seqsplit{2458b84daa0133d0de7fea5f2c20fd1ecb3f335eaa00e81bd6f00c8f3f52da85}} \\
+\path{reports/edge_pidnet_rtx5060_trt.json} &
+\texttt{\seqsplit{5eb085823c892bc40d34d4997df5745206246ee8eba14cf906a7619d43107255}} \\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+\chapter{Implementation Map}
+\label{app:implementation}
+% ============================================================
+
+Table~\ref{tab:appendix_implementation} maps the main repository paths to
+their role in creating or checking the experimental record.
+
+\begin{longtable}{@{}p{0.34\textwidth}p{0.60\textwidth}@{}}
+\caption{Principal repository files and their role in the experimental record.}\label{tab:appendix_implementation}\\
+\toprule
+\textbf{File or directory} & \textbf{Responsibility} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{File or directory} & \textbf{Responsibility} \\
+\midrule
+\endhead
+\path{src/ttfm/audit.py} & Discover file counts, IDs, palette colours, dimensions, pairing, and corruption. \\
+\path{src/ttfm/preprocess.py} & Apply the binary mapping, deterministic hash split, and write manifests and binary masks. \\
+\path{src/ttfm/data.py} & Load manifest samples, resize RGB/masks, apply deterministic augmentation, scale tensors, and compute train-only class weights. \\
+\path{src/ttfm/model.py} & Construct PIDNet, ROD, DDRNet, BiSeNet, and SMP systems behind one full-resolution logits interface. \\
+\path{src/ttfm/vendor_pidnet/} & Vendored PIDNet implementation used by the baseline wrapper. \\
+\path{src/ttfm/rod.py} & EfficientSAM ViT-S encoder, frozen-weight loading, intermediate feature extraction, ROD decoder, and output resizing. \\
+\path{src/ttfm/train.py} & Losses, AdamW, cosine/polynomial schedules, mixed precision, epoch loops, validation, and best-checkpoint selection. \\
+\path{src/ttfm/eval.py} & Read-only checkpoint evaluation and JSON metric output. \\
+\path{src/ttfm/metrics.py} & Softmax threshold, confusion accumulation, mIoU, class IoUs, precision, recall, F1, FSR, and FBR. \\
+\path{src/ttfm/review.py} & Per-image asymmetric-error and boundary scoring plus ranked qualitative panels. \\
+\path{scripts/run_rod_suite.py} & Controlled PIDNet--ROD seeds, reconstructed training runs, common GPU timing, and aggregate reports. \\
+\path{scripts/run_realtime_comparison_suite.py} & Nine-model blue-only repeat-seed comparison. \\
+\path{scripts/run_realtime_blue_green_suite.sh} & Corresponding blue+green architecture suite. \\
+\path{scripts/run_convergence_suite.py} & Generate, resume, evaluate, and aggregate the 27-run convergence-aware blue+green suite. \\
+\path{scripts/build_convergence_evidence.py} & Audit convergence artifacts and regenerate the verified ledger, summary, and figures. \\
+\path{scripts/gpu_inference_benchmark.py} & Eager/CPU forward benchmark with warm-up and repeat controls. \\
+\path{reports/cpu_*_ryzen5500*.json} & Retained eager and compiled Ryzen benchmark records, including thread count, warm-up, repeats, sample count, and latency percentiles. \\
+\path{scripts/edge_trt_benchmark.py} & ONNX export, TensorRT engine construction, scoped latency, and full-test engine accuracy. \\
+\path{reports/*verified_ledger.json} & Per-seed metric, configuration, checkpoint, benchmark, and integrity records. \\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+\chapter{Development Time and Work Plan}
+\label{app:development_time}
+% ============================================================
+
+The project was developed iteratively rather than from a fixed recipe. Early
+work compared several possible formulations of off-road perception before the
+binary CaT task and the final architecture study were selected. Table
+\ref{tab:development_time} reconstructs the effort devoted to each principal
+step. The values are approximate because a formal timesheet was not maintained;
+they represent about 22 working days, or roughly 180 hours, of research,
+implementation, experimentation, and writing. Reading and revision continued
+across several phases, so the entries should be interpreted as an effort
+breakdown rather than as mutually exclusive calendar blocks.
+
+\begingroup
+\small
+\begin{longtable}{@{}p{0.25\textwidth}p{0.17\textwidth}p{0.50\textwidth}@{}}
+\caption[Development-time breakdown.]{Approximate development time devoted to
+the principal stages of the thesis. Automated computation is distinguished
+from hands-on research work where it materially affects the estimate.}
+\label{tab:development_time} \\
+\toprule
+\textbf{Stage} & \textbf{Estimated effort} & \textbf{Work performed and reason for the effort} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Stage} & \textbf{Estimated effort} & \textbf{Work performed and reason for the effort} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{\textit{Continued on the next page}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+Problem framing, literature review, and alternative approaches &
+4 days (about 30 h) &
+Reviewed monocular, geometric, multimodal, and segmentation-based approaches;
+compared possible thesis directions; traced relevant CaT and ROD literature;
+and contacted an original author to query apparent inconsistencies in the
+published experimental description. \\
+
+Dataset search and selection &
+3 days (about 23 h) &
+Compared candidate off-road datasets by annotation type, licence, scene
+diversity, task compatibility, and reproducibility before selecting CaT. \\
+
+CaT audit and dataset preparation &
+2 days (about 16 h) &
+Audited RGB--mask--integer-map correspondence, identified error-prone filename
+pairing assumptions, reconstructed the palette mapping, defined the two binary
+policies, and produced deterministic development splits. \\
+
+PIDNet-S baseline development &
+2 days (about 16 h) &
+Adapted PIDNet-S to two-class output, implemented the common training and
+evaluation path, checked tensor shapes and losses, and obtained a reproducible
+working baseline. \\
+
+Controlled ablations and checkpoint audit &
+2 days (about 16 h) &
+Ran the controlled variants, checked validation-based checkpoint selection,
+recomputed strict test metrics, and generated qualitative error reviews. \\
+
+ROD reconstruction and comparison &
+1 day (about 8 h) &
+Reconstructed the published frozen-encoder recipe, adapted it to the CaT
+policies, and established the matched PIDNet--ROD comparison. \\
+
+Architecture extension and reproducibility evidence &
+1.5 days (about 12 h) &
+Integrated seven further compact systems, standardised their interfaces and
+configurations, executed the multi-seed matrices, and assembled traceable
+result ledgers. \\
+
+Hardware evaluation &
+1 day (about 8 h) &
+Defined timing scopes and measured CPU, H100, and TensorRT execution while
+checking that exported models preserved their source predictions. \\
+
+Convergence-aware follow-up &
+1 full day (about 13 h elapsed) &
+Prepared, launched, monitored, and verified 27 long-horizon runs. Early
+stopping reduced the 300-epoch ceiling to validation-selected checkpoints from
+epochs 50--141. \\
+
+Writing, figure production, and final revision &
+4.5 days (about 36 h) &
+Organised the argument, documented equations and protocols, produced and
+revised figures and tables, incorporated the convergence evidence, and checked
+language, citations, reproducibility, and UC3M presentation requirements. \\
+\midrule
+\textbf{Total} & \textbf{about 22 days (about 180 h)} &
+Approximate hands-on and supervised experimental effort for the complete
+thesis. \\
+\end{longtable}
+\endgroup

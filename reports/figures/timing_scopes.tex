@@ -1,0 +1,23 @@
+\begin{tikzpicture}[
+  node distance=0.25cm,
+  stage/.style={draw,minimum height=0.9cm,text width=1.62cm,align=center,font=\footnotesize,inner sep=2pt},
+  included/.style={stage,fill=softgreen},
+  excluded/.style={stage,fill=black!8,text=black!55},
+  arrow/.style={-{Latex[length=2mm]},thin}
+]
+\node[excluded] (camera) {camera / disk decode};
+\node[included,right=of camera] (resize) {resize and normalise};
+\node[included,right=of resize] (h2d) {host-to-device};
+\node[included,right=of h2d] (model) {model / TensorRT};
+\node[included,right=of model] (post) {softmax and threshold};
+\node[included,right=of post] (d2h) {mask to host};
+\node[excluded,right=of d2h] (planner) {planning and control};
+\draw[arrow] (camera) -- (resize);
+\draw[arrow] (resize) -- (h2d);
+\draw[arrow] (h2d) -- (model);
+\draw[arrow] (model) -- (post);
+\draw[arrow] (post) -- (d2h);
+\draw[arrow] (d2h) -- (planner);
+\draw[very thick,good] ($(resize.south west)+(0,-0.32)$) -- node[below,font=\footnotesize,text=black]{RTX~5060 measured pipeline scope} ($(d2h.south east)+(0,-0.32)$);
+\draw[very thick,pidP] ($(model.north west)+(0,0.32)$) -- node[above,font=\footnotesize,text=black]{device/forward scope} ($(post.north east)+(0,0.32)$);
+\end{tikzpicture}

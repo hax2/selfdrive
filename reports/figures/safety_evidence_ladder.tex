@@ -1,0 +1,24 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  stage/.style={draw,rounded corners=2pt,very thick,align=center,
+    text width=2.75cm,minimum height=1.95cm,inner sep=5pt},
+  future/.style={stage,dashed,draw=black!55,fill=black!5},
+  flow/.style={-{Latex[length=2.4mm]},very thick,draw=azulUC3M}
+]
+  \node[stage,fill=softblue] (metrics) at (1.55,2.05)
+    {\textbf{Pixel metrics}\\mIoU, FSR, FBR\\\footnotesize how many pixels disagree?};
+  \node[stage,fill=softorange] (spatial) at (5.05,2.05)
+    {\textbf{Spatial review}\\location, shape, connectedness\\\footnotesize what does the error look like?};
+  \node[future] (planner) at (8.55,2.05)
+    {\textbf{Planner interaction}\\footprint, route, distance\\\footnotesize does the error affect a path?};
+  \node[future] (vehicle) at (12.05,2.05)
+    {\textbf{Vehicle outcome}\\collision, intervention, progress\\\footnotesize what happened physically?};
+  \draw[flow] (metrics) -- (spatial);
+  \draw[flow] (spatial) -- (planner);
+  \draw[flow] (planner) -- (vehicle);
+
+  \draw[very thick,good] (0.05,-0.38) -- node[below,font=\footnotesize,text=black]
+    {evaluated in this thesis} (6.55,-0.38);
+  \draw[very thick,dashed,black!55] (7.05,-0.38) -- node[below,font=\footnotesize,text=black]
+    {requires future system-level validation} (13.55,-0.38);
+\end{tikzpicture}

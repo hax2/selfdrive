@@ -1,0 +1,271 @@
+% ============================================================
+\chapter{Discussion and Research Outlook}
+\label{ch:discussion}
+% ============================================================
+
+\section{Synthesis of Findings}
+
+The PIDNet-S experiments establish that the CaT capability labels can be
+learned by a compact network at useful accuracy and latency. The retained
+7.62-million-parameter model reaches 0.893941 mIoU, and an independent CPU run
+reconstructs its complete confusion matrix exactly. This level of
+reproducibility connects the reported rates to one identifiable model rather
+than to an undocumented training run. It remains a CaT result, however;
+neither the exact score nor its operational interpretation transfers automatically
+to another site or vehicle.
+
+Several seemingly reasonable interventions did not work as intended. The
+tested photometric augmentation reduced performance, the additional
+false-safe term increased both asymmetric error rates, and greater input
+resolution provided no benefit while halving the batch size. Neutral class
+weights recovered more traversable pixels but did not give the strongest
+combined operating point. By contrast, threshold adjustment behaved
+predictably: it traded false-safe openings for false blocks without eliminating
+the underlying errors. These outcomes argue for controlled measurements of
+engineering choices rather than assumptions based on their names or intent.
+
+Pretrained feature transfer changes the attainable accuracy, but training
+horizon changes the comparison as well. Under the original matched 15-epoch
+conditions, ROD improves mean mIoU over PIDNet-S by 3.15 percentage points for
+blue+green and 3.79 points for blue-only. The convergence-aware blue+green
+follow-up raises both means to 0.9331 and 0.9195, narrowing their difference to
+1.36 points. Across all nine systems, FPN/EfficientNet-B0 reaches
+$0.9423\pm0.0005$ and is highest in each of the three executed seeds;
+U-Net/EfficientNet-B0 follows at $0.9409\pm0.0004$. ROD remains below the five
+pretrained encoder--decoder alternatives but nearly matches
+U-Net/MobileNetV2. These changes show that the earlier matrix described
+performance after equal early exposure, not a converged architecture ranking.
+
+Runtime supplies a different ordering. PIDNet-S produces the highest H100
+throughput, compiled DDRNet-23-Slim leads on the tested CPU, and the two
+EfficientNet-B0 systems provide the greatest overlap. TensorRT brings the
+reconstructed ROD model to 39.38 FPS for the measured local pipeline, but
+PIDNet-S remains much faster at 106.43 FPS. On the Ryzen CPU, ROD reaches only
+0.41 eager FPS and 0.46 compiled FPS because freezing removes encoder gradients
+during training but not encoder computation during inference. Model selection
+is consequently a constraint problem involving target frame rate, runtime, and
+acceptable error profile, not a lookup of the largest mIoU.
+
+\section{Interpreting the Architecture Results}
+
+The comparison does not support a simple narrative that transformers are more
+accurate and CNNs are faster. ROD's pretrained transformer improves over
+randomly initialised PIDNet-S, but FPN and U-Net with a compact pretrained
+convolutional EfficientNet-B0 encoder perform better under the common recipe.
+SegFormer-B0 lies between the EfficientNet and MobileNet systems. The best
+observed result is therefore associated with strong pretrained compact
+features and an effective multiscale decoder, not with one architecture
+category alone.
+
+The $2\times2$ subset suggests that encoder choice has the larger effect:
+EfficientNet-B0 improves both decoders, while FPN's advantage over U-Net is
+0.13 points with EfficientNet and 0.41 points with MobileNetV2. FPN is higher
+for every matched encoder--seed pair in the convergence suite. With only two
+encoders and two decoders, this remains a local interaction, not a universal
+conclusion about FPN or U-Net.
+
+ROD's reconstructed training result shows that optimisation is
+architecture-dependent. CE alone, neutral weights, a larger learning rate, and
+polynomial decay improve ROD relative to the common CE+Dice recipe. This does
+not invalidate the retained PIDNet configuration. It shows that a recipe
+selected during one architecture's development should not be assumed optimal
+for another.
+
+The real-time architectures occupy different parts of the speed--accuracy
+plane. DDRNet provides the highest compiled CPU rate but the lowest
+convergence-aware blue+green accuracy. PIDNet provides the highest H100
+throughput, a verified deployment chain, and now a higher mean mIoU than
+BiSeNetV2. The phrase ``real-time architecture'' therefore describes design
+intent, not a fixed ranking on every processor.
+
+\section{Meaning of the Asymmetric Error Metrics}
+
+The reference PIDNet model has lower FSR than FBR, which indicates a conservative
+aggregate operating balance. The maximum-FSR image demonstrates why that
+statement is insufficient: a 4.32\% global rate can coexist with a 30.20\%
+per-image rate and one connected expansion into a large field. Conversely, the
+maximum-FBR example shows a visually coherent route being almost removed.
+
+The highest-scoring models reduce both directions, so their accuracy gain is not
+obtained simply by opening or closing the entire mask. Even then, pixel rates
+do not specify whether an error intersects the planned trajectory. A false-safe
+pixel behind the vehicle and one under the projected front wheel contribute
+equally. Connectedness, distance, obstacle type, speed, and confidence are
+absent.
+
+The metrics are best used as three layers of evidence:
+\begin{enumerate}
+  \item mIoU and class IoU summarise balanced segmentation overlap;
+  \item FSR and FBR expose the direction of disagreement;
+  \item ranked visual review shows the spatial form of the error.
+\end{enumerate}
+
+Figure~\ref{fig:safety_evidence_ladder} shows why these layers should not be
+collapsed into a single safety claim. This thesis evaluates pixel disagreement
+and its spatial form. Whether an error changes a route, and whether the vehicle
+then collides or loses progress, require a planner and physical system that are
+outside the present experiment.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/safety_evidence_ladder.tex}}
+\caption[From pixel metrics to vehicle-level evidence.]{Evidence required to
+move from segmentation quality to a vehicle-level safety statement. Solid
+stages are evaluated here; dashed stages require future planner and vehicle
+experiments. Original schematic drawn for this thesis.}
+\label{fig:safety_evidence_ladder}
+\end{figure}
+
+A later planner-level study should add collision, intervention, route
+availability, progress, and time-to-goal measures rather than attempting to
+turn FSR alone into a safety certificate.
+
+\section{Annotation and Task Uncertainty}
+
+CaT's vehicle-capability concept is a strength because it is closer to
+navigation than a material label. It also introduces judgement. A sharp
+semantic boundary between a track and adjacent vegetation may be visible in
+RGB; the exact boundary between pickup-traversable and off-road-only soil may
+depend on slope, compaction, moisture, hidden roughness, or an annotator's
+vehicle model.
+
+The selected examples make this limitation concrete without declaring the
+reference wrong. In \texttt{mixed\_pln\_1278}, a pale field and the accepted
+track look similar. In \texttt{mixed\_118}, dense woodland and leaf-covered
+ground provide little visible support for the broad accepted foreground
+region. In \texttt{mixed\_459}, several nearby vegetation--track contours
+appear visually possible. The masks may encode knowledge unavailable
+in the RGB frame, and visual ambiguity does not imply that both regions would
+support a vehicle equally.
+
+Because the dataset provides one released annotation per image and no
+inter-annotator agreement, the thesis cannot estimate label variance, separate
+model error from annotation uncertainty, or provide an upper bound on
+RGB-only performance. A model that reproduces the labels perfectly would
+reproduce their assumptions; it would not necessarily predict vehicle outcome
+perfectly.
+
+\section{Limitations}
+
+\begin{enumerate}
+  \item \textbf{One small, imbalanced dataset.} Training uses 1,002 images from
+  three environments, with Power Line dominating. No environment-stratified
+  result or geographically independent dataset is reported.
+
+  \item \textbf{Sample-level split.} The deterministic hash prevents direct
+  identifier overlap, but it does not explicitly group visually adjacent or
+  near-duplicate frames. The degree of correlation between training and
+  validation samples is not measured.
+
+  \item \textbf{Annotation uncertainty is unquantified.} There are no repeated
+  labels, annotator confidence scores, vehicle trials, or agreement statistics.
+
+  \item \textbf{RGB cannot observe every physical constraint.} Support,
+  deformability, water depth, slope, clearance, and wheel slip may require
+  geometry, temporal evidence, or interaction.
+
+  \item \textbf{Policy dependence.} Blue-only and blue+green are explicit
+  vehicle policies. Results do not transfer numerically to blue+green+red,
+  four-class CaT, or a different vehicle.
+
+  \item \textbf{Repeated benchmark use.} Test images are excluded from
+  optimisation and automatic checkpoint selection, but the project reports
+  many test runs. The benchmark is not a single-use blinded evaluation.
+
+  \item \textbf{Limited statistical scope.} The controlled ablation has one
+  seed. The architecture table has three selected seeds on one fixed split and uses
+  population standard deviation, not confidence intervals or hypothesis tests.
+
+  \item \textbf{Architecture and pretraining are confounded.} PIDNet-S and
+  DDRNet start randomly, while the leading systems use pretrained encoders.
+  The table ranks complete recipes and cannot isolate causal architecture
+  effects.
+
+  \item \textbf{The convergence rule is shared, not model-specific
+  optimisation.} The follow-up removes the obviously early 15-epoch stopping
+  point for blue+green, but all models still share one objective, learning-rate
+  schedule, and patience rule. Individually tuned recipes could change the
+  ranking, and the blue-only matrix remains a fixed-budget result.
+
+  \item \textbf{Two training software environments were used.} The FPN,
+  U-Net, and SegFormer runs used PyTorch 2.13.0/CUDA 13.0; PIDNet, ROD,
+  DDRNet, and BiSeNet used PyTorch 2.7.1/CUDA 12.6. The data, configuration,
+  hardware partition, and evaluator were fixed, but framework version remains
+  a cross-family confound.
+
+  \item \textbf{Checkpoint availability differs from checkpoint identity.}
+  The convergence suite records server-side SHA-256 identities for all 27
+  selected checkpoints, but their binaries are not present locally. The
+  reference PIDNet checkpoint remains the fully local reproduction chain.
+
+  \item \textbf{Convergence training time is not usable evidence.} Shared-GPU
+  workers were paused and resumed to control contention. This preserves
+  training state but makes their recorded wall-clock duration unsuitable for
+  comparing training cost.
+
+  \item \textbf{Qualitative comparison is centred on PIDNet.} The detailed
+  percentile, failure, and ALICE panels use the reference PIDNet model.
+  Equivalent ROD and top-FPN failure panels were not produced, so qualitative
+  error differences between architectures are not established.
+
+  \item \textbf{ALICE is unlabelled.} The model output can be inspected, but no
+  cross-domain accuracy or error rate can be calculated.
+
+  \item \textbf{Pixel metrics omit planning and time.} No temporal consistency,
+  confidence calibration, trajectory collision, intervention, or progress
+  metric is evaluated.
+
+  \item \textbf{Hardware is not the target embedded computer.} The Ryzen,
+  H100 MIG partition, and desktop RTX~5060 do not measure automotive power,
+  thermal limits, camera capture, planner latency, or end-to-end control.
+\end{enumerate}
+
+\section{Future Work}
+
+Future work should close the largest evidence gaps before adding more
+architectures.
+
+\textbf{First, quantify the target.} A representative CaT subset should be
+annotated independently by several people using a written vehicle-capability
+guide. Agreement, boundary dispersion, and confidence should be reported.
+Where possible, annotations should be paired with slope, roughness, soil, and
+vehicle-trial evidence. This would separate visually ambiguous pixels from
+clear model failures.
+
+\textbf{Second, validate domain transfer.} A temporally coherent ALICE subset
+should receive ground truth and vehicle-specific policy labels. Evaluation
+should include sequence-level consistency and should hold complete locations
+or runs out of training. ORFD, RUGD, RELLIS-3D, or WildScenes can extend
+appearance diversity, but their labels must be mapped carefully rather than
+treated as equivalent to CaT capability.
+
+\textbf{Third, connect perception to planning.} The mask should be projected
+into vehicle coordinates and evaluated with a planner. Metrics should weight
+the near field, measure connected false-safe components, record whether the
+planned footprint intersects blocked terrain, and quantify collision-free
+progress. Obstacle inflation and a minimum-corridor rule can then be tested
+against both exposure to blocked terrain and route availability.
+
+\textbf{Fourth, represent uncertainty.} Probability calibration, ensembles,
+test-time uncertainty, and an explicit unknown/abstain region should be
+evaluated. Thresholds should be selected on validation data from a declared
+application cost rather than by maximising test mIoU. Temporal smoothing should
+be tested without allowing old confident errors to persist.
+
+\textbf{Fifth, isolate modelling factors.} Pretrained and random initialisation
+should be compared within the same encoder family. The selected architectures
+should receive model-specific schedules and then be reevaluated under a common
+compute budget. More seeds and grouped or location-held-out splits would give
+stronger uncertainty estimates. Boundary supervision and hard-example sampling
+should be assessed against FSR, FBR, and annotation disagreement.
+
+\textbf{Finally, benchmark the actual robot stack.} The selected checkpoint
+should run from camera capture through preprocessing, inference, projection,
+planning, and control on the intended embedded computer. Measurements should
+include median and tail latency, dropped frames, power, memory, temperature,
+and throttling. RGB should be fused with depth, LiDAR, or vehicle interaction
+where physical support cannot be inferred visually.
+
+These steps would convert the present verified perception benchmark into
+evidence about autonomous navigation rather than merely adding another
+segmentation score.

@@ -1,0 +1,38 @@
+\begin{tikzpicture}[
+  font=\sffamily\small,
+  block/.style={draw,rounded corners=2pt,very thick,align=center,
+    minimum height=1.18cm,inner sep=5pt},
+  flow/.style={-{Latex[length=2.4mm]},very thick,draw=azulUC3M},
+  trainflow/.style={-{Latex[length=2.4mm]},very thick,draw=warn},
+  fixed/.style={block,draw=pidP!80!black,fill=softblue},
+  trainable/.style={block,draw=warn!85!black,fill=softorange}
+]
+  \node[block,fill=softpurple,text width=2.55cm] (source) at (1.4,3.65)
+    {\textbf{Large source corpus}\\many images and masks};
+  \node[trainable,text width=2.25cm] (pretrain) at (5.0,3.65)
+    {\textbf{Pretraining}\\learn general visual features};
+  \node[fixed,text width=2.55cm] (weights) at (8.75,3.65)
+    {\textbf{Pretrained encoder}\\reusable weights};
+  \draw[trainflow] (source) -- (pretrain);
+  \draw[trainflow] (pretrain) -- (weights);
+
+  \node[block,fill=softgreen,text width=2.35cm] (cat) at (1.4,0.30)
+    {\textbf{CaT RGB image}\\small target dataset};
+  \node[fixed,text width=2.55cm] (frozen) at (5.0,0.30)
+    {\textbf{Frozen encoder}\\weights stay fixed};
+  \node[trainable,text width=2.45cm] (decoder) at (8.75,0.30)
+    {\textbf{Trainable decoder}\\learn CaT mask mapping};
+  \node[block,fill=good!16,draw=good!80!black,text width=2.05cm] (mask) at (12.55,0.30)
+    {\textbf{Binary mask}\\traversability};
+  \draw[flow] (cat) -- (frozen);
+  \draw[flow] (frozen) -- (decoder);
+  \draw[flow] (decoder) -- (mask);
+  \draw[flow,dashed] (weights.south) -- ++(0,-0.62) -| (frozen.north);
+  \node[font=\sffamily\footnotesize,fill=white,inner sep=2pt]
+    at (6.88,2.05) {copy pretrained weights};
+
+  \node[draw=pidP!80!black,fill=softblue,rounded corners=2pt,
+    font=\footnotesize,inner sep=3pt] at (5.0,-1.10) {no encoder gradients};
+  \node[draw=warn!85!black,fill=softorange,rounded corners=2pt,
+    font=\footnotesize,inner sep=3pt] at (8.75,-1.10) {decoder updated on CaT};
+\end{tikzpicture}

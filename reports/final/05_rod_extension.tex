@@ -1,0 +1,267 @@
+% ============================================================
+\chapter{ROD and Comparative Architecture Study}
+\label{ch:rod_extension}
+% ============================================================
+
+\section{Motivation for Pretrained Feature Transfer}
+
+The PIDNet-S analysis exposed a recurring pattern: low-contrast corridors
+were sometimes removed, broad fields could be opened incorrectly, and small
+boundary displacements survived even in otherwise accurate masks. With only
+1,002 training images, one possible remedy is to reuse visual structure learned
+from a much larger corpus rather than asking every feature extractor to learn
+from CaT alone. ROD provides a concrete instance of this strategy. It connects
+a trainable off-road segmentation decoder to a pretrained EfficientSAM ViT-S
+encoder whose weights remain fixed during task training
+~\cite{sun2025rod,xiong2024efficientsam}.
+
+This design occupies a markedly different operating point from PIDNet-S. It
+introduces substantially more representation capacity and transfers pretrained
+features, but the full transformer still executes for every frame. Fixed
+weights reduce optimisation cost; they do not make inference inexpensive.
+Accuracy and latency must therefore be measured together.
+
+The comparison proceeds from controlled pairwise evidence to architectural
+context. PIDNet-S and ROD first share the same split, seeds, epoch budget,
+objective, and external resolution. Seven additional systems are then trained
+under the same protocol. This distinguishes a gain over one reference model
+from a gain over the available compact alternatives.
+
+\section{Implemented ROD ViT-S Model}
+
+The ROD implementation contains 29,106,050 parameters. Of these, 22.35 million
+belong to the EfficientSAM ViT-S encoder and are frozen; approximately 6.75
+million belong to the decoder and are trainable. Freezing is enforced in three
+ways: encoder parameters have \texttt{requires\_grad=False}, the encoder is
+kept in evaluation mode even when the outer model enters training mode, and
+its forward pass is executed under \texttt{no\_grad}. Batch-normalisation in
+the decoder remains trainable.
+
+The external input is the same $3\times384\times640$ tensor used by the other
+models. Inside ROD it is bilinearly resized to $1024\times1024$ and normalised
+with ImageNet statistics. A $16\times16$ patch embedding produces a
+$64\times64$ grid of 384-dimensional tokens. The encoder has 12 transformer
+blocks with six attention heads. The learned position embedding was pretrained
+on a $14\times14$ patch grid and is bicubically interpolated to the $64\times64$
+grid.
+
+The released implementation is more specific than the paper's high-level
+description. Rather than summing every transformer output, the decoder uses
+the outputs of blocks 2 through 12. Each selected feature is
+rearranged to channel-first form and projected from 384 to 128 channels by a
+$1\times1$ convolution followed by a $3\times3$ convolution. The projected
+features are fused sequentially through residual convolutional blocks. A
+post-fusion block refines the result and expands it to 256 channels.
+
+Two residual upsampling stages create progressively larger feature maps. The
+decoder then resizes four 256-channel sources---the two upsampled maps, the
+pre-upsample map, and the encoder's final image embedding---to one common
+resolution, concatenates them, and reduces the result to 256 channels. A
+$1\times1$ prediction layer produces two logits. They are finally resized to
+the original $640\times384$ external input size.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/rod_architecture.tex}}
+\caption[Implemented ROD ViT-S pipeline.]{Implemented ROD ViT-S pipeline. The
+pretrained encoder is frozen during CaT training but remains part of every
+inference. The decoder uses intermediate blocks 2--12 and multiscale
+convolutional fusion before the two-class head.}
+\label{fig:rod_architecture}
+\end{figure}
+
+Figure~\ref{fig:rod_architecture} distinguishes the frozen feature extractor
+from the decoder that is updated on CaT.
+
+Full encoder fine-tuning was an available alternative. It was not adopted
+because ROD's defining transfer strategy holds the encoder fixed, the CaT
+training set is small, and fine-tuning would greatly increase training memory
+and the number of task-specific degrees of freedom. The experiment consequently
+does not determine whether end-to-end EfficientSAM adaptation would improve the
+result.
+
+\section{Controlled PIDNet--ROD Comparison}
+
+The matched comparison uses seeds 1337, 2027, and 4242 under both blue-only and
+blue+green label policies. Within a policy, PIDNet-S and ROD receive:
+\begin{itemize}
+  \item the same 1,002/266/544 manifest assignment;
+  \item the same $640\times384$ external tensors and batch size 4;
+  \item 15 epochs and validation-mIoU checkpoint selection;
+  \item AdamW at $2.5\times10^{-4}$ with weight decay $10^{-4}$;
+  \item epoch-level cosine annealing to $10^{-5}$;
+  \item the same deterministic augmentation recipe;
+  \item biased inverse-frequency class weights, CE+Dice, and threshold 0.50.
+\end{itemize}
+
+Matching these decisions prevents a favourable ROD optimiser, seed, or split
+from explaining the comparison. It does not make the two networks identical
+experiments in every respect: ROD uses pretrained frozen encoder weights,
+model-specific normalisation, and an internal $1024\times1024$ transformer input,
+whereas PIDNet-S is randomly initialised and operates directly on the external
+resolution. The result therefore compares the complete model pipelines under
+common task-level controls.
+
+Population mean and population standard deviation are reported:
+\begin{align}
+ \bar m &= \frac{1}{3}\sum_{k=1}^{3}m_k,\\
+ \sigma_{\mathrm{pop}}
+ &=\sqrt{\frac{1}{3}\sum_{k=1}^{3}(m_k-\bar m)^2}.
+\end{align}
+Here, $m_k$ is the value of the reported metric in run $k$; the index
+$k\in\{1,2,3\}$ corresponds to seeds 1337, 2027, and 4242; $\bar m$ is their
+arithmetic mean; and $\sigma_{\mathrm{pop}}$ is their population standard
+deviation. The divisor is three because the equations describe the complete
+declared set of runs rather than estimating variance from a random sample.
+With only three selected seeds, the standard deviation describes observed
+repeatability; it is not a confidence interval over all possible training
+runs.
+
+\section{Reconstructed ROD Training Regime}
+
+The controlled recipe answers a fair architecture-comparison question, but it
+does not use the optimisation choices documented for ROD. A second experiment
+therefore transfers the published settings as closely as the available
+description permits. Table~\ref{tab:rod_recipe_config} contrasts the two
+recipes.
+
+\begin{table}[H]
+\centering
+\caption{Training choices held in the controlled architecture comparison and
+their counterparts in the closest documented ROD recipe.}
+\label{tab:rod_recipe_config}
+\small
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Setting} & \textbf{Controlled comparison} & \textbf{ROD paper approximation} \\
+\midrule
+Objective & weighted cross-entropy + Dice & cross-entropy only \\
+Class weights & inverse frequency with 2.5/0.75 biases & neutral $[1,1]$ \\
+AdamW learning rate & $2.5\times10^{-4}$ & $10^{-3}$ \\
+Weight decay & $10^{-4}$ & 0.01 \\
+Batch size & 4 & 8 (validation 4) \\
+Schedule & epoch-level cosine to $10^{-5}$ & iteration-level polynomial, power 0.9 \\
+Augmentation & common tested recipe enabled & disabled because none is documented \\
+Epoch budget & 15 & 15 retained because publication does not specify one \\
+Threshold & 0.50 & 0.50 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The polynomial scheduler updates after every optimiser step:
+\begin{equation}
+ \eta_t=\eta_0\left(1-\frac{t}{T}\right)^{0.9},
+\end{equation}
+where $\eta_t$ is the learning rate after optimiser step $t$, $\eta_0=10^{-3}$
+is the initial learning rate, $T$ is the total number of optimiser steps in
+15 epochs, and $0.9$ is the fixed polynomial-decay exponent transferred from
+the documented recipe. The step index runs from $t=0$ to $t=T$. The run uses
+bfloat16 mixed precision, the official EfficientSAM ViT-S checkpoint, and a
+frozen encoder. Because the ROD paper does not disclose its epoch budget,
+augmentation policy, or all timing details, this experiment is called the
+\emph{closest documented recipe}. It is evidence about transfer of the
+reported settings to CaT, not an exact reproduction of a published CaT result.
+
+\section{Architecture Set}
+
+After the PIDNet--ROD comparison, seven additional compact systems were added:
+FPN/MobileNetV2, FPN/EfficientNet-B0, U-Net/MobileNetV2,
+U-Net/EfficientNet-B0, SegFormer-B0, DDRNet-23-Slim, and BiSeNetV2. With
+PIDNet-S and ROD this yields nine model systems. Each is trained for the same
+three seeds under both label policies, producing 54 scored runs.
+
+FPN and U-Net are paired with both encoders to separate, within this limited
+factorial subset, encoder and decoder effects. MobileNetV2 provides the lighter
+convolutional encoder; EfficientNet-B0 provides a somewhat higher-capacity
+compact encoder. SegFormer-B0 supplies a hierarchical transformer comparison.
+DDRNet-23-Slim and BiSeNetV2 represent architectures designed specifically for
+real-time segmentation.
+
+Table~\ref{tab:model_implementation_details} records exact parameter counts
+and initialisation. FPN, U-Net, and SegFormer are created through
+\texttt{segmentation-models-pytorch}. DDRNet-23-Slim and BiSeNetV2 are adapted
+from released PyTorch implementations under their licences. Every wrapper
+returns one full-resolution two-class logits tensor so that the common loss and
+metrics see the same interface.
+
+\begin{table}[H]
+\centering
+\caption{Exact model systems, parameter counts, and initialisation in the
+comparative study.}
+\label{tab:model_implementation_details}
+\small
+\begin{tabularx}{\textwidth}{@{}lrlX@{}}
+\toprule
+\textbf{System} & \textbf{Parameters} & \textbf{Initialisation} & \textbf{Implementation note} \\
+\midrule
+PIDNet-S & 7,623,522 & Random & One final head; PAPPM and Light-Bag \\
+ROD ViT-S & 29,106,050 & EfficientSAM ViT-S & 22.35M encoder parameters frozen \\
+FPN/MobileNetV2 & 4,215,554 & ImageNet encoder & SMP FPN with \texttt{mobilenet\_v2} \\
+FPN/EfficientNet-B0 & 5,759,614 & ImageNet encoder & SMP FPN with \texttt{efficientnet-b0} \\
+U-Net/MobileNetV2 & 6,629,090 & ImageNet encoder & SMP U-Net with \texttt{mobilenet\_v2} \\
+U-Net/EfficientNet-B0 & 6,251,614 & ImageNet encoder & SMP U-Net with \texttt{efficientnet-b0} \\
+SegFormer-B0 & 3,714,658 & ImageNet MiT-B0 & SMP SegFormer decoder \\
+DDRNet-23-Slim & 5,694,882 & Random & Two-resolution network; no stable pretrained checkpoint used \\
+BiSeNetV2 & 3,341,202 & Released pretrained backbone & Auxiliary heads disabled for the common loss \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Initialisation is not hidden because it is a major experimental factor on a
+small dataset. PIDNet-S and DDRNet start from random weights; the other seven
+systems use some form of pretraining, although ROD freezes its pretrained
+encoder while the standard ImageNet encoders are trainable. The benchmark
+therefore ranks the implemented recipes. It cannot isolate the causal effect
+of architecture from pretraining without additional within-family
+pretrained-versus-random experiments.
+
+\section{Fixed-Budget Experimental Scope}
+
+For every comparative run, the external input is $640\times384$, the
+batch size is 4, the epoch budget is 15, and the model is selected by validation
+mIoU. AdamW, the learning rate, cosine schedule, common CE+Dice objective,
+policy-specific class weights, augmentation, 0.50 threshold, and three seeds
+are fixed. Blue-only and blue+green experiments write to distinct processed
+roots and output directories so that one policy cannot overwrite the other.
+
+These controls support a restricted statement: under the tested CaT recipe,
+model A has a higher three-seed mean than model B. They do not prove that the
+ranking would remain under model-specific hyperparameter tuning, longer
+training, more seeds, another dataset, or an embedded runtime. In particular,
+the common 15-epoch budget may favour pretrained systems that converge quickly
+and disadvantage randomly initialised models.
+
+The nine-system experiment places the pairwise result in context. ROD's
+advantage over PIDNet-S remains clear, but several pretrained
+encoder--decoder systems achieve higher CaT overlap under the common recipe.
+The results are therefore interpreted as a ranking of complete training
+systems, with small differences read against their observed between-seed
+variation.
+
+\section{Convergence-Aware Blue+Green Follow-Up}
+
+The 15-epoch matrix answers a matched-compute question, but the saved
+validation histories show that it stops while several models are still
+improving. A second experiment therefore repeats all nine architectures and
+three seeds for the principal blue+green policy. It retains the same data,
+external resolution, augmentation, objective, class weighting, optimiser,
+initial learning rate, weight decay, threshold, and seed identities. Only the
+training horizon and stopping rule change.
+
+The follow-up sets 300 epochs as a ceiling, not as a presumed optimum. Cosine
+decay runs from $2.5\times10^{-4}$ to $10^{-5}$ over the first 60 epochs; the
+learning rate then remains at $10^{-5}$. Training cannot stop before epoch 60.
+After that point it stops when validation mIoU has failed to improve by an
+absolute increase of at least $10^{-4}$ on the 0-to-1 mIoU scale for 25
+epochs. The checkpoint writer remains slightly more
+sensitive than the stopping counter: it stores any strict validation-mIoU
+increase, even if the increase is smaller than $10^{-4}$. Consequently, a
+run may save its numerically highest checkpoint near the stopping epoch
+without resetting the early-stopping counter.
+
+This design gives every run time to pass the early learning phase while still
+bounding unnecessary work after the validation curve has flattened. The
+selected epoch is therefore called the \emph{validation-selected checkpoint
+epoch}; it is not described as the universally optimal epoch for that
+architecture. Model-specific objectives and schedules could still change both
+the selected epoch and the final ranking.

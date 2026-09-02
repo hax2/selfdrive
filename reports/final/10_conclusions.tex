@@ -1,0 +1,94 @@
+% ============================================================
+\chapter{Conclusions}
+\label{ch:conclusions}
+% ============================================================
+
+This work set out to determine how far monocular RGB segmentation can support
+vehicle-specific traversability perception under realistic computational
+constraints. CaT provided a suitable test because its labels encode nested
+vehicle capability rather than terrain material alone. Auditing the release
+identified 1,812 valid RGB--label pairs. Their integer maps were converted into
+explicit blue-only and blue+green policies, and the official 544-image test
+partition was kept separate from the deterministic 1,002/266 development
+split.
+
+PIDNet-S provided the first complete answer to the implementation question. The
+selected 7,623,522-parameter model achieves 0.893941 mIoU, with 4.32\% FSR and
+7.04\% FBR. Reconstructing its 133,693,440-pixel confusion matrix on the CPU
+confirms that the saved configuration and checkpoint reproduce the reported
+result. Its development also produced negative findings of practical value:
+the evaluated augmentation, false-safe penalty, and higher-resolution setting
+did not improve the reference configuration. The threshold sweep showed that
+conservativeness can be adjusted, but only by exchanging one disagreement
+direction for the other.
+
+Those disagreements acquire meaning only when their spatial form is inspected.
+The large false-safe field, the almost removed shadowed corridor, and the
+shifted vegetation boundary would lead to different planning responses despite
+all appearing as pixel errors. Percentile sampling shows that such behaviour
+is not represented adequately by a few best and worst images. ALICE sequences
+add evidence about output behaviour under domain shift, but without labels
+they cannot supply an accuracy estimate.
+
+The comparative study demonstrates both the value and the limits of pretrained
+transfer. In the original fixed-15-epoch matrix, ROD raises the matched
+blue+green mean from PIDNet-S's 0.8822 to 0.9138. The convergence-aware
+follow-up shows that neither value represented the end of learning: they rise
+to 0.9195 and 0.9331. Every architecture improves beyond its 15-epoch result,
+and validation selects checkpoints between epochs 50 and 141. The largest
+mean is $0.9423\pm0.0005$ for FPN/EfficientNet-B0, which ranks first in all
+three executed seeds; U-Net/EfficientNet-B0 follows at
+$0.9409\pm0.0004$. This identifies the highest observed mean for the declared suite
+without claiming that one shared schedule is optimal for every architecture.
+
+No single ordering survives the change from accuracy to runtime. PIDNet-S is
+fastest on the common H100 protocol at 270.38 FPS and reaches 106.43 FPS in the
+RTX~5060 TensorRT pipeline. DDRNet-23-Slim leads the compiled Ryzen measurement
+at 36.50 FPS, while the most accurate EfficientNet-B0 models are slower and ROD
+reaches only 0.46 compiled CPU FPS.
+Because training changes parameter values rather than the inference graph,
+these architecture-level timings remain applicable to the convergence-aware
+accuracy points.
+The TensorRT-compiled ROD model reaches 39.38 FPS with negligible mIoU change. These measurements
+show why hardware, precision, runtime, and timing boundaries belong in the
+model specification.
+
+The four research questions of Chapter~\ref{ch:introduction} can now be
+answered directly:
+\begin{enumerate}
+  \item PIDNet-S does provide a reproducible, real-time baseline. Trained only
+  on the official training partition, the retained checkpoint reaches
+  0.893941 mIoU with 4.32\% FSR and 7.04\% FBR, its complete confusion matrix
+  is reproduced exactly over 133,693,440 pixel decisions, and the same saved
+  parameters sustain 21.16 eager CPU frames per second and a 106.43 FPS
+  TensorRT pipeline.
+  \item The tested choices that materially change accuracy and error balance
+  are augmentation (disabling the evaluated recipe improves mIoU by 2.72
+  points), class weighting (neutral weights lower FBR to 6.95\% but raise
+  FSR), and the decision threshold (it exchanges FSR for FBR monotonically).
+  The false-safe loss penalty and the higher-resolution variant degrade the
+  operating point.
+  \item Under matched seeds, frozen-encoder transfer outperforms the compact
+  trained-from-scratch network: ROD leads PIDNet-S by 3.15 percentage points
+  for blue+green and 3.79 for blue-only, with the higher score in all six
+  policy--seed runs. Within the nine-system matrix, both rank below the
+  ImageNet-pretrained encoder--decoder systems, and FPN/EfficientNet-B0 leads
+  the convergence-aware suite at $0.9423\pm0.0005$.
+  \item Accuracy rankings change substantially once deployment conditions
+  enter the comparison. PIDNet-S is fastest under the common H100 protocol at
+  270.38 FPS and reaches 106.43 FPS in the TensorRT pipeline; compiled
+  DDRNet-23-Slim leads the Ryzen measurement at 36.50 FPS; and the most
+  accurate EfficientNet-B0 systems sit in the slower half of the table,
+  confirming that parameter counts and architecture families predict measured
+  speed poorly.
+\end{enumerate}
+
+The resulting masks are useful perception outputs, not certificates of safe
+motion. A single RGB image cannot reveal every property that determines vehicle
+support, and the available CaT release contains neither repeated annotations
+nor agreement measurements for ambiguous capability boundaries. The study also
+does not test temporal consistency, planning, vehicle dynamics, or the complete
+embedded stack. Progress beyond the present results therefore depends less on
+adding another architecture row than on collecting stronger target evidence,
+labelling cross-domain sequences, modelling uncertainty, and evaluating the
+perception--planning--vehicle loop as a whole.

@@ -1,0 +1,450 @@
+% ============================================================
+\chapter{PIDNet-S Model Development}
+\label{ch:pidnet}
+% ============================================================
+
+\section{Selection Rationale}
+
+The initial goal was to establish a model that could be trained, evaluated,
+and plausibly deployed without requiring a high-end GPU. PIDNet-S was selected
+because its architecture explicitly separates semantic context, spatial
+detail, and boundary information while remaining compact
+~\cite{xu2023pidnet}. This matched the main visual structure of CaT: large
+connected trail regions require context, small rocks and vegetation edges
+require detail, and capability boundaries are safety-relevant.
+
+A conventional encoder--decoder such as U-Net offered a simpler alternative,
+whereas a large transformer offered greater representation capacity. Neither
+addressed the initial latency constraint as directly. Starting with a
+purpose-built real-time network made it possible to develop the complete
+pipeline around a compact deployment candidate. The comparative experiments
+in Chapter~\ref{ch:rod_extension} subsequently test whether this choice
+sacrifices accuracy relative to pretrained encoders and other decoder
+families.
+
+The model is trained from scratch. No Cityscapes or ImageNet checkpoint is
+loaded. This keeps the baseline self-contained, but it also means later
+comparisons with pretrained encoders measure complete model recipes rather
+than architecture alone.
+
+\section{Implemented Architecture}
+
+PIDNet's control-system terminology is an analogy. The network does not
+calculate a proportional--integral--derivative control command. Its three
+branches instead divide the segmentation problem:
+\begin{itemize}
+  \item the \textbf{P branch} preserves local appearance and spatial
+  resolution;
+  \item the \textbf{I branch} accumulates semantic context on progressively
+  smaller feature grids;
+  \item the \textbf{D branch} retains high-frequency differences that help
+  locate region boundaries.
+\end{itemize}
+
+After a shared stem, the P and D paths remain at one eighth of the input
+resolution. The I path reaches one sixteenth, one thirty-second, and one
+sixty-fourth resolution. PagFM modules compare P- and I-path features and
+selectively inject semantic context into the detail path. Difference features
+from the semantic stages update the D branch. PAPPM pools context at multiple
+scales at the end of the I path. Light-Bag then uses boundary attention from
+the D branch to fuse the spatial and semantic representations
+~\cite{xu2023pidnet}.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/pidnet_architecture.tex}}
+\caption[Conceptual PIDNet-S three-branch architecture.]{Conceptual PIDNet-S
+flow. The P branch retains spatial detail, the I branch extracts context, and
+the D branch supplies boundary cues. PagFM, PAPPM, and Light-Bag exchange and
+fuse those representations before the segmentation head. Original schematic
+drawn for this thesis and adapted from Xu et al.~\cite{xu2023pidnet}.}
+\label{fig:final_pidnet_architecture}
+\end{figure}
+
+Figure~\ref{fig:final_pidnet_architecture} shows the three processing branches
+and the points at which they exchange and fuse features.
+
+The implementation uses the PIDNet-S schedule $(m,n,C)=(2,3,32)$, with 96
+pyramid-pooling channels and 128 head channels. $C$ is the base width; $m$ and
+$n$ control residual-stage repetition. Table~\ref{tab:pidnet_tensor_shapes}
+records the principal shapes for the $640\times384$ input. Listing these
+shapes is useful both for implementation verification and for understanding
+where computation is spent.
+
+\begin{table}[H]
+\centering
+\caption{Principal implemented PIDNet-S feature shapes at $640\times384$.}
+\label{tab:pidnet_tensor_shapes}
+\small
+\begin{tabularx}{\textwidth}{@{}lclX@{}}
+\toprule
+\textbf{Component} & \textbf{Spatial size} & \textbf{Channels} & \textbf{Purpose} \\
+\midrule
+Shared stem output & $80\times48$ ($1/8$) & 64 & Common input to the three paths \\
+P branch & $80\times48$ ($1/8$) & $64\rightarrow128$ & Preserve detail; receive two PagFM updates \\
+I stage 3 & $40\times24$ ($1/16$) & 128 & First deeper semantic stage \\
+I stage 4 & $20\times12$ ($1/32$) & 256 & Broader contextual representation \\
+I stage 5 & $10\times6$ ($1/64$) & 512 & Deepest semantic features before PAPPM \\
+PAPPM output & $80\times48$ ($1/8$) & 128 & Multi-scale context returned for fusion \\
+D branch & $80\times48$ ($1/8$) & $32\rightarrow64\rightarrow128$ & Boundary-sensitive representation \\
+Light-Bag output & $80\times48$ ($1/8$) & 128 & Boundary-guided P/I fusion \\
+Binary head & $80\times48$ ($1/8$) & 2 & Native untraversable/traversable logits \\
+Wrapper output & $640\times384$ & 2 & Bilinearly upsampled full-resolution logits \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Auxiliary P- and D-head outputs are disabled, so the network exposes one final
+two-class logits tensor and has 7,623,522 trainable parameters. In the vendored
+PIDNet implementation this architectural choice is named
+\texttt{augment=False}. It is unrelated to the data-loader
+\texttt{augment} flag. Both happen to be false for the retained checkpoint, but
+they control different operations.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/pidnet_binary_pipeline.tex}}
+\caption[Implemented PIDNet-S binary pipeline.]{Implemented PIDNet-S binary
+pipeline. The one-eighth-resolution logits are returned to the input
+resolution before the training loss or deployment decision is calculated.
+The lower dashed path is active only during training. Original schematic drawn
+for this thesis; the core network follows Xu et al.~\cite{xu2023pidnet}.}
+\label{fig:final_pidnet_binary_pipeline}
+\end{figure}
+
+Figure~\ref{fig:final_pidnet_binary_pipeline} then connects that core network
+to the two-class training and thresholding operations implemented here.
+
+For logits $z_{i0}$ and $z_{i1}$ at pixel $i$, the traversable probability is
+\begin{equation}
+ p_i =
+ \frac{\exp(z_{i1})}
+ {\exp(z_{i0})+\exp(z_{i1})}.
+ \label{eq:pidnet_softmax}
+\end{equation}
+Here, $i$ indexes a pixel, $z_{i0}$ and $z_{i1}$ are its untraversable and
+traversable logits, $\exp(\cdot)$ is the exponential function, and $p_i$ is
+the normalised probability assigned to the traversable class. The other
+softmax output, $1-p_i$, is the untraversable probability.
+The reference binary prediction is $\hat y_i=\mathbb{1}[p_i\geq0.50]$.
+The constant 0.50 is the fixed probability threshold, and equality is assigned
+to the traversable class. No morphological cleanup, connected-component filtering, or temporal smoothing
+is applied. The output therefore represents the model and threshold directly.
+
+\section{Objective, Optimiser, and Checkpoint Selection}
+
+The main PIDNet objective combines weighted cross-entropy and soft Dice loss.
+For classes $c\in\{0,1\}$ and their corresponding weights $w_c$, the
+cross-entropy term is
+\begin{equation}
+ \mathcal{L}_{\mathrm{WCE}}
+ =-\frac{1}{N}\sum_{i=1}^{N}w_{y_i}\log p(y_i\mid x).
+\end{equation}
+In this expression, $\mathcal{L}_{\mathrm{WCE}}$ is weighted cross-entropy,
+$N$ is the number of pixels included in the loss, $i$ indexes those pixels,
+$y_i\in\{0,1\}$ is the target class, $w_{y_i}$ is the weight of that class,
+and $p(y_i\mid x)$ is the probability assigned to the correct class for input
+$x$. The natural logarithm is denoted by $\log$.
+The implemented Dice term operates on the traversable probability and binary
+target. For one image,
+\begin{equation}
+ \mathcal{L}_{\mathrm{Dice}}
+ =1-\frac{2\sum_i p_i y_i+\epsilon}
+ {\sum_i p_i+\sum_i y_i+\epsilon},
+ \label{eq:pidnet_dice}
+\end{equation}
+Here, $p_i$ is the traversable probability from
+Equation~\ref{eq:pidnet_softmax}, $y_i$ is one for a traversable target and
+zero otherwise, each sum covers the pixels of one image, and
+$\epsilon=10^{-6}$ prevents division by zero. The resulting
+$\mathcal{L}_{\mathrm{Dice}}$ is zero for perfect overlap and approaches one
+as overlap is lost. The constant factor 2 is the conventional Dice
+normalisation: when prediction and target coincide, the doubled intersection
+equals the sum of their two sizes. The batch mean is used. Dice complements per-pixel
+cross-entropy with a
+region-overlap signal~\cite{milletari2016vnet}. The default total is
+\begin{equation}
+ \mathcal{L}=\mathcal{L}_{\mathrm{WCE}}+\mathcal{L}_{\mathrm{Dice}}.
+\end{equation}
+Thus, $\mathcal{L}$ is the scalar objective differentiated during the default
+training run, and both component losses enter with unit coefficient.
+
+Class weights are computed from inverse training-pixel frequency. Before
+normalisation, the untraversable weight is multiplied by 2.5 and the
+traversable weight by 0.75. The two final weights are rescaled to sum to two.
+For the fixed split they are $[1.2606075,\,0.7393925]$. The intent was to
+discourage false-safe predictions by making errors on the blocked class more
+expensive. Because loss weighting changes optimisation rather than directly
+optimising FSR, its actual effect must be established experimentally.
+
+An optional false-safe probability penalty was also implemented:
+\begin{equation}
+ \mathcal{L}_{\mathrm{FS}}
+ =\frac{\sum_i p_i\,\mathbb{1}[y_i=0]}
+ {\sum_i\mathbb{1}[y_i=0]}.
+ \label{eq:false_safe_penalty}
+\end{equation}
+$i$ indexes the same $N$ loss pixels as above, and both sums run over those
+pixels. The indicator $\mathbb{1}[y_i=0]$ selects annotated untraversable pixels, so
+the numerator sums their predicted traversable probabilities and the
+denominator counts them. Consequently, $\mathcal{L}_{\mathrm{FS}}$ is the
+mean traversable probability over the blocked class. With non-negative
+coefficient $\lambda_{\mathrm{FS}}$, the tested objective becomes
+$\mathcal{L}+\lambda_{\mathrm{FS}}\mathcal{L}_{\mathrm{FS}}$; the ablation uses
+$\lambda_{\mathrm{FS}}=0.35$.
+This term pushes traversable probability down over all annotated negative
+pixels. It was a plausible alternative to class weighting, but the controlled
+experiment later showed that the tested coefficient did not improve the
+desired rate.
+
+The retained training settings are given in
+Table~\ref{tab:frozen_pidnet_training}. AdamW supplies decoupled weight decay
+~\cite{loshchilov2019adamw}. Cosine annealing reduces the learning rate from
+$2.5\times10^{-4}$ toward $10^{-5}$ over 15 epochs. Bfloat16 automatic mixed
+precision is used on CUDA when supported, while model parameters and optimiser
+state remain stored in FP32.
+
+\begin{table}[H]
+\centering
+\caption{Training configuration of the reference PIDNet-S model.}
+\label{tab:frozen_pidnet_training}
+\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Setting} & \textbf{Implemented value and function} \\
+\midrule
+Initialisation & Random PIDNet-S weights; no pretrained checkpoint \\
+Input and batch & $640\times384$ RGB; batch size 4 \\
+Epochs & 15 complete passes over 1,002 training images \\
+Optimiser & AdamW, initial learning rate $2.5\times10^{-4}$, weight decay $10^{-4}$ \\
+Scheduler & Cosine annealing by epoch to minimum learning rate $10^{-5}$ \\
+Objective & weighted cross-entropy + traversable soft Dice \\
+Class weights & $[1.2606075,\,0.7393925]$ for untraversable/traversable \\
+Data augmentation & disabled \\
+Mixed precision & bfloat16 autocast on supported CUDA hardware \\
+Seed and workers & seed 1337; zero loader worker processes in the portable config \\
+Selection & save the epoch with maximum validation mIoU \\
+Decision threshold & 0.50, fixed before official test evaluation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+After each epoch, all 266 validation images are evaluated without augmentation
+or shuffling. A new \texttt{best.pt} is written only if validation mIoU
+increases. The retained checkpoint comes from epoch 15, where validation mIoU
+is 0.88834. This rule prevents the 544-image test score from participating in
+model selection.
+
+\section{Exploratory Development}
+
+The earliest experiments were iterative engineering runs. They are useful
+because they show how the system changed, but they are not single-factor
+ablations: several settings change together. Table
+~\ref{tab:pidnet_iterative_development} lists both configuration and test
+outcome so that the later controlled study is not confused with this
+exploration.
+
+\begin{table}[H]
+\centering
+\caption{Exploratory PIDNet-S development runs. Values are test results; the
+runs are confounded and do not estimate individual causal effects.}
+\label{tab:pidnet_iterative_development}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{@{}p{0.17\textwidth}Xlrrrr@{}}
+\toprule
+\textbf{Run} & \textbf{Main change(s)} & \textbf{Policy} & \textbf{mIoU} & \textbf{FSR} & \textbf{FBR} & \textbf{Thr.} \\
+\midrule
+\texttt{default} & Initial pipeline, five epochs & Blue & 0.8374 & 7.24\% & 7.92\% & 0.50 \\
+\texttt{conservative} & 15 epochs and biased class weights & Blue & 0.8735 & 3.89\% & 9.67\% & 0.50 \\
+\texttt{third\_run} & $720\times448$, false-safe term, 18 epochs & Blue & 0.8219 & 2.32\% & 21.42\% & 0.58 \\
+\texttt{fourth\_run} & Remove false-safe term; retain higher resolution & Blue & 0.8544 & 4.08\% & 12.30\% & 0.53 \\
+\path{blue_green_best} & Change policy; $640\times384$, 15 epochs & Blue+green & 0.8780 & 4.87\% & 8.34\% & 0.50 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The five-epoch run established that the complete pipeline functioned but left
+clear room for learning. Extending training and biasing the loss reduced FSR
+while increasing FBR, suggesting a more conservative operating point. The
+third run combined higher resolution, an explicit false-safe penalty, and a
+0.58 threshold. Its low FSR was accompanied by a very high 21.42\% FBR and
+lower mIoU. Because three factors changed, it was impossible to identify the
+cause. The fourth run removed the explicit penalty but retained the higher
+resolution and a threshold above 0.50; it recovered part of the accuracy but
+remained overly conservative.
+
+The blue+green run changed the target vehicle and returned to
+$640\times384$. Its result motivated using blue+green as the main operational
+policy, but it does not prove that merging green causes an accuracy
+improvement: target definition, training history, and class balance differ
+from the earlier blue-only runs. This interpretive constraint is retained
+throughout the thesis.
+
+The exploratory phase produced two lessons. First, a low FSR can be obtained
+by simply blocking more pixels, so FSR must always be read with FBR. Second,
+multi-factor iteration can guide engineering but cannot support a claim about
+which setting caused the change. Those lessons led to the controlled ablation.
+
+\section{Controlled Configuration Ablation}
+
+The controlled reference uses the blue+green policy, PIDNet-S,
+$640\times384$, batch size 4, 15 epochs, seed 1337, augmentation enabled,
+biased class weights, CE+Dice, and threshold 0.50. Four variants each change
+one factor:
+\begin{enumerate}
+  \item add the false-safe penalty with weight 0.35;
+  \item disable the complete tested augmentation recipe;
+  \item increase input to $720\times448$ and reduce batch size to 2 for memory;
+  \item replace the computed class weights with neutral $[1,1]$.
+\end{enumerate}
+
+The alternatives were chosen to answer practical questions arising from the
+exploratory work. The penalty tests whether FSR can be reduced inside the loss
+rather than at the threshold. Disabling augmentation tests whether the
+synthetic appearance variation matches CaT. Higher resolution tests whether
+thin boundaries are limited by input detail. Neutral weights test whether the
+manually biased imbalance correction is necessary.
+
+\begin{table}[H]
+\centering
+\caption{Single-seed controlled PIDNet-S ablation. Bold identifies the
+configuration retained for subsequent analysis. Lower FSR and FBR are
+preferable.}
+\label{tab:pidnet_controlled_ablation}
+\small
+\begin{tabularx}{\textwidth}{@{}lXrrr@{}}
+\toprule
+\textbf{Run} & \textbf{One changed factor} & \textbf{mIoU} & \textbf{FSR} & \textbf{FBR} \\
+\midrule
+Reference & None & 0.8667 & 5.89\% & 8.48\% \\
+False-safe loss & Penalty coefficient 0.35 & 0.8177 & 7.45\% & 12.95\% \\
+\textbf{Augmentation off} & \textbf{Disable tested flip and photometric recipe} & \textbf{0.8939} & \textbf{4.32\%} & 7.04\% \\
+Higher resolution & $720\times448$, batch size 2 & 0.8632 & 5.62\% & 9.28\% \\
+Neutral weights & Class weights $[1,1]$ & 0.8848 & 5.28\% & \textbf{6.95\%} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tab:pidnet_controlled_ablation} supplies the test result for each
+one-factor change and marks the retained configuration.
+
+Disabling the tested augmentation improves mIoU by 2.72 percentage points and
+reduces both asymmetric error rates relative to the reference. The result
+suggests that the colour, blur, and sharpness variations used here do not
+represent helpful additional CaT variation. It cannot establish that a
+different geometric, weather, or sensor-specific augmentation would also be
+harmful.
+
+The false-safe penalty is discarded because it worsens mIoU, FSR, and FBR.
+Its gradient pushes traversable probability downward on every negative pixel,
+but that global pressure does not guarantee a better thresholded operating
+point after optimisation. Higher resolution is also discarded: it increases
+pixel computation by 31.25\%, halves the batch size, and does not improve any
+headline metric. Neutral weights produce the lowest FBR but a higher FSR and
+lower mIoU than augmentation-off. The augmentation-off checkpoint is selected
+by validation mIoU. Settings from different rows are not combined after
+examining their test results.
+
+Because each row has one seed, the differences provide engineering evidence
+rather than estimates of population effects. The separate three-seed
+architecture experiment measures repeatability for complete model recipes; it
+does not change the statistical scope of this ablation.
+
+\section{Threshold as an Operating Control}
+
+A threshold sweep was conducted on the earlier
+\texttt{blue\_green\_best} checkpoint from 0.35 to 0.65. It was not used to
+alter the reference checkpoint's 0.50 threshold. Table
+~\ref{tab:pidnet_threshold_sweep} shows the expected monotonic trade:
+increasing the threshold reduces false-safe openings and increases false
+blocks.
+
+\begin{table}[H]
+\centering
+\caption{Post-hoc threshold sweep on the earlier
+\texttt{blue\_green\_best} checkpoint.}
+\label{tab:pidnet_threshold_sweep}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+\textbf{Threshold} & \textbf{mIoU} & \textbf{FSR} & \textbf{FBR} \\
+\midrule
+0.35 & 0.8774 & 6.14\% & 6.78\% \\
+0.40 & 0.8781 & 5.68\% & 7.29\% \\
+0.45 & 0.8782 & 5.26\% & 7.81\% \\
+0.50 & 0.8780 & 4.87\% & 8.34\% \\
+0.55 & 0.8774 & 4.50\% & 8.89\% \\
+0.60 & 0.8763 & 4.15\% & 9.49\% \\
+0.65 & 0.8747 & 3.80\% & 10.14\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.84\textwidth,
+  height=6.5cm,
+  xlabel={Traversable probability threshold},
+  ylabel={Pixel error rate},
+  ymin=0.03,ymax=0.105,
+  xmin=0.34,xmax=0.66,
+  xtick={0.35,0.40,0.45,0.50,0.55,0.60,0.65},
+  xticklabels={0.35,0.40,0.45,0.50,0.55,0.60,0.65},
+  ytick={0.04,0.06,0.08,0.10},
+  yticklabels={4\%,6\%,8\%,10\%},
+  grid=both,
+  grid style={line},
+  legend style={
+    at={(0.5,1.04)},
+    anchor=south,
+    legend columns=2,
+    fill=white,
+    draw=black!35
+  }
+]
+\addplot[color=safety,mark=*,thick] coordinates {
+  (0.35,0.0614) (0.40,0.0568) (0.45,0.0526) (0.50,0.0487)
+  (0.55,0.0450) (0.60,0.0415) (0.65,0.0380)
+};
+\addlegendentry{FSR}
+\addplot[color=block,mark=square*,thick] coordinates {
+  (0.35,0.0678) (0.40,0.0729) (0.45,0.0781) (0.50,0.0834)
+  (0.55,0.0889) (0.60,0.0949) (0.65,0.1014)
+};
+\addlegendentry{FBR}
+\end{axis}
+\end{tikzpicture}
+\caption{False-safe and false-block trade-off under post-hoc threshold
+variation. A threshold is an operating choice; it does not improve both error
+directions simultaneously.}
+\label{fig:pidnet_threshold_plot}
+\end{figure}
+
+Figure~\ref{fig:pidnet_threshold_plot} makes the opposing movement of FSR and
+FBR across the tested thresholds directly visible.
+
+The maximum observed mIoU occurs at 0.45, but the difference from 0.50 is only
+0.0002. More importantly, the sweep uses the test set for characterisation.
+Choosing 0.45 from this table and reporting it as an untouched test result
+would leak test information into model selection. The final 0.50 operating
+point is retained. A deployed threshold should instead be selected on
+validation data using an application-defined error cost or risk constraint, then
+evaluated once on an independent test set.
+
+\section{Reference Checkpoint}
+
+All subsequent PIDNet-S error analysis, reproduction, CPU, and TensorRT measurements
+use the following checkpoint:
+\begin{center}
+\small\path{outputs/controlled_ablation_augment_off/checkpoints/best.pt}
+\end{center}
+Keeping the parameters fixed preserves a direct link between the configuration,
+manifest, decision threshold, pixel metrics, qualitative panels, and exported
+engines. The checkpoint is the strongest PIDNet-S configuration observed in
+the controlled study, not an estimate of the architecture's maximum possible
+performance. Other augmentation families, pretrained weights, boundary
+supervision, longer schedules, or different seed sets could produce a
+different result. Its value is that it identifies one model whose behaviour
+can be reproduced across evaluation and deployment settings.

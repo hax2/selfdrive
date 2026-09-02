@@ -1,0 +1,328 @@
+% Build from reports/: latexmk -pdf -interaction=nonstopmode final_thesis.tex
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[vmargin=2.5cm,hmargin=3cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{txfonts}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{enumitem}
+\usepackage{needspace}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{seqsplit}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+
+\definecolor{azulUC3M}{RGB}{0,0,102}
+\definecolor{safety}{HTML}{A8322D}
+\definecolor{block}{HTML}{255F85}
+\definecolor{good}{HTML}{2D7D46}
+\definecolor{warn}{HTML}{D88324}
+\definecolor{line}{HTML}{D7DED8}
+\definecolor{softblue}{HTML}{E8F0F8}
+\definecolor{softgreen}{HTML}{E8F3EB}
+\definecolor{softorange}{HTML}{FAEEDD}
+\definecolor{softpurple}{HTML}{EEE8F4}
+\definecolor{pidP}{HTML}{2F6DB0}
+\definecolor{pidI}{HTML}{D88324}
+\definecolor{pidD}{HTML}{7A4FA3}
+\definecolor{pidFuse}{HTML}{2D7D46}
+
+\newcommand{\MasterDegree}{Master in Connected Industry 4.0}
+\newcommand{\ThesisAuthor}{Samer Awad}
+\newcommand{\ThesisTutor}{Alberto Jiménez Hormeño}
+\newcommand{\AcademicYear}{2025--2026}
+\newcommand{\SubmissionPlaceDate}{Madrid, July 2026}
+\newcommand{\ThesisTitle}{Learning Binary Traversability from Monocular RGB for Off-Road Navigation}
+\newcommand{\FSR}{\mathrm{FSR}}
+\newcommand{\FBR}{\mathrm{FBR}}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue,
+  pdftitle={\ThesisTitle},
+  pdfauthor={\ThesisAuthor},
+  pdfsubject={Master Thesis, Universidad Carlos III de Madrid},
+  pdfkeywords={traversability, semantic segmentation, PIDNet, ROD, CaT, asymmetric error metrics, real-time inference, reproducibility}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\thepage}
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \rfoot{\thepage}
+}
+
+\titleformat{\chapter}[block]{\large\bfseries\filcenter}{\thechapter.}{5pt}{}
+\titlespacing{\chapter}{0pt}{0pt}{*3}
+\titleformat{\section}{\bfseries}{\thesection.}{5pt}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{5pt}{}
+\titlecontents{chapter}[0pt]{}
+  {\contentsmargin{0pt}\thecontentslabel.\enspace}
+  {\contentsmargin{0pt}}
+  {\titlerule*[.7pc]{.}\contentspage}
+\titlecontents{section}[5pt]{}
+  {\contentsmargin{0pt}\thecontentslabel.\enspace}
+  {\contentsmargin{0pt}}
+  {\titlerule*[.7pc]{.}\contentspage}
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+\setlength{\parskip}{6pt}
+\setlength{\emergencystretch}{1.5em}
+\renewcommand{\baselinestretch}{1.15}
+\setlist{itemsep=2pt,topsep=3pt}
+
+\captionsetup[table]{
+  name=TABLE,
+  justification=centering,
+  labelsep=period,
+  labelfont=small,
+  font=small
+}
+\captionsetup[figure]{
+  name=Fig.,
+  format=hang,
+  singlelinecheck=off,
+  labelsep=period,
+  labelfont=small,
+  font=small
+}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  rulecolor=\color{line},
+  showstringspaces=false
+}
+
+\begin{document}
+\hypersetup{pageanchor=false}
+\pagenumbering{roman}
+
+\begin{titlepage}
+  \begin{sffamily}
+  \color{azulUC3M}
+  \begin{center}
+    \makebox[\textwidth][c]{%
+      \includegraphics[width=16cm]{figures/uc3m_logo.png}%
+    }
+
+    \vspace{1cm}
+    {\Large
+      \MasterDegree\\
+      \AcademicYear\\[1cm]
+      \textsl{Master Thesis}
+    }
+
+    \bigskip
+    \begin{minipage}{0.96\textwidth}
+      \centering
+      {\Huge ``\ThesisTitle''\par}
+    \end{minipage}
+
+    \vspace{0.5cm}
+    \rule{10.5cm}{0.1mm}\\[0.9cm]
+    {\LARGE \ThesisAuthor}\\[1cm]
+    {\Large
+      Tutor\\
+      \ThesisTutor\\[0.18cm]
+      \SubmissionPlaceDate
+    }
+  \end{center}
+
+  \vfill
+  \end{sffamily}
+\end{titlepage}
+
+% Blank courtesy verso required by the UC3M library template.
+\setcounter{page}{2}
+\clearpage
+\thispagestyle{empty}
+\null
+\clearpage
+
+% Optional author-specific front matter, as seen in the reference thesis:
+% \clearpage
+% \chapter*{Acknowledgements}
+% \addcontentsline{toc}{chapter}{Acknowledgements}
+% Replace this comment with the author's own acknowledgement text.
+
+\hypersetup{pageanchor=true}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+Traversability perception estimates which parts of a visible scene a specific
+vehicle can negotiate. This thesis formulates that task as binary semantic
+segmentation from one RGB image using the vehicle-capability annotations of
+the CaT dataset. The released labels are converted into two documented
+policies. The principal blue+green policy treats the sedan and pickup regions
+as traversable while retaining background and off-road-only terrain as
+blocked. A deterministic split of the official training partition provides
+validation data, and all 544 released test images are reserved for evaluation.
+
+PIDNet-S is first used to establish the data and evaluation pipeline and to
+test loss design, augmentation, class weighting, resolution, and decision
+threshold. Its separately retained reference checkpoint achieves 0.8939 mean
+Intersection over Union (mIoU), a 4.32\% False-Safe Rate (FSR), and a 7.04\%
+False-Block Rate (FBR). A separate CPU evaluation reproduces all four confusion
+counts over 133,693,440 pixel decisions. The model processes 21.16 frames per
+second (FPS) on an AMD Ryzen~5~5500 when the model forward pass and prediction
+are timed, and 106.43 FPS after TensorRT conversion on an NVIDIA RTX~5060 when
+preprocessing, inference, and mask return are timed.
+
+The architecture study compares PIDNet-S with frozen-encoder ROD and seven
+other compact systems. An initial 15-epoch matrix supplies a matched
+fixed-budget comparison under blue-only and blue+green policies. Because the
+validation histories were still improving, a three-seed blue+green follow-up
+uses a 300-epoch ceiling, 60-epoch cosine decay, and validation-based early
+stopping. All nine models achieve higher mean test mIoU than under the fixed
+15-epoch budget. FPN/EfficientNet-B0 obtains the largest mean
+test mIoU ($0.9423\pm0.0005$), followed by U-Net/EfficientNet-B0
+($0.9409\pm0.0004$); validation selects checkpoints between epochs 50 and 141.
+Runtime rankings differ: PIDNet-S leads the H100 measurements, while
+DDRNet-23-Slim leads the compiled CPU comparison.
+
+Examples selected at several error percentiles, together with cases ranked by
+false-safe, false-block, and boundary error, connect the aggregate scores to
+the spatial form of the mistakes. Unlabelled ALICE sequences illustrate
+cross-domain output behaviour but provide no accuracy measurement. These
+findings support real-time pixel-level perception, but they do not certify that
+vehicle motion is safe: a single RGB image hides relevant physical properties,
+capability boundaries may be uncertain, and neither planning nor vehicle-level
+behaviour is evaluated.
+
+\noindent\textbf{Keywords:} traversability estimation; semantic segmentation;
+PIDNet; ROD; CaT dataset; safety-oriented evaluation; real-time inference;
+TensorRT; reproducibility.
+
+\clearpage
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+
+La percepción de transitabilidad estima qué regiones visibles puede recorrer
+un vehículo determinado. Esta tesis formula la tarea como segmentación
+semántica binaria de una imagen RGB mediante las anotaciones de capacidad
+vehicular de CaT. Las etiquetas se convierten en dos políticas explícitas. La
+política principal azul+verde considera transitables las regiones anotadas como
+aptas para turismos o camionetas, y mantiene como no transitables el fondo y
+las regiones reservadas a vehículos todoterreno. Una división determinista de
+la partición oficial de entrenamiento proporciona los datos de validación,
+mientras que las 544 imágenes oficiales de prueba se reservan para la
+evaluación.
+
+PIDNet-S establece el flujo experimental y permite estudiar la pérdida, el
+aumento de datos, la ponderación, la resolución y el umbral. El modelo
+seleccionado alcanza un mIoU de 0,8939, una
+tasa de falso seguro del 4,32\% y una tasa de falso bloqueo del 7,04\%. Una
+evaluación independiente en CPU reproduce los cuatro recuentos de la matriz de
+confusión sobre 133.693.440 decisiones de píxel. El modelo procesa 21,16
+imágenes por segundo en un AMD Ryzen~5~5500 cuando se cronometran el pase hacia
+delante y la predicción, y 106,43 imágenes por segundo tras la conversión a
+TensorRT en una NVIDIA RTX~5060 cuando se cronometran el preprocesamiento, la
+inferencia y la devolución de la máscara.
+
+El estudio compara PIDNet-S con ROD, cuyo codificador permanece congelado, y
+otros siete sistemas compactos. Una primera matriz de 15 épocas proporciona
+un presupuesto idéntico para las políticas azul y azul+verde. Como la
+validación seguía mejorando, un segundo experimento azul+verde con tres
+semillas utiliza un máximo de 300 épocas, decaimiento cosenoidal durante 60 épocas
+y parada temprana. Los nueve modelos obtienen un mIoU medio de prueba superior
+al alcanzado con el presupuesto fijo de 15 épocas. FPN/EfficientNet-B0 obtiene
+el mayor mIoU medio ($0{,}9423\pm0{,}0005$), seguido de U-Net/EfficientNet-B0
+($0{,}9409\pm0{,}0004$). Los puntos de control seleccionados mediante
+validación corresponden a épocas comprendidas entre 50 y 141. En cuanto a la
+velocidad, PIDNet-S alcanza el mayor rendimiento en la H100 y
+DDRNet-23-Slim encabeza la comparación compilada en CPU.
+
+Los ejemplos seleccionados por percentiles de error y los casos ordenados por
+falso seguro, falso bloqueo y error de frontera relacionan las métricas
+agregadas con la forma espacial de los errores. Las secuencias de ALICE, al no
+estar anotadas, solo ilustran el comportamiento del modelo fuera del dominio de
+CaT. Los resultados muestran una percepción por píxel útil en tiempo real, pero
+no certifican que el movimiento del vehículo sea seguro.
+
+\noindent\textbf{Palabras clave:} transitabilidad; segmentación semántica;
+PIDNet; ROD; CaT; métricas de error asimétricas; inferencia en tiempo real;
+reproducibilidad.
+
+\clearpage
+\chapter*{Notation and Acronyms}
+\addcontentsline{toc}{chapter}{Notation and Acronyms}
+\begin{longtable}{@{}p{0.18\textwidth}p{0.76\textwidth}@{}}
+\toprule
+\textbf{Term} & \textbf{Meaning in this thesis} \\
+\midrule
+ALICE & Unlabelled external mobile-robot sequences used only for qualitative transfer. \\
+CaT & CAVS Traversability dataset. \\
+CNN & Convolutional neural network. \\
+CPU / GPU & Central processing unit / graphics processing unit. \\
+FBR & False-Block Rate: fraction of truly traversable pixels predicted blocked. \\
+FPN & Feature Pyramid Network. \\
+FP, FN, TP, TN & False positive, false negative, true positive, and true negative, with traversable defined as positive. \\
+FPS & Frames per second, always tied to a declared timing scope. \\
+FSR & False-Safe Rate: fraction of truly untraversable pixels predicted traversable. \\
+H100 MIG & The NVIDIA H100 NVL 3g.47GB multi-instance GPU partition used for common server timing. \\
+IoU / mIoU & Intersection over Union for one class / unweighted mean across the two binary classes. \\
+PIDNet-S & Small PIDNet variant used as the main lightweight baseline. \\
+ROD & RGB-Only Fast and Efficient Off-road Freespace Detection model adapted to CaT. \\
+RGB & Red, green, and blue image channels. \\
+SMP & \texttt{segmentation-models-pytorch}, used for FPN, U-Net, and SegFormer implementations. \\
+TensorRT & NVIDIA inference compiler/runtime used for the optimised RTX~5060 deployment measurements. \\
+ViT-S & Small Vision Transformer encoder variant. \\
+\bottomrule
+\end{longtable}
+
+\clearpage
+\tableofcontents
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+\clearpage
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+\clearpage
+\pagenumbering{arabic}
+
+\input{final/01_introduction}
+\input{final/02_background}
+\input{final/03_cat_pipeline}
+\input{final/04_pidnet_development}
+\input{final/05_rod_extension}
+\input{final/06_protocols}
+\input{final/07_results}
+\input{final/08_hardware}
+\input{final/09_discussion}
+\input{final/10_conclusions}
+\input{final/bibliography}
+\input{final/appendices}
+
+\end{document}
