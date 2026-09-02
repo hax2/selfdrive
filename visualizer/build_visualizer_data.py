@@ -155,7 +155,7 @@ def main():
             "fbr_mean": agg["false_block_rate"]["mean"],
             "fbr_std": agg["false_block_rate"]["std_population"],
             "gain_pp": agg.get("mIoU_gain_percentage_points", 0.0),
-            "fixed_15_mIoU": agg.get("fixed_15_epoch_mIoU", 0.0),
+            "fixed_15_mIoU": agg.get("fixed_15_epoch_mIoU", {}).get("mean", 0.0) if isinstance(agg.get("fixed_15_epoch_mIoU"), dict) else (agg.get("fixed_15_epoch_mIoU") if isinstance(agg.get("fixed_15_epoch_mIoU"), (int, float)) else 0.0),
             "runs": run_items
         })
     # Sort by mIoU descending

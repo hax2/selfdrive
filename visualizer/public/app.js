@@ -769,9 +769,12 @@
       const y = margin.top + idx * (innerH / models.length);
       const barW = (m.gain_pp / maxGain) * innerW;
       const color = MODEL_COLORS[m.model] || '#00e5ff';
+      const fixedVal = (typeof m.fixed_15_mIoU === 'object' && m.fixed_15_mIoU !== null)
+        ? (m.fixed_15_mIoU.mean || 0)
+        : (Number(m.fixed_15_mIoU) || (m.mIoU_mean - (m.gain_pp || 0) / 100));
 
       svgHtml += `
-        <g class="gain-bar-group" data-name="${escapeHtml(m.model)}" data-gain="${m.gain_pp.toFixed(2)}" data-fixed="${m.fixed_15_mIoU.toFixed(4)}" data-conv="${m.mIoU_mean.toFixed(4)}">
+        <g class="gain-bar-group" data-name="${escapeHtml(m.model)}" data-gain="${m.gain_pp.toFixed(2)}" data-fixed="${fixedVal.toFixed(4)}" data-conv="${m.mIoU_mean.toFixed(4)}">
           <text x="${margin.left - 10}" y="${y + barHeight / 2 + 4}" fill="#f1f5f9" font-size="11" font-weight="600" text-anchor="end">${escapeHtml(m.model)}</text>
           <rect x="${margin.left}" y="${y}" width="${barW}" height="${barHeight}" rx="4" fill="${color}" style="cursor: pointer; opacity: 0.85;" />
           <text x="${margin.left + barW + 8}" y="${y + barHeight / 2 + 4}" fill="${color}" font-size="10" font-family="var(--font-mono)" font-weight="700">+${m.gain_pp.toFixed(2)} pp</text>
