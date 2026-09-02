@@ -1434,6 +1434,28 @@ strong {
   padding-top: 0.65rem;
 }
 
+.btn-inspect-direct {
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: var(--cyan-400);
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all var(--transition-fast);
+}
+
+.btn-inspect-direct:hover {
+  background: var(--cyan-400);
+  color: #041324;
+  box-shadow: 0 0 14px var(--cyan-glow);
+  transform: translateY(-1px);
+}
+
 /* 544 Browser Search Bar */
 .gallery-search-bar {
   background: var(--bg-card);

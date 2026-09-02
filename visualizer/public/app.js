@@ -1083,7 +1083,7 @@
 
       return `
         <div class="gallery-card" data-id="${escapeHtml(item.id)}" data-thumb="${escapeHtml(thumb)}" data-title="${escapeHtml(item.title)}" data-desc="${escapeHtml(item.description)}">
-          <div class="gallery-thumb-wrap">
+          <div class="gallery-thumb-wrap" style="cursor: zoom-in;" title="Click to view full image">
             <img src="${escapeHtml(thumb)}" alt="${escapeHtml(item.title)}" loading="lazy">
             <span class="gallery-card-badge fsr-tag ${badgeClass}">
               ${escapeHtml(item.category.replace(/_/g, ' '))}
@@ -1096,21 +1096,43 @@
             </div>
             <div class="gallery-card-footer">
               <span>Sample: ${escapeHtml(item.id)}</span>
-              <span class="text-cyan font-bold">Inspect 🔎</span>
+              <button type="button" class="btn-inspect-direct" data-id="${escapeHtml(item.id)}" title="Inspect in Interactive Mask Inspector">
+                Inspect 🔎
+              </button>
             </div>
           </div>
         </div>
       `;
     }).join('');
 
-    // Attach card click handlers for modal
-    container.querySelectorAll('.gallery-card').forEach(card => {
-      card.addEventListener('click', () => {
+    // Attach inspect button clicks (directly launches Mask Inspector)
+    container.querySelectorAll('.btn-inspect-direct').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        openInInspector(id);
+      });
+    });
+
+    // Attach thumbnail click to open high-res lightbox
+    container.querySelectorAll('.gallery-thumb-wrap').forEach(wrap => {
+      wrap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = wrap.closest('.gallery-card');
+        if (!card) return;
         const id = card.getAttribute('data-id');
         const thumb = card.getAttribute('data-thumb');
         const title = card.getAttribute('data-title');
         const desc = card.getAttribute('data-desc');
         openImageLightbox(thumb, title, desc, id);
+      });
+    });
+
+    // Clicking the rest of the card also inspects
+    container.querySelectorAll('.gallery-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-id');
+        openInInspector(id);
       });
     });
   }
@@ -1135,7 +1157,7 @@
 
     container.innerHTML = paged.map(s => `
       <div class="gallery-card" data-id="${escapeHtml(s.id)}" data-thumb="${escapeHtml(s.triptych_url)}" data-title="Test Sample: ${escapeHtml(s.id)}" data-desc="Official test sample triptych (RGB, Ground Truth, Prediction).">
-        <div class="gallery-thumb-wrap">
+        <div class="gallery-thumb-wrap" style="cursor: zoom-in;" title="Click to view full image">
           <img src="${escapeHtml(s.triptych_url)}" alt="${escapeHtml(s.id)}" loading="lazy">
           <span class="gallery-card-badge fsr-tag cyan">Test Set</span>
         </div>
@@ -1146,14 +1168,27 @@
           </div>
           <div class="gallery-card-footer">
             <span>640x384</span>
-            <span class="text-cyan font-bold">Inspect 🔎</span>
+            <button type="button" class="btn-inspect-direct" data-id="${escapeHtml(s.id)}" title="Inspect in Interactive Mask Inspector">
+              Inspect 🔎
+            </button>
           </div>
         </div>
       </div>
     `).join('');
 
-    container.querySelectorAll('.gallery-card').forEach(card => {
-      card.addEventListener('click', () => {
+    container.querySelectorAll('.btn-inspect-direct').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute('data-id');
+        openInInspector(id);
+      });
+    });
+
+    container.querySelectorAll('.gallery-thumb-wrap').forEach(wrap => {
+      wrap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const card = wrap.closest('.gallery-card');
+        if (!card) return;
         const id = card.getAttribute('data-id');
         const thumb = card.getAttribute('data-thumb');
         const title = card.getAttribute('data-title');
@@ -1161,6 +1196,58 @@
         openImageLightbox(thumb, title, desc, id);
       });
     });
+
+    container.querySelectorAll('.gallery-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-id');
+        openInInspector(id);
+      });
+    });
+  }
+
+  // Open Sample directly in Interactive Mask Inspector
+  function openInInspector(sampleId) {
+    if (!sampleId) return;
+
+    // Close any open modals
+    const imgBackdrop = document.getElementById('image-modal-backdrop');
+    if (imgBackdrop) imgBackdrop.classList.remove('open');
+    const seedBackdrop = document.getElementById('seed-modal-backdrop');
+    if (seedBackdrop) seedBackdrop.classList.remove('open');
+
+    // Ensure sample exists in inspector dropdown
+    const select = document.getElementById('inspector-sample-select');
+    if (select) {
+      let found = false;
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].value === sampleId) {
+          select.selectedIndex = i;
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        const opt = document.createElement('option');
+        opt.value = sampleId;
+        opt.textContent = `${sampleId} • Selected Sample`;
+        select.appendChild(opt);
+        select.value = sampleId;
+      }
+    }
+
+    // Update the inspector with this sample
+    updateSplitInspectorSample(sampleId);
+
+    // Switch view to Interactive Mask Inspector tab
+    switchView('view-inspector');
+
+    // Smoothly scroll to the split container
+    setTimeout(() => {
+      const container = document.getElementById('split-container');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
   }
 
   // Lightbox Modal
@@ -1179,9 +1266,7 @@
 
     if (btnLoad) {
       btnLoad.onclick = () => {
-        if (backdrop) backdrop.classList.remove('open');
-        updateSplitInspectorSample(sampleId);
-        switchView('view-inspector');
+        openInInspector(sampleId);
       };
     }
 

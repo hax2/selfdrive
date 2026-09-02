@@ -247,22 +247,6 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Seed Details Modal Dialog -->
-      <div class="modal-backdrop" id="seed-modal-backdrop">
-        <div class="modal-dialog" id="seed-modal-dialog">
-          <div class="modal-header">
-            <div>
-              <h3 class="modal-title" id="seed-modal-title">Model Multi-Seed Ledger</h3>
-              <p class="modal-subtitle" id="seed-modal-subtitle">Controlled Seed Drilldown: 1337, 2027, 4242</p>
-            </div>
-            <button class="modal-close-btn" id="btn-close-seed-modal" aria-label="Close dialog">✕</button>
-          </div>
-          <div class="modal-body" id="seed-modal-body">
-            <!-- Dynamic seed breakdown content -->
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- ============================================================== -->
@@ -390,13 +374,42 @@
         <div class="inspector-sample-selector">
           <label for="inspector-sample-select" class="select-label">Select Sample Case:</label>
           <select id="inspector-sample-select" class="custom-select">
-            <option value="mixed_pln_1278">Severe False Safe in Hazard Trench (mixed_pln_1278)</option>
-            <option value="mixed_425">False Block on Path Dust & Texture (mixed_425)</option>
-            <option value="mixed_459">Soft Trail Edge Boundary Ambiguity (mixed_459)</option>
-            <option value="mixed_pln_961">Challenging 10th Percentile Terrain (mixed_pln_961)</option>
-            <option value="mixed_89">Top 90th Percentile Flawless Alignment (mixed_89)</option>
-            <option value="mixed_pln_1188">Exemplary Double-Track Forest Road (mixed_pln_1188)</option>
-            <option value="mixed_100">Standard Test Verification Sample (mixed_100)</option>
+            <optgroup label="Worst False-Safe Hazards (Acute Rollover)">
+              <option value="mixed_pln_1278">mixed_pln_1278 • Severe False Safe in Hazard Depression</option>
+              <option value="mixed_pln_610">mixed_pln_610 • False Safe on Dense Off-Road Brush</option>
+              <option value="mixed_pln_546">mixed_pln_546 • Overhanging Branch & Shadow Ambiguity</option>
+            </optgroup>
+            <optgroup label="Worst False-Block Errors (Over-Cautious Stops)">
+              <option value="mixed_425">mixed_425 • Path Dust & Fine Texture Glare</option>
+              <option value="mixed_306">mixed_306 • High-Contrast Harsh Sunlight Shading</option>
+              <option value="mixed_394">mixed_394 • False Block in Rut Depression</option>
+            </optgroup>
+            <optgroup label="Worst Boundary Ambiguity">
+              <option value="mixed_459">mixed_459 • Soft Trail Edge Boundary Ambiguity</option>
+              <option value="mixed_313">mixed_313 • Transition Over-Expansion on Trail Fringe</option>
+            </optgroup>
+            <optgroup label="Performance Percentile Benchmarks">
+              <option value="mixed_pln_961">mixed_pln_961 • 10th Percentile (Challenging Terrain)</option>
+              <option value="mixed_pln_1209">mixed_pln_1209 • 30th Percentile (Standard Mixed Path)</option>
+              <option value="mixed_pln_119">mixed_pln_119 • 50th Percentile Median Performance</option>
+              <option value="mixed_pln_1033">mixed_pln_1033 • 70th Percentile Clear Trail</option>
+              <option value="mixed_89">mixed_89 • 90th Percentile Near-Perfect Alignment</option>
+            </optgroup>
+            <optgroup label="Success Cases (Forest Roads & Double-Tracks)">
+              <option value="mixed_pln_1188">mixed_pln_1188 • Exemplary Double-Track Forest Road</option>
+              <option value="mixed_pln_1282">mixed_pln_1282 • Clear Open Trail Navigation</option>
+              <option value="mixed_pln_1306">mixed_pln_1306 • Sharp Turn & Vegetation Boundary</option>
+            </optgroup>
+            <optgroup label="Standard Test Samples">
+              <option value="mixed_100">mixed_100 • Standard Verification Run #1</option>
+              <option value="mixed_104">mixed_104 • Standard Verification Run #2</option>
+              <option value="mixed_106">mixed_106 • Standard Verification Run #3</option>
+              <option value="mixed_108">mixed_108 • Standard Verification Run #4</option>
+              <option value="mixed_113">mixed_113 • Standard Verification Run #5</option>
+              <option value="mixed_115">mixed_115 • Standard Verification Run #6</option>
+              <option value="mixed_118">mixed_118 • Standard Verification Run #7</option>
+              <option value="mixed_123">mixed_123 • Standard Verification Run #8</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -521,27 +534,6 @@
       <!-- Gallery Grid -->
       <div class="gallery-grid" id="gallery-card-grid">
         <!-- Dynamically injected gallery items -->
-      </div>
-
-      <!-- Image High-Res Lightbox Modal -->
-      <div class="modal-backdrop" id="image-modal-backdrop">
-        <div class="modal-dialog modal-large" id="image-modal-dialog">
-          <div class="modal-header">
-            <div>
-              <h3 class="modal-title" id="lightbox-title">Sample Inspection</h3>
-              <p class="modal-subtitle" id="lightbox-subtitle">CaT Test Sample</p>
-            </div>
-            <button class="modal-close-btn" id="btn-close-lightbox" aria-label="Close dialog">✕</button>
-          </div>
-          <div class="modal-body text-center" id="lightbox-body">
-            <img class="lightbox-img" id="lightbox-img" src="" alt="High-resolution preview">
-            <p class="lightbox-caption" id="lightbox-caption"></p>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" id="btn-lightbox-load-inspector">Open in Split Inspector</button>
-            <button class="btn btn-glass" id="btn-lightbox-close">Close</button>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -788,6 +780,43 @@
       </div>
     </div>
   </footer>
+
+  <!-- Seed Details Modal Dialog (Placed at body root for true fixed overlay) -->
+  <div class="modal-backdrop" id="seed-modal-backdrop">
+    <div class="modal-dialog" id="seed-modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="seed-modal-title">Model Multi-Seed Ledger</h3>
+          <p class="modal-subtitle" id="seed-modal-subtitle">Controlled Seed Drilldown: 1337, 2027, 4242</p>
+        </div>
+        <button class="modal-close-btn" id="btn-close-seed-modal" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body" id="seed-modal-body">
+        <!-- Dynamic seed breakdown content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Image High-Res Lightbox Modal (Placed at body root for true fixed overlay) -->
+  <div class="modal-backdrop" id="image-modal-backdrop">
+    <div class="modal-dialog modal-large" id="image-modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="lightbox-title">Sample Inspection</h3>
+          <p class="modal-subtitle" id="lightbox-subtitle">CaT Test Sample</p>
+        </div>
+        <button class="modal-close-btn" id="btn-close-lightbox" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body text-center" id="lightbox-body">
+        <img class="lightbox-img" id="lightbox-img" src="" alt="High-resolution preview">
+        <p class="lightbox-caption" id="lightbox-caption"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btn-lightbox-load-inspector">Open in Interactive Split Inspector</button>
+        <button class="btn btn-glass" id="btn-lightbox-close">Close</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Frontend Logic Script -->
   <script src="./app.js"></script>
