@@ -50,20 +50,23 @@ def main():
         shutil.copy2(f, DOCS / "media" / "qualitative" / f.name)
     print(f"Copied {len(list(qual_src.glob('*.png')))} qualitative images to docs/media/qualitative/")
 
-    # 5. Copy Curated Samples
+    # 5. Extract pixel-aligned 640x384 crops from triptychs
+    from PIL import Image
     copied_samples = []
     for sid in PRESET_SAMPLE_IDS:
         t_src = ROOT / "outputs" / "mixed_binary_traversability" / "test_review" / "all_triptychs" / f"{sid}.png"
-        o_src = ROOT / "outputs" / "mixed_binary_traversability" / "test_review" / "all_overlays" / f"{sid}.png"
-        i_src = ROOT / "data_processed_blue_green" / "test" / "images" / f"{sid}.png"
-        m_src = ROOT / "data_processed_blue_green" / "test" / "masks" / f"{sid}.png"
-
-        if t_src.exists(): shutil.copy2(t_src, DOCS / "media" / "samples" / "triptychs" / f"{sid}.png")
-        if o_src.exists(): shutil.copy2(o_src, DOCS / "media" / "samples" / "overlays" / f"{sid}.png")
-        if i_src.exists(): shutil.copy2(i_src, DOCS / "media" / "samples" / "images" / f"{sid}.png")
-        if m_src.exists(): shutil.copy2(m_src, DOCS / "media" / "samples" / "masks" / f"{sid}.png")
-        copied_samples.append(sid)
-    print(f"Copied {len(copied_samples)} curated sample sets into docs/media/samples/")
+        if t_src.exists():
+            shutil.copy2(t_src, DOCS / "media" / "samples" / "triptychs" / f"{sid}.png")
+            im = Image.open(t_src)
+            if im.size == (1920, 384):
+                rgb = im.crop((0, 0, 640, 384))
+                gt = im.crop((640, 0, 1280, 384))
+                pred = im.crop((1280, 0, 1920, 384))
+                rgb.save(DOCS / "media" / "samples" / "images" / f"{sid}.png")
+                gt.save(DOCS / "media" / "samples" / "masks" / f"{sid}.png")
+                pred.save(DOCS / "media" / "samples" / "overlays" / f"{sid}.png")
+            copied_samples.append(sid)
+    print(f"Extracted {len(copied_samples)} pixel-aligned 640x384 sample sets into docs/media/samples/")
 
     # 6. Load benchmark data and update all URLs to relative paths
     src_data_file = ROOT / "visualizer" / "public" / "data" / "benchmark_data.json"

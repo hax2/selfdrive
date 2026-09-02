@@ -59,7 +59,7 @@
     setupEventListeners();
 
     try {
-      const res = await fetch('/api/data');
+      const res = await fetch('./data/benchmark_data.json');
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       state.data = await res.json();
       console.log('Benchmark dataset loaded successfully:', state.data);
@@ -932,22 +932,33 @@
 
     let isDragging = false;
 
+    function setSplit(pct) {
+      pct = Math.max(0, Math.min(100, pct));
+      state.splitPercent = pct;
+      container.style.setProperty('--split-pos', `${pct}%`);
+      fgLayer.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+      fgLayer.style.webkitClipPath = `inset(0 ${100 - pct}% 0 0)`;
+      divider.style.left = `${pct}%`;
+    }
+
+    function calculatePercent(clientX) {
+      const rect = container.getBoundingClientRect();
+      let pos = (clientX - rect.left) / rect.width;
+      pos = Math.max(0.01, Math.min(0.99, pos));
+      return (pos * 100).toFixed(2);
+    }
+
     function onMove(e) {
       if (!isDragging) return;
-      const rect = container.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      let pos = (clientX - rect.left) / rect.width;
-      pos = Math.max(0.02, Math.min(0.98, pos));
-      const pct = (pos * 100).toFixed(2);
-
-      state.splitPercent = pct;
-      divider.style.left = `${pct}%`;
-      fgLayer.style.width = `${pct}%`;
+      setSplit(calculatePercent(clientX));
     }
 
     function startDrag(e) {
+      if (state.splitMode === 'triptych') return;
       isDragging = true;
-      onMove(e);
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      setSplit(calculatePercent(clientX));
       document.body.style.userSelect = 'none';
     }
 
@@ -963,6 +974,9 @@
     container.addEventListener('touchstart', startDrag, { passive: true });
     window.addEventListener('touchmove', onMove, { passive: true });
     window.addEventListener('touchend', stopDrag);
+
+    // Initial 50% split
+    setSplit(50);
   }
 
   function updateSplitInspectorSample(sampleId) {
@@ -1003,26 +1017,29 @@
     const labelLeft = document.getElementById('split-label-left');
     const labelRight = document.getElementById('split-label-right');
 
-    const rgbUrl = `/media/data_processed_blue_green/test/images/${sampleId}.png`;
-    const maskUrl = `/media/data_processed_blue_green/test/masks/${sampleId}.png`;
-    const overlayUrl = `/media/outputs/mixed_binary_traversability/test_review/all_overlays/${sampleId}.png`;
-    const triptychUrl = `/media/outputs/mixed_binary_traversability/test_review/all_triptychs/${sampleId}.png`;
+    const rgbUrl = `./media/samples/images/${sampleId}.png`;
+    const maskUrl = `./media/samples/masks/${sampleId}.png`;
+    const overlayUrl = `./media/samples/overlays/${sampleId}.png`;
+    const triptychUrl = `./media/samples/triptychs/${sampleId}.png`;
 
+    const splitContainer = document.getElementById('split-container');
     if (mode === 'rgb_pred') {
+      if (splitContainer) splitContainer.classList.remove('triptych-mode');
       if (imgFg) imgFg.src = rgbUrl;
       if (imgBg) imgBg.src = overlayUrl;
       if (labelLeft) labelLeft.textContent = 'Raw Camera RGB';
       if (labelRight) labelRight.textContent = 'Prediction Overlay';
     } else if (mode === 'gt_pred') {
+      if (splitContainer) splitContainer.classList.remove('triptych-mode');
       if (imgFg) imgFg.src = maskUrl;
       if (imgBg) imgBg.src = overlayUrl;
       if (labelLeft) labelLeft.textContent = 'Ground Truth Mask';
       if (labelRight) labelRight.textContent = 'Prediction Overlay';
     } else if (mode === 'triptych') {
-      if (imgFg) imgFg.src = triptychUrl;
+      if (splitContainer) splitContainer.classList.add('triptych-mode');
       if (imgBg) imgBg.src = triptychUrl;
-      if (labelLeft) labelLeft.textContent = 'Full Triptych';
-      if (labelRight) labelRight.textContent = 'Full Triptych';
+      if (labelLeft) labelLeft.textContent = 'Full Triptych (RGB • GT • Prediction)';
+      if (labelRight) labelRight.textContent = '';
     }
   }
 

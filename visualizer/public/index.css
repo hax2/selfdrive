@@ -1191,6 +1191,20 @@ strong {
   cursor: col-resize;
   user-select: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --split-pos: 50%;
+}
+
+.split-container.triptych-mode {
+  aspect-ratio: 1920 / 384;
+  cursor: default;
+}
+
+.split-container.triptych-mode .split-divider {
+  display: none;
+}
+
+.split-container.triptych-mode .split-layer.layer-fg {
+  display: none;
 }
 
 .split-layer {
@@ -1198,6 +1212,7 @@ strong {
   inset: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
 .split-layer img {
@@ -1209,24 +1224,26 @@ strong {
 
 .split-layer.layer-fg {
   z-index: 10;
-  width: 50%;
-  overflow: hidden;
-  border-right: 2px solid var(--cyan-400);
+  width: 100% !important;
+  height: 100% !important;
+  clip-path: inset(0 calc(100% - var(--split-pos, 50%)) 0 0);
+  -webkit-clip-path: inset(0 calc(100% - var(--split-pos, 50%)) 0 0);
+  pointer-events: none;
 }
 
 .split-layer.layer-fg img {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   object-fit: contain;
-  max-width: none;
+  display: block;
 }
 
 .split-divider {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 50%;
-  width: 4px;
+  left: var(--split-pos, 50%);
+  width: 3px;
   background: var(--cyan-400);
   box-shadow: 0 0 14px var(--cyan-glow);
   z-index: 20;
