@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TTFM Off-Road Traversability Segmentation | Research Visualizer</title>
+  <meta name="description" content="Interactive research visualizer for binary off-road traversability segmentation benchmarking 9 deep learning architectures, convergence-aware training, asymmetric safety errors, and edge hardware deployment.">
+  
+  <!-- Google Fonts: Outfit & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="index.css">
+</head>
+<body class="dark-theme">
+  <!-- Top Application Bar -->
+  <header class="app-header" id="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-badge-pulse" aria-hidden="true"></div>
+        <div class="brand-titles">
+          <h1 class="brand-title">TTFM <span class="brand-accent">Traversability</span></h1>
+          <p class="brand-subtitle">Off-Road Autonomous Driving • Research Benchmark Visualizer</p>
+        </div>
+      </div>
+      
+      <div class="header-meta">
+        <div class="meta-tag"><span class="tag-dot cyan"></span> 9 Architectures</div>
+        <div class="meta-tag"><span class="tag-dot emerald"></span> 81+ Controlled Runs</div>
+        <div class="meta-tag"><span class="tag-dot violet"></span> 133.7M Test Pixels</div>
+        <div class="meta-tag institution-tag">UC3M Thesis 2026</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs-bar" aria-label="Main Navigation">
+      <div class="nav-tabs-container">
+        <button class="nav-tab active" id="tab-btn-overview" data-target="view-overview">
+          <span class="tab-icon">📊</span> Executive Overview
+        </button>
+        <button class="nav-tab" id="tab-btn-leaderboard" data-target="view-leaderboard">
+          <span class="tab-icon">🏆</span> Leaderboard
+        </button>
+        <button class="nav-tab" id="tab-btn-analytics" data-target="view-analytics">
+          <span class="tab-icon">📈</span> Pareto & Analytics
+        </button>
+        <button class="nav-tab" id="tab-btn-inspector" data-target="view-inspector">
+          <span class="tab-icon">🔍</span> Interactive Mask Inspector
+        </button>
+        <button class="nav-tab" id="tab-btn-gallery" data-target="view-gallery">
+          <span class="tab-icon">🖼️</span> Qualitative Gallery
+        </button>
+        <button class="nav-tab" id="tab-btn-hardware" data-target="view-hardware">
+          <span class="tab-icon">⚡</span> Edge Hardware Lab
+        </button>
+        <button class="nav-tab" id="tab-btn-theory" data-target="view-theory">
+          <span class="tab-icon">📚</span> Thesis Figures & Theory
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="app-main" id="app-main">
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: EXECUTIVE OVERVIEW & KPIS                              -->
+    <!-- ============================================================== -->
+    <section class="view-panel active" id="view-overview">
+      <!-- Hero Banner -->
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-badge">Research Synthesis • CaT Off-Road Dataset</div>
+          <h2 class="hero-heading">High-Accuracy Real-Time Traversability vs Foundation SAM Baselines</h2>
+          <p class="hero-lead">
+            A comprehensive investigation evaluating 9 deep learning models across 3 seeds under matched optimization,
+            analyzing the asymmetric error trade-off between <strong class="text-rose">False-Safe hazards</strong> (catastrophic obstacle misses)
+            and <strong class="text-amber">False-Block delays</strong> (phantom stops), alongside edge acceleration on RTX 5060, H100, and Ryzen CPUs.
+          </p>
+          
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="btn-hero-explore-leaderboard">
+              <span>Explore Full Leaderboard</span> →
+            </button>
+            <button class="btn btn-glass" id="btn-hero-inspect-masks">
+              <span>Interactive Mask Splitter</span>
+            </button>
+            <button class="btn btn-glass" id="btn-hero-pareto">
+              <span>View Pareto Frontier</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-kpi-grid" id="hero-kpis-container">
+          <!-- Dynamically populated KPI cards -->
+        </div>
+      </div>
+
+      <!-- Key Findings Callout Matrix -->
+      <div class="section-title-wrap">
+        <h3 class="section-title">Core Research Discoveries</h3>
+        <p class="section-desc">Key empirical conclusions established by the verified ledger and controlled experiments.</p>
+      </div>
+
+      <div class="discovery-grid">
+        <div class="discovery-card cyan-border">
+          <div class="card-icon cyan-bg">🏆</div>
+          <div class="discovery-body">
+            <span class="discovery-tag cyan">Accuracy Champion</span>
+            <h4 class="discovery-title">FPN/EfficientNet-B0 Outperforms 5x Larger Models</h4>
+            <p class="discovery-text">
+              Reaches top test accuracy of <strong>0.9423 mIoU</strong> (+1.07 pp gain under convergence scheduling) and the lowest False-Safe Rate (<strong>2.55%</strong>), outperforming the heavy 29.1M parameter ROD ViT-S SAM baseline while using only 5.76M parameters.
+            </p>
+          </div>
+        </div>
+
+        <div class="discovery-card emerald-border">
+          <div class="card-icon emerald-bg">⚡</div>
+          <div class="discovery-body">
+            <span class="discovery-tag emerald">Edge Real-Time King</span>
+            <h4 class="discovery-title">PIDNet-S Achieves 1038 FPS with TensorRT</h4>
+            <p class="discovery-text">
+              Under FP16 TensorRT 10 on the RTX 5060 edge GPU, PIDNet-S executes its forward inference in just <strong>0.96 ms (1038 FPS)</strong>, with a complete host-to-device pipeline of 9.40 ms (106 FPS), fitting effortlessly into 100 Hz robotic control loops.
+            </p>
+          </div>
+        </div>
+
+        <div class="discovery-card violet-border">
+          <div class="card-icon violet-bg">🤖</div>
+          <div class="discovery-body">
+            <span class="discovery-tag violet">Foundation Model Limits</span>
+            <h4 class="discovery-title">ROD ViT-S Cost-Accuracy Asymmetry</h4>
+            <p class="discovery-text">
+              While ROD ViT-S (frozen EfficientSAM) provides high-level representation (<strong>0.9331 mIoU</strong>), its inference is 12x slower (21.8 FPS on H100) and requires <strong>680 MiB peak VRAM</strong> versus 58 MiB for PIDNet-S, rendering it impractical on battery-limited rovers.
+            </p>
+          </div>
+        </div>
+
+        <div class="discovery-card amber-border">
+          <div class="card-icon amber-bg">🛡️</div>
+          <div class="discovery-body">
+            <span class="discovery-tag amber">Asymmetric Safety Metric</span>
+            <h4 class="discovery-title">Why False-Safe Rate (FSR) Governs Autonomy</h4>
+            <p class="discovery-text">
+              Standard mIoU masks critical safety failures. An autonomous vehicle mistaking a trench or boulder for safe path (<strong class="text-rose">False Safe</strong>) risks catastrophic rollover, whereas over-conservatively flagging grass (<strong class="text-amber">False Block</strong>) only triggers re-planning.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Comparison Showcase: 9 Evaluated Architectures -->
+      <div class="section-title-wrap mt-8">
+        <h3 class="section-title">The 9 Evaluated Architectures</h3>
+        <p class="section-desc">Classified across Real-Time CNNs, Lightweight Encoder-Decoders, and Foundation Transformers.</p>
+      </div>
+
+      <div class="arch-card-grid" id="arch-card-grid">
+        <!-- Dynamically injected architecture cards -->
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 2: INTERACTIVE BENCHMARK LEADERBOARD                      -->
+    <!-- ============================================================== -->
+    <section class="view-panel" id="view-leaderboard">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-heading">Comprehensive Benchmark Leaderboard</h2>
+          <p class="panel-desc">All population statistics are mean ± standard deviation across identical seeds 1337, 2027, and 4242.</p>
+        </div>
+
+        <!-- Policy Selector Pills -->
+        <div class="policy-pills-wrap">
+          <span class="pill-label">Evaluation Policy:</span>
+          <div class="pill-group" id="leaderboard-policy-selector">
+            <button class="pill-btn active" data-policy="convergence">
+              <span class="pill-indicator"></span> Convergence-Aware (300e)
+            </button>
+            <button class="pill-btn" data-policy="blue_green">
+              <span class="pill-indicator"></span> Blue+Green (15e)
+            </button>
+            <button class="pill-btn" data-policy="blue_only">
+              <span class="pill-indicator"></span> Blue-Only (15e)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Toolbar -->
+      <div class="table-toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔎</span>
+          <input type="text" id="leaderboard-search-input" placeholder="Search architecture, family, or backbone..." aria-label="Search models">
+        </div>
+
+        <div class="filter-controls">
+          <label class="select-label" for="filter-family-select">Family:</label>
+          <select id="filter-family-select" class="custom-select">
+            <option value="all">All Families (9 Models)</option>
+            <option value="Lightweight FPN">Lightweight FPN</option>
+            <option value="Encoder-Decoder">Encoder-Decoder (U-Net)</option>
+            <option value="Real-Time CNN">Real-Time High-FPS CNN</option>
+            <option value="Foundation">Foundation / Transformer</option>
+          </select>
+
+          <label class="select-label" for="sort-metric-select">Sort by:</label>
+          <select id="sort-metric-select" class="custom-select">
+            <option value="mIoU">Test mIoU (High to Low)</option>
+            <option value="fsr">False-Safe Rate (Low to High - Safest)</option>
+            <option value="f1">F1 Score (High to Low)</option>
+            <option value="fbr">False-Block Rate (Low to High)</option>
+            <option value="fps">H100 Throughput (FPS)</option>
+            <option value="gain">Gain over 15e (Convergence)</option>
+            <option value="params">Parameters (Compactness)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Main Benchmark Table -->
+      <div class="table-responsive-wrapper">
+        <table class="benchmark-table" id="benchmark-table">
+          <thead>
+            <tr>
+              <th class="th-rank">#</th>
+              <th class="th-model">Model Architecture</th>
+              <th class="th-family">Family</th>
+              <th class="th-params">Params</th>
+              <th class="th-epochs" id="th-epoch-header">Epochs / Budget</th>
+              <th class="th-miou sortable" data-sort="mIoU">
+                Test mIoU <span class="sort-arrow">▼</span>
+              </th>
+              <th class="th-f1 sortable" data-sort="f1">Traversable F1</th>
+              <th class="th-fsr sortable" data-sort="fsr" title="False-Safe Rate: Lower is safer (avoids collisions)">
+                False-Safe (FSR) ↓
+              </th>
+              <th class="th-fbr sortable" data-sort="fbr" title="False-Block Rate: Lower is better (avoids unnecessary stops)">
+                False-Block (FBR) ↓
+              </th>
+              <th class="th-gain" id="th-gain-header">Gain (15e Δ)</th>
+              <th class="th-h100">H100 FPS</th>
+              <th class="th-actions">Details</th>
+            </tr>
+          </thead>
+          <tbody id="benchmark-table-body">
+            <!-- Dynamically populated table rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Seed Details Modal Dialog -->
+      <div class="modal-backdrop" id="seed-modal-backdrop">
+        <div class="modal-dialog" id="seed-modal-dialog">
+          <div class="modal-header">
+            <div>
+              <h3 class="modal-title" id="seed-modal-title">Model Multi-Seed Ledger</h3>
+              <p class="modal-subtitle" id="seed-modal-subtitle">Controlled Seed Drilldown: 1337, 2027, 4242</p>
+            </div>
+            <button class="modal-close-btn" id="btn-close-seed-modal" aria-label="Close dialog">✕</button>
+          </div>
+          <div class="modal-body" id="seed-modal-body">
+            <!-- Dynamic seed breakdown content -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 3: PARETO FRONTIER & VISUAL ANALYTICS                     -->
+    <!-- ============================================================== -->
+    <section class="view-panel" id="view-analytics">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-heading">Visual Analytics & Pareto Frontiers</h2>
+          <p class="panel-desc">Interactive multi-dimensional evaluation of Speed vs Accuracy, Safety vs Availability, and Convergence Trajectories.</p>
+        </div>
+      </div>
+
+      <!-- Analytics Charts Grid -->
+      <div class="analytics-grid">
+        <!-- Chart 1: Speed vs Accuracy Pareto Frontier -->
+        <div class="chart-card wide-chart">
+          <div class="chart-card-header">
+            <div>
+              <h3 class="chart-title">Speed vs Accuracy Pareto Frontier</h3>
+              <p class="chart-desc">Throughput vs Test mIoU across 9 architectures. The Pareto boundary represents non-dominated deployment models.</p>
+            </div>
+            <div class="chart-controls">
+              <span class="control-label">Hardware Device:</span>
+              <div class="pill-group" id="pareto-hardware-selector">
+                <button class="pill-btn active" data-hw="h100">H100 GPU</button>
+                <button class="pill-btn" data-hw="rtx5060">RTX 5060 Edge</button>
+                <button class="pill-btn" data-hw="ryzen">Ryzen 5500 CPU</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="chart-render-container" id="pareto-chart-container">
+            <svg class="interactive-svg-chart" id="pareto-svg" viewBox="0 0 900 450" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="chart-tooltip" id="pareto-tooltip"></div>
+          </div>
+
+          <div class="chart-footer-note">
+            <span class="note-bullet">💡</span>
+            <strong>Insight:</strong> <strong>FPN/EfficientNet-B0</strong> dominates the high-accuracy frontier (0.9423 mIoU at 131.4 FPS), while <strong>PIDNet-S</strong> dominates real-time throughput (270.4 FPS on H100, 1038 FPS with TensorRT).
+          </div>
+        </div>
+
+        <!-- Chart 2: Asymmetric Safety Space (FSR vs FBR) -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3 class="chart-title">Asymmetric Error Space: FSR vs FBR</h3>
+              <p class="chart-desc">False-Safe Rate (X) vs False-Block Rate (Y). Lower & left is optimal.</p>
+            </div>
+            <div class="chart-badge danger-badge">Critical Robotic Safety</div>
+          </div>
+
+          <div class="chart-render-container" id="safety-chart-container">
+            <svg class="interactive-svg-chart" id="safety-svg" viewBox="0 0 500 380" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="chart-tooltip" id="safety-tooltip"></div>
+          </div>
+
+          <div class="chart-footer-note">
+            <span class="note-bullet">🛡️</span>
+            <strong>Danger Zone:</strong> Models in the right sector risk severe collisions by failing to detect drop-offs or rocks.
+          </div>
+        </div>
+
+        <!-- Chart 3: Convergence Gain Comparison -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3 class="chart-title">Convergence Schedule Gain over 15 Epochs</h3>
+              <p class="chart-desc">mIoU delta (+pp) achieved by early stopping + cosine schedule.</p>
+            </div>
+          </div>
+
+          <div class="chart-render-container" id="gain-chart-container">
+            <svg class="interactive-svg-chart" id="gain-svg" viewBox="0 0 500 380" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="chart-tooltip" id="gain-tooltip"></div>
+          </div>
+
+          <div class="chart-footer-note">
+            <span class="note-bullet">📈</span>
+            <strong>Major Impact:</strong> Real-time models like PIDNet-S gain <strong>+3.73 pp</strong> and DDRNet gains <strong>+3.49 pp</strong> under convergence training.
+          </div>
+        </div>
+
+        <!-- Chart 4: Full Convergence Epoch-by-Epoch Curves -->
+        <div class="chart-card wide-chart">
+          <div class="chart-card-header">
+            <div>
+              <h3 class="chart-title">Convergence Suite: Validation mIoU Across 300 Epochs</h3>
+              <p class="chart-desc">Real training trajectories under patience 25 early stopping for seed 1337.</p>
+            </div>
+            <div class="chart-controls">
+              <span class="control-label">Metric:</span>
+              <div class="pill-group" id="curve-metric-selector">
+                <button class="pill-btn active" data-metric="val_mIoU">Val mIoU</button>
+                <button class="pill-btn" data-metric="val_loss">Val Loss</button>
+                <button class="pill-btn" data-metric="val_fsr">False-Safe (FSR)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="curve-filter-pills" id="curve-model-toggles">
+            <!-- Dynamically populated model toggle buttons -->
+          </div>
+
+          <div class="chart-render-container" id="curves-chart-container">
+            <svg class="interactive-svg-chart" id="curves-svg" viewBox="0 0 900 400" preserveAspectRatio="xMidYMid meet"></svg>
+            <div class="chart-tooltip" id="curves-tooltip"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 4: INTERACTIVE MASK SPLIT INSPECTOR                       -->
+    <!-- ============================================================== -->
+    <section class="view-panel" id="view-inspector">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-heading">Interactive Mask Split Inspector</h2>
+          <p class="panel-desc">Drag the vertical divider handle to inspect raw camera RGB against ground-truth and model prediction overlays in real time.</p>
+        </div>
+
+        <!-- Preset Sample Selector -->
+        <div class="inspector-sample-selector">
+          <label for="inspector-sample-select" class="select-label">Select Sample Case:</label>
+          <select id="inspector-sample-select" class="custom-select">
+            <option value="mixed_pln_1278">Severe False Safe in Hazard Trench (mixed_pln_1278)</option>
+            <option value="mixed_425">False Block on Path Dust & Texture (mixed_425)</option>
+            <option value="mixed_459">Soft Trail Edge Boundary Ambiguity (mixed_459)</option>
+            <option value="mixed_pln_961">Challenging 10th Percentile Terrain (mixed_pln_961)</option>
+            <option value="mixed_89">Top 90th Percentile Flawless Alignment (mixed_89)</option>
+            <option value="mixed_pln_1188">Exemplary Double-Track Forest Road (mixed_pln_1188)</option>
+            <option value="mixed_100">Standard Test Verification Sample (mixed_100)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Split Viewer Workspace -->
+      <div class="split-viewer-card">
+        <!-- Toolbar for inspection modes -->
+        <div class="split-viewer-toolbar">
+          <div class="mode-toggles">
+            <span class="control-label">Split Comparison Mode:</span>
+            <div class="pill-group" id="split-mode-selector">
+              <button class="pill-btn active" data-mode="rgb_pred">Raw Camera RGB ⟷ Model Prediction</button>
+              <button class="pill-btn" data-mode="gt_pred">Ground Truth ⟷ Model Prediction</button>
+              <button class="pill-btn" data-mode="triptych">Full Triptych (RGB • GT • Prediction)</button>
+            </div>
+          </div>
+
+          <div class="view-indicators">
+            <span class="badge-layer left" id="split-label-left">Raw Camera RGB</span>
+            <span class="badge-vs">VS</span>
+            <span class="badge-layer right" id="split-label-right">Model Prediction Overlay</span>
+          </div>
+        </div>
+
+        <!-- Split Canvas Container -->
+        <div class="split-container" id="split-container">
+          <!-- Background Layer -->
+          <div class="split-layer layer-bg">
+            <img id="split-img-bg" src="/media/outputs/mixed_binary_traversability/test_review/all_overlays/mixed_pln_1278.png" alt="Right inspection layer">
+          </div>
+
+          <!-- Foreground Layer (Clipped) -->
+          <div class="split-layer layer-fg" id="split-layer-fg">
+            <img id="split-img-fg" src="/media/data_processed_blue_green/test/images/mixed_pln_1278.png" alt="Left inspection layer">
+          </div>
+
+          <!-- Draggable Divider -->
+          <div class="split-divider" id="split-divider">
+            <div class="split-handle" aria-label="Drag to adjust split position">
+              <span class="handle-arrow">◀</span>
+              <span class="handle-bar"></span>
+              <span class="handle-arrow">▶</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sample Details Footer -->
+        <div class="split-footer" id="split-footer-info">
+          <div class="split-sample-meta">
+            <h4 class="sample-title" id="inspector-sample-title">Severe False Safe in Hazard Trench</h4>
+            <p class="sample-desc" id="inspector-sample-desc">The model incorrectly classifies an untraversable depression as traversable path, posing an acute rollover hazard.</p>
+          </div>
+          <div class="split-metrics-badges">
+            <div class="metric-pill danger" id="inspector-fsr-badge">False-Safe: 23.5%</div>
+            <div class="metric-pill safe" id="inspector-fbr-badge">False-Block: 2.1%</div>
+            <div class="metric-pill cyan">Resolution: 640 x 384</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Color Legend for Masks -->
+      <div class="mask-legend-bar">
+        <div class="legend-item">
+          <span class="legend-swatch traversable-blue"></span>
+          <span>Traversable Path (Blue)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch traversable-green"></span>
+          <span>Rough Vegetation / Grass (Green)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch untraversable-black"></span>
+          <span>Untraversable Obstacle / Ditch / Boundary</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch false-safe-red"></span>
+          <span>False-Safe Error (Hazard Miss)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch false-block-yellow"></span>
+          <span>False-Block Error (False Positive Stop)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 5: QUALITATIVE GALLERY & 544 TEST BROWSER                -->
+    <!-- ============================================================== -->
+    <section class="view-panel" id="view-gallery">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-heading">Qualitative Review Gallery</h2>
+          <p class="panel-desc">Curated failure mode taxonomy, percentile performance slices, field robot sequences, and complete 544 test image browser.</p>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="pill-group" id="gallery-category-selector">
+          <button class="pill-btn active" data-cat="all">All Cases</button>
+          <button class="pill-btn" data-cat="worst_false_safe">Worst False-Safe (Hazards)</button>
+          <button class="pill-btn" data-cat="worst_false_block">Worst False-Block (Stops)</button>
+          <button class="pill-btn" data-cat="worst_boundary">Boundary Ambiguity</button>
+          <button class="pill-btn" data-cat="percentiles">Percentile Slices</button>
+          <button class="pill-btn" data-cat="alice_sequence">ALICE Field Robot</button>
+          <button class="pill-btn" data-cat="success_cases">Success Highlights</button>
+          <button class="pill-btn" data-cat="all_544_browser">Browse 544 Test Set</button>
+        </div>
+      </div>
+
+      <!-- Search & Controls for 544 Browser (Hidden by default, active when browsing) -->
+      <div class="gallery-search-bar hidden" id="browser-search-bar">
+        <div class="search-box">
+          <span class="search-icon">🔎</span>
+          <input type="text" id="browser-search-input" placeholder="Search sample by ID (e.g. mixed_100, mixed_pln_961)...">
+        </div>
+        <div class="pagination-info" id="browser-pagination-info">Showing samples 1 - 24 of 544</div>
+        <div class="pagination-controls">
+          <button class="btn btn-sm btn-glass" id="btn-prev-page">◀ Prev</button>
+          <button class="btn btn-sm btn-glass" id="btn-next-page">Next ▶</button>
+        </div>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div class="gallery-grid" id="gallery-card-grid">
+        <!-- Dynamically injected gallery items -->
+      </div>
+
+      <!-- Image High-Res Lightbox Modal -->
+      <div class="modal-backdrop" id="image-modal-backdrop">
+        <div class="modal-dialog modal-large" id="image-modal-dialog">
+          <div class="modal-header">
+            <div>
+              <h3 class="modal-title" id="lightbox-title">Sample Inspection</h3>
+              <p class="modal-subtitle" id="lightbox-subtitle">CaT Test Sample</p>
+            </div>
+            <button class="modal-close-btn" id="btn-close-lightbox" aria-label="Close dialog">✕</button>
+          </div>
+          <div class="modal-body text-center" id="lightbox-body">
+            <img class="lightbox-img" id="lightbox-img" src="" alt="High-resolution preview">
+            <p class="lightbox-caption" id="lightbox-caption"></p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="btn-lightbox-load-inspector">Open in Split Inspector</button>
+            <button class="btn btn-glass" id="btn-lightbox-close">Close</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 6: EDGE HARDWARE LAB & DEPLOYMENT BENCHMARK               -->
+    <!-- ============================================================== -->
+    <section class="view-panel" id="view-hardware">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-heading">Edge Hardware Deployment Lab</h2>
+          <p class="panel-desc">Real measured latencies, FPS throughput, and memory allocation across Cloud GPU, Edge GPU, and Robot Embedded CPU.</p>
+        </div>
+      </div>
+
+      <!-- Hardware Platform Summary Cards -->
+      <div class="hardware-platforms-grid">
+        <!-- H100 Card -->
+        <div class="hw-card cyan-border">
+          <div class="hw-card-header">
+            <div class="hw-icon cyan">☁️</div>
+            <div>
+              <h3 class="hw-name">NVIDIA H100 NVL MIG</h3>
+              <span class="hw-sub">Cloud / Server GPU Baseline</span>
+            </div>
+          </div>
+          <div class="hw-specs">
+            <div class="spec-row">
+              <span class="spec-label">Throughput:</span>
+              <span class="spec-val">Up to 270.4 FPS (PIDNet-S)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Resolution:</span>
+              <span class="spec-val">640 x 384, Batch 1</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Precision:</span>
+              <span class="spec-val">FP32 Eager PyTorch 2.13</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RTX 5060 Card -->
+        <div class="hw-card emerald-border">
+          <div class="hw-card-header">
+            <div class="hw-icon emerald">⚡</div>
+            <div>
+              <h3 class="hw-name">NVIDIA GeForce RTX 5060</h3>
+              <span class="hw-sub">Embedded Autonomous Rover GPU</span>
+            </div>
+          </div>
+          <div class="hw-specs">
+            <div class="spec-row">
+              <span class="spec-label">TensorRT Speed:</span>
+              <span class="spec-val text-emerald">1038 FPS (0.96 ms forward)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Full Pipeline:</span>
+              <span class="spec-val">106 FPS (9.40 ms end-to-end)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">TensorRT Engine:</span>
+              <span class="spec-val">TRT 10.16 FP16 Engine</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ryzen 5500 Card -->
+        <div class="hw-card amber-border">
+          <div class="hw-card-header">
+            <div class="hw-icon amber">🖥️</div>
+            <div>
+              <h3 class="hw-name">AMD Ryzen 5 5500</h3>
+              <span class="hw-sub">Low-Power Robot Embedded CPU</span>
+            </div>
+          </div>
+          <div class="hw-specs">
+            <div class="spec-row">
+              <span class="spec-label">Compiled Speed:</span>
+              <span class="spec-val">Up to 36.5 FPS (DDRNet)</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Inductor Speedup:</span>
+              <span class="spec-val">1.3x – 2.0x vs Eager Python</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Compiler Stack:</span>
+              <span class="spec-val">PyTorch 2.1 Inductor AOT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TensorRT vs PyTorch Deep Dive -->
+      <div class="section-title-wrap mt-8">
+        <h3 class="section-title">Edge Acceleration: TensorRT 10 vs PyTorch Eager</h3>
+        <p class="section-desc">Measured on NVIDIA GeForce RTX 5060 with identical test batches and test mIoU verification.</p>
+      </div>
+
+      <div class="edge-comparison-matrix">
+        <div class="trt-detail-card">
+          <div class="trt-header">
+            <h4>PIDNet-S on RTX 5060</h4>
+            <span class="badge-emerald">1038 FPS Forward Pass</span>
+          </div>
+
+          <div class="trt-stats-grid">
+            <div class="stat-box">
+              <span class="stat-num text-emerald">0.96 ms</span>
+              <span class="stat-desc">TRT Forward Latency (1038 FPS)</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">9.40 ms</span>
+              <span class="stat-desc">TRT Full Pipeline (106 FPS)</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">8.37 ms</span>
+              <span class="stat-desc">PyTorch Eager Forward (119 FPS)</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num text-cyan">8.7x</span>
+              <span class="stat-desc">TensorRT Acceleration Factor</span>
+            </div>
+          </div>
+
+          <div class="memory-bar-wrap">
+            <div class="memory-label">
+              <span>VRAM Allocation: <strong>14.5 MB Params</strong> • <strong>57.9 MB Peak VRAM</strong></span>
+              <span class="text-emerald">Minimal Footprint</span>
+            </div>
+            <div class="memory-bar">
+              <div class="memory-bar-fill emerald" style="width: 8.5%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="trt-detail-card">
+          <div class="trt-header">
+            <h4>ROD ViT-S on RTX 5060</h4>
+            <span class="badge-rose">31.9 FPS Forward Pass</span>
+          </div>
+
+          <div class="trt-stats-grid">
+            <div class="stat-box">
+              <span class="stat-num text-rose">31.39 ms</span>
+              <span class="stat-desc">PyTorch Forward Latency (31.9 FPS)</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">38.36 ms</span>
+              <span class="stat-desc">PyTorch Full Pipeline (26.1 FPS)</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">29.1 M</span>
+              <span class="stat-desc">Total Backbone Weights</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num text-amber">12x Slower</span>
+              <span class="stat-desc">vs PIDNet-S on same GPU</span>
+            </div>
+          </div>
+
+          <div class="memory-bar-wrap">
+            <div class="memory-label">
+              <span>VRAM Allocation: <strong>55.5 MB Params</strong> • <strong>680.0 MB Peak VRAM</strong></span>
+              <span class="text-rose">12x Higher Memory Cost</span>
+            </div>
+            <div class="memory-bar">
+              <div class="memory-bar-fill rose" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame Budget Visualization -->
+      <div class="section-title-wrap mt-8">
+        <h3 class="section-title">Autonomous Control Loop Frame Budget Breakdown</h3>
+        <p class="section-desc">How forward inference fits alongside Host-to-Device (H2D), Normalisation, Readout (D2H), and Path Planning budgets.</p>
+      </div>
+
+      <div class="budget-card">
+        <div class="budget-scale">
+          <div class="budget-marker m10" style="left: 30%;">
+            <span class="marker-label">100 Hz Target (10.0 ms)</span>
+          </div>
+          <div class="budget-marker m33" style="left: 100%;">
+            <span class="marker-label">30 Hz Target (33.3 ms)</span>
+          </div>
+        </div>
+
+        <div class="budget-bar-stack">
+          <div class="budget-seg seg-infer" style="width: 9.6%;" title="Forward Pass: 0.96 ms">
+            <span>Infer (0.96ms)</span>
+          </div>
+          <div class="budget-seg seg-io" style="width: 25%;" title="Host-to-Device & Normalise: 2.50 ms">
+            <span>H2D / Norm (2.5ms)</span>
+          </div>
+          <div class="budget-seg seg-d2h" style="width: 15%;" title="Mask Readout D2H: 1.50 ms">
+            <span>Readout (1.5ms)</span>
+          </div>
+          <div class="budget-seg seg-planner" style="width: 50.4%;" title="Available for Path Planner: 5.04 ms in 100Hz">
+            <span>Planner Headroom (5.04ms)</span>
+          </div>
+        </div>
+
+        <div class="budget-legend">
+          <span class="budget-legend-item"><span class="legend-box infer"></span> GPU TensorRT Inference</span>
+          <span class="budget-legend-item"><span class="legend-box io"></span> Camera Decode / Normalise</span>
+          <span class="budget-legend-item"><span class="legend-box d2h"></span> Device-to-Host Mask Transfer</span>
+          <span class="budget-legend-item"><span class="legend-box planner"></span> Trajectory & Planner Headroom</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 7: THESIS THEORY & CONCEPTS GALLERY                      -->
+    <!-- ============================================================== -->
+    <section class="view-panel" id="view-theory">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-heading">Thesis Conceptual Diagrams & Explanations</h2>
+          <p class="panel-desc">Visual theory figures from Chapter 1 through Chapter 7 illustrating dataset partitioning, depthwise convolutions, frozen SAM adaptation, and the safety evidence ladder.</p>
+        </div>
+      </div>
+
+      <!-- Theory Grid -->
+      <div class="theory-grid" id="theory-card-grid">
+        <!-- Dynamically injected theory cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">
+        <strong>TTFM Traversability Research Visualizer</strong> • Master's Thesis • Universidad Carlos III de Madrid (UC3M)
+      </p>
+      <div class="footer-links">
+        <span class="footer-link">Dataset: CaT & ORFD</span>
+        <span class="footer-divider">•</span>
+        <span class="footer-link">PyTorch 2.13 & TensorRT 10</span>
+        <span class="footer-divider">•</span>
+        <span class="footer-link">H100 NVL & RTX 5060</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Frontend Logic Script -->
+  <script src="app.js"></script>
+</body>
+</html>

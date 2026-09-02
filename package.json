@@ -1,0 +1,21 @@
+{
+  "name": "ttfm-results-visualizer",
+  "version": "1.0.0",
+  "description": "Interactive Research Visualizer for TTFM Off-Road Traversability Segmentation",
+  "main": "visualizer/server.js",
+  "scripts": {
+    "dev": "node visualizer/server.js",
+    "start": "node visualizer/server.js",
+    "build-data": "python3 visualizer/build_visualizer_data.py"
+  },
+  "keywords": [
+    "traversability",
+    "segmentation",
+    "autonomous-driving",
+    "benchmark",
+    "visualizer",
+    "deep-learning"
+  ],
+  "author": "UC3M TFM",
+  "license": "MIT"
+}
