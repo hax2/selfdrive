@@ -509,55 +509,68 @@
     const tooltip = document.getElementById('pareto-tooltip');
     if (!svg || !state.data) return;
 
-    const bgModels = state.data.suites.blue_green || [];
-    const convModels = state.data.suites.convergence || [];
+    const comparison = state.data.hardware?.model_comparison_table || [];
+    const rtxDetails = Object.values(state.data.hardware?.rtx5060_details || {});
     const hwMode = state.paretoHardware; // 'h100' | 'rtx5060' | 'ryzen'
+    const desc = document.getElementById('pareto-chart-desc');
+    const note = document.getElementById('pareto-chart-note');
 
-    // Extract points { name, fps, mIoU, params, fsr }
-    const points = bgModels.map(m => {
-      const conv = convModels.find(c => c.model === m.model);
-      const mIoU = conv ? conv.mIoU_mean : m.mIoU_mean;
+    // Build each hardware view only from measurements made on that device.
+    // Accuracy follows the checkpoint evaluated by the corresponding hardware
+    // benchmark; no cross-device speed estimates or mixed runtimes are used.
+    let points = comparison.map(row => ({
+      name: row.model,
+      fps: row.h100_fps,
+      latencyMs: Number.isFinite(row.h100_fps) ? 1000 / row.h100_fps : null,
+      mIoU: row.mIoU_bg,
+      params: row.params,
+      fsr: row.fsr_bg,
+      color: MODEL_COLORS[row.model] || '#566278'
+    })).filter(point => Number.isFinite(point.fps) && Number.isFinite(point.mIoU));
 
-      let fps = m.h100_fps || 20;
-      let latencyMs = m.h100_latency_ms || 10;
-      let labelHw = 'H100 NVL';
-
-      if (hwMode === 'rtx5060') {
-        if (m.model === 'PIDNet-S') {
-          fps = 1037.97; // TRT
-          latencyMs = 0.96;
-        } else if (m.model === 'ROD ViT-S') {
-          fps = 31.86;
-          latencyMs = 31.39;
-        } else {
-          fps = (m.h100_fps || 100) * 0.75;
-          latencyMs = 1000 / fps;
-        }
-        labelHw = 'RTX 5060 Edge';
-      } else if (hwMode === 'ryzen') {
-        fps = m.ryzen_compiled_fps || (m.h100_fps ? m.h100_fps / 15 : 5);
-        latencyMs = 1000 / fps;
-        labelHw = 'Ryzen 5500 CPU';
-      }
-
-      return {
-        name: m.model,
-        fps,
-        latencyMs,
-        mIoU,
-        params: m.parameters,
-        fsr: m.fsr_mean,
-        hw: labelHw,
-        color: MODEL_COLORS[m.model] || '#38bdf8'
-      };
-    });
+    if (hwMode === 'rtx5060') {
+      points = comparison.map(row => {
+        const detail = rtxDetails.find(item => item.model === row.model);
+        return {
+          name: row.model,
+          fps: row.rtx5060_pytorch_fps,
+          latencyMs: detail?.pytorch_forward_ms ?? (Number.isFinite(row.rtx5060_pytorch_fps) ? 1000 / row.rtx5060_pytorch_fps : null),
+          mIoU: detail?.test_miou_fp32 ?? null,
+          params: row.params,
+          fsr: null,
+          color: MODEL_COLORS[row.model] || '#566278'
+        };
+      }).filter(point => Number.isFinite(point.fps) && Number.isFinite(point.mIoU));
+      if (desc) desc.textContent = 'Only directly measured PyTorch eager results are shown. TensorRT is excluded to keep the runtime comparison consistent.';
+      if (note) note.textContent = 'RTX 5060 coverage is currently limited to PIDNet-S and ROD ViT-S. TensorRT results remain available in the Deployment section.';
+    } else if (hwMode === 'ryzen') {
+      points = comparison.map(row => ({
+        name: row.model,
+        fps: row.ryzen_compiled_fps,
+        latencyMs: Number.isFinite(row.ryzen_compiled_fps) ? 1000 / row.ryzen_compiled_fps : null,
+        mIoU: row.mIoU_bg,
+        params: row.params,
+        fsr: row.fsr_bg,
+        color: MODEL_COLORS[row.model] || '#566278'
+      })).filter(point => Number.isFinite(point.fps) && Number.isFinite(point.mIoU));
+      if (desc) desc.textContent = 'Measured Ryzen 5 5500 compiled throughput paired with the corresponding Blue + Green test checkpoint.';
+      if (note) note.textContent = 'ROD ViT-S is omitted because no Ryzen measurement is available; the remaining eight points are measured compiled runs.';
+    } else {
+      if (desc) desc.textContent = 'Measured H100 eager throughput paired with the corresponding Blue + Green test checkpoint.';
+      if (note) note.textContent = 'All nine points use measured H100 throughput and the matching Blue + Green evaluation policy.';
+    }
 
     const W = 900, H = 450;
     const margin = { top: 40, right: 40, bottom: 55, left: 70 };
     const innerW = W - margin.left - margin.right;
     const innerH = H - margin.top - margin.bottom;
 
-    const maxFps = hwMode === 'rtx5060' ? 1100 : (hwMode === 'ryzen' ? 45 : 300);
+    const observedMaxFps = Math.max(...points.map(point => point.fps), 1);
+    const maxFps = observedMaxFps <= 50
+      ? Math.ceil(observedMaxFps / 10) * 10
+      : observedMaxFps <= 150
+        ? Math.ceil(observedMaxFps / 25) * 25
+        : Math.ceil(observedMaxFps / 50) * 50;
     const minFps = 0;
     const minMIoU = 0.86;
     const maxMIoU = 0.95;
@@ -585,7 +598,7 @@
     }
 
     // Vertical grid lines (FPS)
-    const stepFps = hwMode === 'rtx5060' ? 200 : (hwMode === 'ryzen' ? 10 : 50);
+    const stepFps = maxFps <= 50 ? 10 : (maxFps <= 150 ? 25 : 50);
     for (let f = minFps; f <= maxFps; f += stepFps) {
       const x = xScale(f);
       svgHtml += `
@@ -625,16 +638,30 @@
       `;
     }
 
-    // Draw Model Points
+    const labelPlacement = {
+      'FPN/EfficientNet-B0': { dx: 10, dy: -14, anchor: 'start' },
+      'U-Net/EfficientNet-B0': { dx: -10, dy: -12, anchor: 'end' },
+      'FPN/MobileNetV2': { dx: 10, dy: -12, anchor: 'start' },
+      'SegFormer-B0': { dx: 10, dy: 19, anchor: 'start' },
+      'U-Net/MobileNetV2': { dx: -10, dy: 19, anchor: 'end' },
+      'ROD ViT-S': { dx: 0, dy: -13, anchor: 'middle' },
+      'PIDNet-S': { dx: 0, dy: -13, anchor: 'middle' },
+      'BiSeNetV2': { dx: 0, dy: -13, anchor: 'middle' },
+      'DDRNet-23-Slim': { dx: 0, dy: -13, anchor: 'middle' }
+    };
+
+    // Draw Model Points with deterministic, separated label positions.
     points.forEach(p => {
       const cx = xScale(p.fps);
       const cy = yScale(p.mIoU);
       const isPareto = pareto.some(par => par.name === p.name);
+      const label = labelPlacement[p.name] || { dx: 0, dy: -13, anchor: 'middle' };
+      const fsrText = Number.isFinite(p.fsr) ? (p.fsr * 100).toFixed(2) : '—';
 
       svgHtml += `
-        <g class="chart-point-group" data-name="${escapeHtml(p.name)}" data-fps="${p.fps.toFixed(1)}" data-lat="${p.latencyMs.toFixed(2)}" data-miou="${p.mIoU.toFixed(4)}" data-fsr="${(p.fsr * 100).toFixed(2)}" data-params="${(p.params / 1e6).toFixed(2)}M">
+        <g class="chart-point-group" data-name="${escapeHtml(p.name)}" data-fps="${p.fps.toFixed(1)}" data-lat="${p.latencyMs.toFixed(2)}" data-miou="${p.mIoU.toFixed(4)}" data-fsr="${fsrText}" data-params="${(p.params / 1e6).toFixed(2)}M">
           <circle cx="${cx}" cy="${cy}" r="${isPareto ? 8 : 6}" fill="${p.color}" stroke="#060913" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px ${p.color});" />
-          <text x="${cx}" y="${cy - 12}" fill="${p.color}" font-size="11" font-weight="700" text-anchor="middle" pointer-events="none">${escapeHtml(p.name)}</text>
+          <text x="${cx + label.dx}" y="${cy + label.dy}" fill="${p.color}" font-size="10.5" font-weight="700" text-anchor="${label.anchor}" pointer-events="none">${escapeHtml(p.name)}</text>
         </g>
       `;
     });
@@ -656,7 +683,7 @@
             <div style="font-weight: 800; color: ${MODEL_COLORS[name] || '#fff'}; margin-bottom: 0.25rem;">${name}</div>
             <div>Test mIoU: <strong>${miou}</strong></div>
             <div>Throughput: <strong>${fps} FPS</strong> (${lat} ms)</div>
-            <div>False-Safe Rate: <strong>${fsr}%</strong></div>
+            <div>False-Safe Rate: <strong>${fsr === '—' ? 'not measured in this run' : `${fsr}%`}</strong></div>
             <div>Weights: <strong>${params}</strong></div>
           `;
           tooltip.style.opacity = '1';
@@ -679,9 +706,9 @@
   }
 
   function labelHwText(mode) {
-    if (mode === 'rtx5060') return 'RTX 5060 TensorRT';
-    if (mode === 'ryzen') return 'Ryzen 5500 CPU';
-    return 'H100 NVL';
+    if (mode === 'rtx5060') return 'RTX 5060 PyTorch eager';
+    if (mode === 'ryzen') return 'Ryzen 5500 compiled';
+    return 'H100 NVL eager';
   }
 
   // --- Chart 2: Asymmetric Safety Space (FSR vs FBR) ---

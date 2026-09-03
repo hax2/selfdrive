@@ -280,13 +280,13 @@
           <div class="chart-card-header">
             <div>
               <h3 class="chart-title">Speed vs Accuracy Pareto Frontier</h3>
-              <p class="chart-desc">Throughput vs Test mIoU across 9 architectures. The Pareto boundary represents non-dominated deployment models.</p>
+              <p class="chart-desc" id="pareto-chart-desc">Measured H100 eager throughput paired with the corresponding Blue + Green test checkpoint.</p>
             </div>
             <div class="chart-controls">
               <span class="control-label">Hardware Device:</span>
               <div class="pill-group" id="pareto-hardware-selector">
                 <button class="pill-btn active" data-hw="h100">H100 GPU</button>
-                <button class="pill-btn" data-hw="rtx5060">RTX 5060 Edge</button>
+                <button class="pill-btn" data-hw="rtx5060">RTX 5060 PyTorch</button>
                 <button class="pill-btn" data-hw="ryzen">Ryzen 5500 CPU</button>
               </div>
             </div>
@@ -297,9 +297,8 @@
             <div class="chart-tooltip" id="pareto-tooltip"></div>
           </div>
 
-          <div class="chart-footer-note">
-            <span class="note-bullet">💡</span>
-            <strong>Insight:</strong> <strong>FPN/EfficientNet-B0</strong> dominates the high-accuracy frontier (0.9423 mIoU at 131.4 FPS), while <strong>PIDNet-S</strong> dominates real-time throughput (270.4 FPS on H100, 1038 FPS with TensorRT).
+          <div class="chart-footer-note" id="pareto-chart-note">
+            All points use measured throughput and the matching Blue + Green evaluation policy. Hover a point for the exact values.
           </div>
         </div>
 
