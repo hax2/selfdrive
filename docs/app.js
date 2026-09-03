@@ -470,8 +470,8 @@
                   <th>Checkpoint Epoch</th>
                   <th>Test mIoU</th>
                   <th>F1 Score</th>
-                  <th>False Safe (FSR)</th>
-                  <th>False Block (FBR)</th>
+                  <th>False-Safe (FSR)</th>
+                  <th>False-Block (FBR)</th>
                   <th>Precision</th>
                   <th>Recall</th>
                 </tr>
@@ -533,16 +533,16 @@
         const detail = rtxDetails.find(item => item.model === row.model);
         return {
           name: row.model,
-          fps: row.rtx5060_pytorch_fps,
-          latencyMs: detail?.pytorch_forward_ms ?? (Number.isFinite(row.rtx5060_pytorch_fps) ? 1000 / row.rtx5060_pytorch_fps : null),
-          mIoU: detail?.test_miou_fp32 ?? null,
+          fps: row.rtx5060_trt_fps,
+          latencyMs: detail?.trt_pipeline_ms ?? (Number.isFinite(row.rtx5060_trt_fps) ? 1000 / row.rtx5060_trt_fps : null),
+          mIoU: detail?.test_miou_trt ?? null,
           params: row.params,
-          fsr: null,
+          fsr: detail?.test_fsr_trt ?? null,
           color: MODEL_COLORS[row.model] || '#566278'
         };
       }).filter(point => Number.isFinite(point.fps) && Number.isFinite(point.mIoU));
-      if (desc) desc.textContent = 'Only directly measured PyTorch eager results are shown. TensorRT is excluded to keep the runtime comparison consistent.';
-      if (note) note.textContent = 'RTX 5060 coverage is currently limited to PIDNet-S and ROD ViT-S. TensorRT results remain available in the Deployment section.';
+      if (desc) desc.textContent = 'Measured RTX 5060 TensorRT pipeline throughput paired with each engine\'s full-test mixed-precision mIoU.';
+      if (note) note.textContent = 'RTX 5060 coverage is limited to the exported PIDNet-S and ROD ViT-S checkpoints; camera, planning, and control are excluded.';
     } else if (hwMode === 'ryzen') {
       points = comparison.map(row => ({
         name: row.model,

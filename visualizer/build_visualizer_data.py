@@ -294,7 +294,7 @@ def main():
                 "id": "rtx5060",
                 "name": "NVIDIA GeForce RTX 5060 (Edge GPU)",
                 "type": "Embedded / Edge GPU",
-                "notes": "Batch size 1, 640x384, comparing FP16 PyTorch eager vs TensorRT 10.16 FP16 Engine."
+                "notes": "Batch size 1, 640x384, TensorRT 10.16 FP16-enabled mixed-precision engines."
             },
             {
                 "id": "ryzen5500",
@@ -310,26 +310,23 @@ def main():
                 "trt_forward_fps": edge_pidnet_trt.get("forward", {}).get("fps_from_mean_latency", 1037.97),
                 "trt_pipeline_ms": edge_pidnet_trt.get("pipeline", {}).get("mean_ms", 9.40),
                 "trt_pipeline_fps": edge_pidnet_trt.get("pipeline", {}).get("fps_from_mean_latency", 106.43),
-                "pytorch_forward_ms": edge_summary.get("pidnet_s", {}).get("forward_mean_ms", 8.37),
-                "pytorch_forward_fps": edge_summary.get("pidnet_s", {}).get("forward_fps", 119.41),
-                "pytorch_pipeline_ms": edge_summary.get("pidnet_s", {}).get("pipeline_mean_ms", 14.90),
-                "pytorch_pipeline_fps": edge_summary.get("pidnet_s", {}).get("pipeline_fps", 67.13),
-                "param_memory_mib": edge_summary.get("pidnet_s", {}).get("parameter_memory_mib", 14.54),
-                "peak_vram_mib": edge_summary.get("pidnet_s", {}).get("peak_allocated_mib", 57.86),
-                "test_miou_fp16": edge_summary.get("pidnet_s", {}).get("fp16_full_test_miou", 0.89396),
-                "test_miou_fp32": edge_summary.get("pidnet_s", {}).get("fp32_full_test_miou", 0.89394)
+                "trt_pipeline_p50_ms": edge_pidnet_trt.get("pipeline", {}).get("p50_ms", 9.178),
+                "trt_pipeline_p95_ms": edge_pidnet_trt.get("pipeline", {}).get("p95_ms", 10.943),
+                "test_miou_trt": edge_pidnet_trt.get("fp16_test_metrics", {}).get("mIoU", 0.893764),
+                "test_fsr_trt": edge_pidnet_trt.get("fp16_test_metrics", {}).get("false_safe_rate", 0.043117),
+                "test_fbr_trt": edge_pidnet_trt.get("fp16_test_metrics", {}).get("false_block_rate", 0.070667)
             },
             "rod_vits": {
                 "model": "ROD ViT-S",
-                "trt_available": False,
-                "pytorch_forward_ms": edge_summary.get("rod", {}).get("forward_mean_ms", 31.39),
-                "pytorch_forward_fps": edge_summary.get("rod", {}).get("forward_fps", 31.86),
-                "pytorch_pipeline_ms": edge_summary.get("rod", {}).get("pipeline_mean_ms", 38.36),
-                "pytorch_pipeline_fps": edge_summary.get("rod", {}).get("pipeline_fps", 26.07),
-                "param_memory_mib": edge_summary.get("rod", {}).get("parameter_memory_mib", 55.52),
-                "peak_vram_mib": edge_summary.get("rod", {}).get("peak_allocated_mib", 679.97),
-                "test_miou_fp16": edge_summary.get("rod", {}).get("fp16_full_test_miou", 0.92357),
-                "test_miou_fp32": edge_summary.get("rod", {}).get("fp32_full_test_miou", 0.92357)
+                "trt_forward_ms": edge_rod_trt.get("forward", {}).get("mean_ms", 17.401),
+                "trt_forward_fps": edge_rod_trt.get("forward", {}).get("fps_from_mean_latency", 57.47),
+                "trt_pipeline_ms": edge_rod_trt.get("pipeline", {}).get("mean_ms", 25.392),
+                "trt_pipeline_fps": edge_rod_trt.get("pipeline", {}).get("fps_from_mean_latency", 39.38),
+                "trt_pipeline_p50_ms": edge_rod_trt.get("pipeline", {}).get("p50_ms", 25.255),
+                "trt_pipeline_p95_ms": edge_rod_trt.get("pipeline", {}).get("p95_ms", 26.580),
+                "test_miou_trt": edge_rod_trt.get("fp16_test_metrics", {}).get("mIoU", 0.923635),
+                "test_fsr_trt": edge_rod_trt.get("fp16_test_metrics", {}).get("false_safe_rate", 0.038508),
+                "test_fbr_trt": edge_rod_trt.get("fp16_test_metrics", {}).get("false_block_rate", 0.039574)
             }
         },
         "model_comparison_table": []
@@ -343,15 +340,19 @@ def main():
         ryzen_eag = m.get("ryzen_eager_fps")
         params = m.get("parameters")
         
-        rtx_trt_fps = 1037.97 if name == "PIDNet-S" else None
-        rtx_py_fps = 119.41 if name == "PIDNet-S" else (31.86 if name == "ROD ViT-S" else None)
+        rtx_trt_fps = (
+            edge_pidnet_trt.get("pipeline", {}).get("fps_from_mean_latency")
+            if name == "PIDNet-S"
+            else edge_rod_trt.get("pipeline", {}).get("fps_from_mean_latency")
+            if name == "ROD ViT-S"
+            else None
+        )
 
         hardware_benchmarks["model_comparison_table"].append({
             "model": name,
             "params": params,
             "h100_fps": h100_fps,
             "rtx5060_trt_fps": rtx_trt_fps,
-            "rtx5060_pytorch_fps": rtx_py_fps,
             "ryzen_compiled_fps": ryzen_comp,
             "ryzen_eager_fps": ryzen_eag,
             "mIoU_bg": m["mIoU_mean"],
@@ -403,7 +404,7 @@ def main():
         "worst_false_safe": [
             {
                 "id": "mixed_pln_1278",
-                "title": "Severe False Safe in Hazard Depression",
+                "title": "Severe False-Safe in Hazard Depression",
                 "category": "worst_false_safe",
                 "triptych_url": "/media/outputs/mixed_binary_traversability/test_review/all_triptychs/mixed_pln_1278.png",
                 "overlay_url": "/media/outputs/mixed_binary_traversability/test_review/all_overlays/mixed_pln_1278.png",
@@ -414,7 +415,7 @@ def main():
             },
             {
                 "id": "mixed_pln_610",
-                "title": "False Safe on Dense Off-Road Brush",
+                "title": "False-Safe on Dense Off-Road Brush",
                 "category": "worst_false_safe",
                 "triptych_url": "/media/outputs/mixed_binary_traversability/test_review/all_triptychs/mixed_pln_610.png",
                 "overlay_url": "/media/outputs/mixed_binary_traversability/test_review/all_overlays/mixed_pln_610.png",
@@ -438,7 +439,7 @@ def main():
         "worst_false_block": [
             {
                 "id": "mixed_425",
-                "title": "False Block on Path Dust & Texture Variation",
+                "title": "False-Block on Path Dust & Texture Variation",
                 "category": "worst_false_block",
                 "triptych_url": "/media/outputs/mixed_binary_traversability/test_review/all_triptychs/mixed_425.png",
                 "overlay_url": "/media/outputs/mixed_binary_traversability/test_review/all_overlays/mixed_425.png",
@@ -449,7 +450,7 @@ def main():
             },
             {
                 "id": "mixed_306",
-                "title": "False Block in Tree Canopy Shadow",
+                "title": "False-Block in Tree Canopy Shadow",
                 "category": "worst_false_block",
                 "triptych_url": "/media/outputs/mixed_binary_traversability/test_review/all_triptychs/mixed_306.png",
                 "overlay_url": "/media/outputs/mixed_binary_traversability/test_review/all_overlays/mixed_306.png",
@@ -460,7 +461,7 @@ def main():
             },
             {
                 "id": "mixed_394",
-                "title": "Transition False Block at Curve Entrance",
+                "title": "Transition False-Block at Curve Entrance",
                 "category": "worst_false_block",
                 "triptych_url": "/media/outputs/mixed_binary_traversability/test_review/all_triptychs/mixed_394.png",
                 "overlay_url": "/media/outputs/mixed_binary_traversability/test_review/all_overlays/mixed_394.png",
@@ -624,13 +625,13 @@ def main():
             "id": "05_confusion_matrix_visual",
             "title": "Pixel-Level Confusion Matrix & Asymmetric Error Space",
             "img_url": "/media/look_here/05_confusion_matrix_visual.png",
-            "description": "Definition of True Positives, True Negatives, False Safe (FP, collision hazard), and False Block (FN, unnecessary stop) over 133.7M pixel decisions."
+            "description": "Definition of True Positives, True Negatives, False-Safe (FP, collision hazard), and False-Block (FN, unnecessary stop) over 133.7M pixel decisions."
         },
         {
             "id": "06_tensorrt_frame_budget",
             "title": "Edge Compute Frame Budget Allocation",
             "img_url": "/media/look_here/06_tensorrt_frame_budget.png",
-            "description": "Breakdown of the 100 Hz / 30 Hz autonomous robot control loop, showing inference vs camera I/O, resizing, host-to-device, and planner overhead."
+            "description": "Measured TensorRT pipeline latency within a nominal 30 FPS frame budget; the remaining time is unallocated rather than measured planner headroom."
         },
         {
             "id": "07_safety_evidence_ladder",

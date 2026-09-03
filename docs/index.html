@@ -134,7 +134,7 @@
             <span class="discovery-tag emerald">Edge Real-Time King</span>
             <h4 class="discovery-title">PIDNet-S Achieves 1038 FPS with TensorRT</h4>
             <p class="discovery-text">
-              Under FP16 TensorRT 10 on the RTX 5060 edge GPU, PIDNet-S executes its forward inference in just <strong>0.96 ms (1038 FPS)</strong>, with a complete host-to-device pipeline of 9.40 ms (106 FPS), fitting effortlessly into 100 Hz robotic control loops.
+              Under FP16-enabled mixed-precision TensorRT 10 on the RTX 5060 edge GPU, PIDNet-S executes its device/forward scope in <strong>0.96 ms (1038 FPS)</strong>. Its measured pipeline reaches <strong>9.40 ms (106 FPS)</strong>, excluding camera, planning, and control.
             </p>
           </div>
         </div>
@@ -145,7 +145,7 @@
             <span class="discovery-tag violet">Foundation Model Limits</span>
             <h4 class="discovery-title">ROD ViT-S Cost-Accuracy Asymmetry</h4>
             <p class="discovery-text">
-              While ROD ViT-S (frozen EfficientSAM) provides high-level representation (<strong>0.9331 mIoU</strong>), its inference is 12x slower (21.8 FPS on H100) and requires <strong>680 MiB peak VRAM</strong> versus 58 MiB for PIDNet-S, rendering it impractical on battery-limited rovers.
+              ROD ViT-S (frozen EfficientSAM) reaches <strong>0.9331 mIoU</strong>, but its 21.8 FPS H100 throughput is about 12.4 times lower than PIDNet-S under the shared eager-FP32 protocol. It therefore falls outside the observed H100 accuracy–speed frontier for this dataset and recipe.
             </p>
           </div>
         </div>
@@ -156,7 +156,7 @@
             <span class="discovery-tag amber">Asymmetric Safety Metric</span>
             <h4 class="discovery-title">Why False-Safe Rate (FSR) Governs Autonomy</h4>
             <p class="discovery-text">
-              Standard mIoU masks critical safety failures. An autonomous vehicle mistaking a trench or boulder for safe path (<strong class="text-rose">False Safe</strong>) risks catastrophic rollover, whereas over-conservatively flagging grass (<strong class="text-amber">False Block</strong>) only triggers re-planning.
+              Standard mIoU masks critical safety failures. An autonomous vehicle mistaking a trench or boulder for safe path (<strong class="text-rose">False-Safe</strong>) risks collision or rollover, whereas over-conservatively flagging traversable terrain (<strong class="text-amber">False-Block</strong>) causes an unnecessary stop or re-planning event.
             </p>
           </div>
         </div>
@@ -387,14 +387,14 @@
           <label for="inspector-sample-select" class="select-label">Select Sample Case:</label>
           <select id="inspector-sample-select" class="custom-select">
             <optgroup label="Worst False-Safe Hazards (Acute Rollover)">
-              <option value="mixed_pln_1278">mixed_pln_1278 • Severe False Safe in Hazard Depression</option>
-              <option value="mixed_pln_610">mixed_pln_610 • False Safe on Dense Off-Road Brush</option>
+              <option value="mixed_pln_1278">mixed_pln_1278 • Severe False-Safe in Hazard Depression</option>
+              <option value="mixed_pln_610">mixed_pln_610 • False-Safe on Dense Off-Road Brush</option>
               <option value="mixed_pln_546">mixed_pln_546 • Overhanging Branch & Shadow Ambiguity</option>
             </optgroup>
             <optgroup label="Worst False-Block Errors (Over-Cautious Stops)">
               <option value="mixed_425">mixed_425 • Path Dust & Fine Texture Glare</option>
               <option value="mixed_306">mixed_306 • High-Contrast Harsh Sunlight Shading</option>
-              <option value="mixed_394">mixed_394 • False Block in Rut Depression</option>
+              <option value="mixed_394">mixed_394 • False-Block in Rut Depression</option>
             </optgroup>
             <optgroup label="Worst Boundary Ambiguity">
               <option value="mixed_459">mixed_459 • Soft Trail Edge Boundary Ambiguity</option>
@@ -471,7 +471,7 @@
         <!-- Sample Details Footer -->
         <div class="split-footer" id="split-footer-info">
           <div class="split-sample-meta">
-            <h4 class="sample-title" id="inspector-sample-title">Severe False Safe in Hazard Trench</h4>
+            <h4 class="sample-title" id="inspector-sample-title">Severe False-Safe in Hazard Trench</h4>
             <p class="sample-desc" id="inspector-sample-desc">The model incorrectly classifies an untraversable depression as traversable path, posing an acute rollover hazard.</p>
           </div>
           <div class="split-metrics-badges">
@@ -638,45 +638,35 @@
         </div>
       </div>
 
-      <!-- TensorRT vs PyTorch Deep Dive -->
+      <!-- TensorRT deployment measurements -->
       <div class="section-title-wrap mt-8">
-        <h3 class="section-title">Edge Acceleration: TensorRT 10 vs PyTorch Eager</h3>
-        <p class="section-desc">Measured on NVIDIA GeForce RTX 5060 with identical test batches and test mIoU verification.</p>
+        <h3 class="section-title">RTX 5060 TensorRT Measurements</h3>
+        <p class="section-desc">FP16-enabled mixed-precision TensorRT 10.16 measurements at batch one and 640 × 384 external input, with full-test accuracy verification.</p>
       </div>
 
       <div class="edge-comparison-matrix">
         <div class="trt-detail-card">
           <div class="trt-header">
             <h4>PIDNet-S on RTX 5060</h4>
-            <span class="badge-emerald">1038 FPS Forward Pass</span>
+            <span class="badge-emerald">106.43 Pipeline FPS</span>
           </div>
 
           <div class="trt-stats-grid">
             <div class="stat-box">
               <span class="stat-num text-emerald">0.96 ms</span>
-              <span class="stat-desc">TRT Forward Latency (1038 FPS)</span>
+              <span class="stat-desc">Mean Device/Forward Latency</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-num">1037.97</span>
+              <span class="stat-desc">Device/Forward FPS</span>
             </div>
             <div class="stat-box">
               <span class="stat-num">9.40 ms</span>
-              <span class="stat-desc">TRT Full Pipeline (106 FPS)</span>
+              <span class="stat-desc">Mean Measured-Pipeline Latency</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num">8.37 ms</span>
-              <span class="stat-desc">PyTorch Eager Forward (119 FPS)</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-num text-cyan">8.7x</span>
-              <span class="stat-desc">TensorRT Acceleration Factor</span>
-            </div>
-          </div>
-
-          <div class="memory-bar-wrap">
-            <div class="memory-label">
-              <span>VRAM Allocation: <strong>14.5 MB Params</strong> • <strong>57.9 MB Peak VRAM</strong></span>
-              <span class="text-emerald">Minimal Footprint</span>
-            </div>
-            <div class="memory-bar">
-              <div class="memory-bar-fill emerald" style="width: 8.5%;"></div>
+              <span class="stat-num text-cyan">106.43</span>
+              <span class="stat-desc">Measured-Pipeline FPS</span>
             </div>
           </div>
         </div>
@@ -684,35 +674,25 @@
         <div class="trt-detail-card">
           <div class="trt-header">
             <h4>ROD ViT-S on RTX 5060</h4>
-            <span class="badge-rose">31.9 FPS Forward Pass</span>
+            <span class="badge-rose">39.38 Pipeline FPS</span>
           </div>
 
           <div class="trt-stats-grid">
             <div class="stat-box">
-              <span class="stat-num text-rose">31.39 ms</span>
-              <span class="stat-desc">PyTorch Forward Latency (31.9 FPS)</span>
+              <span class="stat-num text-rose">17.40 ms</span>
+              <span class="stat-desc">Mean Device/Forward Latency</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num">38.36 ms</span>
-              <span class="stat-desc">PyTorch Full Pipeline (26.1 FPS)</span>
+              <span class="stat-num">57.47</span>
+              <span class="stat-desc">Device/Forward FPS</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num">29.1 M</span>
-              <span class="stat-desc">Total Backbone Weights</span>
+              <span class="stat-num">25.39 ms</span>
+              <span class="stat-desc">Mean Measured-Pipeline Latency</span>
             </div>
             <div class="stat-box">
-              <span class="stat-num text-amber">12x Slower</span>
-              <span class="stat-desc">vs PIDNet-S on same GPU</span>
-            </div>
-          </div>
-
-          <div class="memory-bar-wrap">
-            <div class="memory-label">
-              <span>VRAM Allocation: <strong>55.5 MB Params</strong> • <strong>680.0 MB Peak VRAM</strong></span>
-              <span class="text-rose">12x Higher Memory Cost</span>
-            </div>
-            <div class="memory-bar">
-              <div class="memory-bar-fill rose" style="width: 100%;"></div>
+              <span class="stat-num text-amber">39.38</span>
+              <span class="stat-desc">Measured-Pipeline FPS</span>
             </div>
           </div>
         </div>
@@ -720,8 +700,8 @@
 
       <!-- Frame Budget Visualization -->
       <div class="section-title-wrap mt-8">
-        <h3 class="section-title">Autonomous Control Loop Frame Budget Breakdown</h3>
-        <p class="section-desc">How forward inference fits alongside Host-to-Device (H2D), Normalisation, Readout (D2H), and Path Planning budgets.</p>
+        <h3 class="section-title">Measured Pipeline Within a 30 FPS Frame Budget</h3>
+        <p class="section-desc">The coloured portion is measured; the remainder is unallocated time, not a measurement of camera, planning, or control.</p>
       </div>
 
       <div class="budget-card">
@@ -734,27 +714,29 @@
           </div>
         </div>
 
-        <div class="budget-bar-stack">
-          <div class="budget-seg seg-infer" style="width: 9.6%;" title="Forward Pass: 0.96 ms">
-            <span>Infer (0.96ms)</span>
-          </div>
-          <div class="budget-seg seg-io" style="width: 25%;" title="Host-to-Device & Normalise: 2.50 ms">
-            <span>H2D / Norm (2.5ms)</span>
-          </div>
-          <div class="budget-seg seg-d2h" style="width: 15%;" title="Mask Readout D2H: 1.50 ms">
-            <span>Readout (1.5ms)</span>
-          </div>
-          <div class="budget-seg seg-planner" style="width: 50.4%;" title="Available for Path Planner: 5.04 ms in 100Hz">
-            <span>Planner Headroom (5.04ms)</span>
+        <div class="budget-row">
+          <span class="budget-row-label">PIDNet-S</span>
+          <div class="budget-bar-stack">
+            <div class="budget-seg seg-infer" style="width: 28.19%;" title="Measured pipeline: 9.396 ms">
+              <span>9.396 ms</span>
+            </div>
+            <div class="budget-seg seg-unallocated" style="width: 71.81%;" title="Unallocated: 23.937 ms">
+              <span>23.937 ms unallocated</span>
+            </div>
           </div>
         </div>
-
-        <div class="budget-legend">
-          <span class="budget-legend-item"><span class="legend-box infer"></span> GPU TensorRT Inference</span>
-          <span class="budget-legend-item"><span class="legend-box io"></span> Camera Decode / Normalise</span>
-          <span class="budget-legend-item"><span class="legend-box d2h"></span> Device-to-Host Mask Transfer</span>
-          <span class="budget-legend-item"><span class="legend-box planner"></span> Trajectory & Planner Headroom</span>
+        <div class="budget-row">
+          <span class="budget-row-label">ROD ViT-S</span>
+          <div class="budget-bar-stack">
+            <div class="budget-seg seg-d2h" style="width: 76.18%;" title="Measured pipeline: 25.392 ms">
+              <span>25.392 ms</span>
+            </div>
+            <div class="budget-seg seg-unallocated" style="width: 23.82%;" title="Unallocated: 7.941 ms">
+              <span>7.941 ms</span>
+            </div>
+          </div>
         </div>
+        <p class="budget-note">Both measurements exclude disk decode, camera-driver latency, visualisation, planning, actuation, and one-time engine construction.</p>
       </div>
     </section>
 
@@ -784,7 +766,7 @@
         <strong>Learning Binary Traversability from Monocular RGB for Off-Road Navigation</strong> • Master's Thesis • Universidad Carlos III de Madrid (UC3M)
       </p>
       <div class="footer-links">
-        <span class="footer-link">Dataset: CaT & ORFD</span>
+        <a class="footer-link" href="https://github.com/hax2/cat-pidnet-thesis-reproducibility" target="_blank" rel="noopener noreferrer">Reproducibility repository</a>
         <span class="footer-divider">•</span>
         <span class="footer-link">PyTorch 2.13 & TensorRT 10</span>
         <span class="footer-divider">•</span>

@@ -11371,7 +11371,7 @@
         "id": "rtx5060",
         "name": "NVIDIA GeForce RTX 5060 (Edge GPU)",
         "type": "Embedded / Edge GPU",
-        "notes": "Batch size 1, 640x384, comparing FP16 PyTorch eager vs TensorRT 10.16 FP16 Engine."
+        "notes": "Batch size 1, 640x384, TensorRT 10.16 FP16-enabled mixed-precision engines."
       },
       {
         "id": "ryzen5500",
@@ -11387,26 +11387,23 @@
         "trt_forward_fps": 1037.9723198919773,
         "trt_pipeline_ms": 9.395625933757401,
         "trt_pipeline_fps": 106.43250455588225,
-        "pytorch_forward_ms": 8.37478404828289,
-        "pytorch_forward_fps": 119.40606399337942,
-        "pytorch_pipeline_ms": 14.8955339074746,
-        "pytorch_pipeline_fps": 67.13421661899602,
-        "param_memory_mib": 14.540714263916016,
-        "peak_vram_mib": 57.85693359375,
-        "test_miou_fp16": 0.8939638673110821,
-        "test_miou_fp32": 0.8939406948414585
+        "trt_pipeline_p50_ms": 9.178187465295196,
+        "trt_pipeline_p95_ms": 10.943362902617082,
+        "test_miou_trt": 0.8937640836927854,
+        "test_fsr_trt": 0.04311712440189698,
+        "test_fbr_trt": 0.07066656930108693
       },
       "rod_vits": {
         "model": "ROD ViT-S",
-        "trt_available": false,
-        "pytorch_forward_ms": 31.387723726584227,
-        "pytorch_forward_fps": 31.859589714466534,
-        "pytorch_pipeline_ms": 38.35714783381263,
-        "pytorch_pipeline_fps": 26.070760118365186,
-        "param_memory_mib": 55.515384674072266,
-        "peak_vram_mib": 679.9677734375,
-        "test_miou_fp16": 0.9235742541976881,
-        "test_miou_fp32": 0.923568606153993
+        "trt_forward_ms": 17.40140227630036,
+        "trt_forward_fps": 57.466633097835945,
+        "trt_pipeline_ms": 25.391882464828086,
+        "trt_pipeline_fps": 39.38266496724548,
+        "trt_pipeline_p50_ms": 25.255229498725384,
+        "trt_pipeline_p95_ms": 26.57978713978082,
+        "test_miou_trt": 0.9236346417584864,
+        "test_fsr_trt": 0.03850803110390776,
+        "test_fbr_trt": 0.03957369249585658
       }
     },
     "model_comparison_table": [
@@ -11415,7 +11412,6 @@
         "params": 5759614,
         "h100_fps": 131.3980195442369,
         "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": null,
         "ryzen_compiled_fps": 11.69586759099956,
         "ryzen_eager_fps": 5.9212489798204215,
         "mIoU_bg": 0.9315222863386055,
@@ -11427,7 +11423,6 @@
         "params": 6251614,
         "h100_fps": 101.24053289301357,
         "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": null,
         "ryzen_compiled_fps": 9.664434673455546,
         "ryzen_eager_fps": 6.955533182760107,
         "mIoU_bg": 0.9312691678756777,
@@ -11439,7 +11434,6 @@
         "params": 4215554,
         "h100_fps": 147.36369525047468,
         "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": null,
         "ryzen_compiled_fps": 14.261041978994431,
         "ryzen_eager_fps": 7.234255617098604,
         "mIoU_bg": 0.9254734700997386,
@@ -11451,7 +11445,6 @@
         "params": 3714658,
         "h100_fps": 141.2268377628202,
         "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": null,
         "ryzen_compiled_fps": 8.230114708449472,
         "ryzen_eager_fps": 4.377162864328107,
         "mIoU_bg": 0.9254299674143052,
@@ -11463,7 +11456,6 @@
         "params": 6629090,
         "h100_fps": 131.85791282687197,
         "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": null,
         "ryzen_compiled_fps": 10.148451472649054,
         "ryzen_eager_fps": 7.100056308619161,
         "mIoU_bg": 0.9206562329451058,
@@ -11474,8 +11466,7 @@
         "model": "ROD ViT-S",
         "params": 29106050,
         "h100_fps": 21.793652701039072,
-        "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": 31.86,
+        "rtx5060_trt_fps": 39.38266496724548,
         "ryzen_compiled_fps": null,
         "ryzen_eager_fps": null,
         "mIoU_bg": 0.9137570488021668,
@@ -11487,7 +11478,6 @@
         "params": 3341202,
         "h100_fps": 167.7998051817707,
         "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": null,
         "ryzen_compiled_fps": 16.3423967965297,
         "ryzen_eager_fps": 11.484249419852969,
         "mIoU_bg": 0.8867537325273807,
@@ -11498,8 +11488,7 @@
         "model": "PIDNet-S",
         "params": 7623522,
         "h100_fps": 270.3845312905148,
-        "rtx5060_trt_fps": 1037.97,
-        "rtx5060_pytorch_fps": 119.41,
+        "rtx5060_trt_fps": 106.43250455588225,
         "ryzen_compiled_fps": 27.044994350519474,
         "ryzen_eager_fps": 21.161414158897035,
         "mIoU_bg": 0.8822229442228839,
@@ -11511,7 +11500,6 @@
         "params": 5694882,
         "h100_fps": 245.1724379270031,
         "rtx5060_trt_fps": null,
-        "rtx5060_pytorch_fps": null,
         "ryzen_compiled_fps": 36.49962023667147,
         "ryzen_eager_fps": 27.74174943306388,
         "mIoU_bg": 0.8745677383860987,
@@ -11607,7 +11595,7 @@
     "worst_false_safe": [
       {
         "id": "mixed_pln_1278",
-        "title": "Severe False Safe in Hazard Depression",
+        "title": "Severe False-Safe in Hazard Depression",
         "category": "worst_false_safe",
         "triptych_url": "./media/samples/triptychs/mixed_pln_1278.png",
         "overlay_url": "./media/samples/triptychs/mixed_pln_1278.png",
@@ -11618,7 +11606,7 @@
       },
       {
         "id": "mixed_pln_610",
-        "title": "False Safe on Dense Off-Road Brush",
+        "title": "False-Safe on Dense Off-Road Brush",
         "category": "worst_false_safe",
         "triptych_url": "./media/samples/triptychs/mixed_pln_610.png",
         "overlay_url": "./media/samples/triptychs/mixed_pln_610.png",
@@ -11642,7 +11630,7 @@
     "worst_false_block": [
       {
         "id": "mixed_425",
-        "title": "False Block on Path Dust & Texture Variation",
+        "title": "False-Block on Path Dust & Texture Variation",
         "category": "worst_false_block",
         "triptych_url": "./media/samples/triptychs/mixed_425.png",
         "overlay_url": "./media/samples/triptychs/mixed_425.png",
@@ -11653,7 +11641,7 @@
       },
       {
         "id": "mixed_306",
-        "title": "False Block in Tree Canopy Shadow",
+        "title": "False-Block in Tree Canopy Shadow",
         "category": "worst_false_block",
         "triptych_url": "./media/samples/triptychs/mixed_306.png",
         "overlay_url": "./media/samples/triptychs/mixed_306.png",
@@ -11664,7 +11652,7 @@
       },
       {
         "id": "mixed_394",
-        "title": "Transition False Block at Curve Entrance",
+        "title": "Transition False-Block at Curve Entrance",
         "category": "worst_false_block",
         "triptych_url": "./media/samples/triptychs/mixed_394.png",
         "overlay_url": "./media/samples/triptychs/mixed_394.png",
@@ -11826,13 +11814,13 @@
       "id": "05_confusion_matrix_visual",
       "title": "Pixel-Level Confusion Matrix & Asymmetric Error Space",
       "img_url": "./media/look_here/05_confusion_matrix_visual.png",
-      "description": "Definition of True Positives, True Negatives, False Safe (FP, collision hazard), and False Block (FN, unnecessary stop) over 133.7M pixel decisions."
+      "description": "Definition of True Positives, True Negatives, False-Safe (FP, collision hazard), and False-Block (FN, unnecessary stop) over 133.7M pixel decisions."
     },
     {
       "id": "06_tensorrt_frame_budget",
       "title": "Edge Compute Frame Budget Allocation",
       "img_url": "./media/look_here/06_tensorrt_frame_budget.png",
-      "description": "Breakdown of the 100 Hz / 30 Hz autonomous robot control loop, showing inference vs camera I/O, resizing, host-to-device, and planner overhead."
+      "description": "Measured TensorRT pipeline latency within a nominal 30 FPS frame budget; the remaining time is unallocated rather than measured planner headroom."
     },
     {
       "id": "07_safety_evidence_ladder",
