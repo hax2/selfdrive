@@ -5,11 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TTFM Off-Road Traversability Segmentation | Research Visualizer</title>
   <meta name="description" content="Interactive research visualizer for binary off-road traversability segmentation benchmarking 9 deep learning architectures, convergence-aware training, asymmetric safety errors, and edge hardware deployment.">
+  <meta name="theme-color" content="#f2f1ec">
+  <link rel="canonical" href="https://samermakes.com/selfdrive/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="TTFM Traversability — Off-road autonomy, measured.">
+  <meta property="og:description" content="Compare nine segmentation architectures across accuracy, asymmetric safety errors, convergence, and edge deployment.">
+  <meta property="og:url" content="https://samermakes.com/selfdrive/">
+  <meta property="og:image" content="https://samermakes.com/selfdrive/og.png">
+  <meta property="og:image:width" content="1672">
+  <meta property="og:image:height" content="941">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TTFM Traversability — Off-road autonomy, measured.">
+  <meta name="twitter:description" content="Compare nine segmentation architectures across accuracy, asymmetric safety errors, convergence, and edge deployment.">
+  <meta name="twitter:image" content="https://samermakes.com/selfdrive/og.png">
   
-  <!-- Google Fonts: Outfit & JetBrains Mono -->
+  <!-- Typefaces: readable editorial sans + technical mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="./index.css">
 </head>
@@ -18,44 +31,44 @@
   <header class="app-header" id="app-header">
     <div class="header-inner">
       <div class="header-brand">
-        <div class="brand-badge-pulse" aria-hidden="true"></div>
+        <div class="brand-mark" aria-hidden="true">T</div>
         <div class="brand-titles">
           <h1 class="brand-title">TTFM <span class="brand-accent">Traversability</span></h1>
-          <p class="brand-subtitle">Off-Road Autonomous Driving • Research Benchmark Visualizer</p>
+          <p class="brand-subtitle">Off-road autonomy benchmark</p>
         </div>
       </div>
       
       <div class="header-meta">
-        <div class="meta-tag"><span class="tag-dot cyan"></span> 9 Architectures</div>
-        <div class="meta-tag"><span class="tag-dot emerald"></span> 81+ Controlled Runs</div>
-        <div class="meta-tag"><span class="tag-dot violet"></span> 133.7M Test Pixels</div>
+        <div class="meta-tag">9 architectures</div>
+        <div class="meta-tag">81 controlled runs</div>
+        <div class="meta-tag">133.7M test pixels</div>
         <div class="meta-tag institution-tag">UC3M Thesis 2026</div>
       </div>
     </div>
 
     <!-- Navigation Tabs -->
-    <nav class="nav-tabs-bar" aria-label="Main Navigation">
-      <div class="nav-tabs-container">
-        <button class="nav-tab active" id="tab-btn-overview" data-target="view-overview">
-          <span class="tab-icon">📊</span> Executive Overview
+    <nav class="nav-tabs-bar" aria-label="Research sections">
+      <div class="nav-tabs-container" role="tablist">
+        <button class="nav-tab active" id="tab-btn-overview" data-target="view-overview" role="tab" aria-controls="view-overview" aria-selected="true">
+          Overview
         </button>
-        <button class="nav-tab" id="tab-btn-leaderboard" data-target="view-leaderboard">
-          <span class="tab-icon">🏆</span> Leaderboard
+        <button class="nav-tab" id="tab-btn-leaderboard" data-target="view-leaderboard" role="tab" aria-controls="view-leaderboard" aria-selected="false" tabindex="-1">
+          Results
         </button>
-        <button class="nav-tab" id="tab-btn-analytics" data-target="view-analytics">
-          <span class="tab-icon">📈</span> Pareto & Analytics
+        <button class="nav-tab" id="tab-btn-analytics" data-target="view-analytics" role="tab" aria-controls="view-analytics" aria-selected="false" tabindex="-1">
+          Analysis
         </button>
-        <button class="nav-tab" id="tab-btn-inspector" data-target="view-inspector">
-          <span class="tab-icon">🔍</span> Interactive Mask Inspector
+        <button class="nav-tab" id="tab-btn-inspector" data-target="view-inspector" role="tab" aria-controls="view-inspector" aria-selected="false" tabindex="-1">
+          Mask inspector
         </button>
-        <button class="nav-tab" id="tab-btn-gallery" data-target="view-gallery">
-          <span class="tab-icon">🖼️</span> Qualitative Gallery
+        <button class="nav-tab" id="tab-btn-gallery" data-target="view-gallery" role="tab" aria-controls="view-gallery" aria-selected="false" tabindex="-1">
+          Cases
         </button>
-        <button class="nav-tab" id="tab-btn-hardware" data-target="view-hardware">
-          <span class="tab-icon">⚡</span> Edge Hardware Lab
+        <button class="nav-tab" id="tab-btn-hardware" data-target="view-hardware" role="tab" aria-controls="view-hardware" aria-selected="false" tabindex="-1">
+          Deployment
         </button>
-        <button class="nav-tab" id="tab-btn-theory" data-target="view-theory">
-          <span class="tab-icon">📚</span> Thesis Figures & Theory
+        <button class="nav-tab" id="tab-btn-theory" data-target="view-theory" role="tab" aria-controls="view-theory" aria-selected="false" tabindex="-1">
+          Methods
         </button>
       </div>
     </nav>
@@ -67,27 +80,27 @@
     <!-- ============================================================== -->
     <!-- VIEW 1: EXECUTIVE OVERVIEW & KPIS                              -->
     <!-- ============================================================== -->
-    <section class="view-panel active" id="view-overview">
+    <section class="view-panel active" id="view-overview" role="tabpanel" aria-labelledby="tab-btn-overview">
       <!-- Hero Banner -->
       <div class="hero-card">
         <div class="hero-content">
-          <div class="hero-badge">Research Synthesis • CaT Off-Road Dataset</div>
-          <h2 class="hero-heading">High-Accuracy Real-Time Traversability vs Foundation SAM Baselines</h2>
+          <div class="hero-badge">CaT off-road dataset / master's thesis / 2026</div>
+          <h2 class="hero-heading">Which segmentation models are safe enough—and fast enough—for off-road autonomy?</h2>
           <p class="hero-lead">
-            A comprehensive investigation evaluating 9 deep learning models across 3 seeds under matched optimization,
-            analyzing the asymmetric error trade-off between <strong class="text-rose">False-Safe hazards</strong> (catastrophic obstacle misses)
-            and <strong class="text-amber">False-Block delays</strong> (phantom stops), alongside edge acceleration on RTX 5060, H100, and Ryzen CPUs.
+            Nine segmentation architectures, three controlled seeds, and 133.7 million test-pixel decisions.
+            Compare accuracy with the errors that matter in motion: <strong class="text-rose">false-safe</strong> pixels can admit obstacles,
+            while <strong class="text-amber">false-block</strong> pixels can stop a viable route. Deployment results cover RTX 5060, H100, and Ryzen CPU hardware.
           </p>
           
           <div class="hero-actions">
             <button class="btn btn-primary" id="btn-hero-explore-leaderboard">
-              <span>Explore Full Leaderboard</span> →
+              <span>Compare models</span> →
             </button>
             <button class="btn btn-glass" id="btn-hero-inspect-masks">
-              <span>Interactive Mask Splitter</span>
+              <span>Inspect predictions</span>
             </button>
             <button class="btn btn-glass" id="btn-hero-pareto">
-              <span>View Pareto Frontier</span>
+              <span>View trade-offs</span>
             </button>
           </div>
         </div>
@@ -105,7 +118,7 @@
 
       <div class="discovery-grid">
         <div class="discovery-card cyan-border">
-          <div class="card-icon cyan-bg">🏆</div>
+          <div class="card-index" aria-hidden="true">01</div>
           <div class="discovery-body">
             <span class="discovery-tag cyan">Accuracy Champion</span>
             <h4 class="discovery-title">FPN/EfficientNet-B0 Outperforms 5x Larger Models</h4>
@@ -116,7 +129,7 @@
         </div>
 
         <div class="discovery-card emerald-border">
-          <div class="card-icon emerald-bg">⚡</div>
+          <div class="card-index" aria-hidden="true">02</div>
           <div class="discovery-body">
             <span class="discovery-tag emerald">Edge Real-Time King</span>
             <h4 class="discovery-title">PIDNet-S Achieves 1038 FPS with TensorRT</h4>
@@ -127,7 +140,7 @@
         </div>
 
         <div class="discovery-card violet-border">
-          <div class="card-icon violet-bg">🤖</div>
+          <div class="card-index" aria-hidden="true">03</div>
           <div class="discovery-body">
             <span class="discovery-tag violet">Foundation Model Limits</span>
             <h4 class="discovery-title">ROD ViT-S Cost-Accuracy Asymmetry</h4>
@@ -138,7 +151,7 @@
         </div>
 
         <div class="discovery-card amber-border">
-          <div class="card-icon amber-bg">🛡️</div>
+          <div class="card-index" aria-hidden="true">04</div>
           <div class="discovery-body">
             <span class="discovery-tag amber">Asymmetric Safety Metric</span>
             <h4 class="discovery-title">Why False-Safe Rate (FSR) Governs Autonomy</h4>
@@ -163,7 +176,7 @@
     <!-- ============================================================== -->
     <!-- VIEW 2: INTERACTIVE BENCHMARK LEADERBOARD                      -->
     <!-- ============================================================== -->
-    <section class="view-panel" id="view-leaderboard">
+    <section class="view-panel" id="view-leaderboard" role="tabpanel" aria-labelledby="tab-btn-leaderboard">
       <div class="panel-header">
         <div>
           <h2 class="panel-heading">Comprehensive Benchmark Leaderboard</h2>
@@ -190,7 +203,7 @@
       <!-- Controls & Filter Toolbar -->
       <div class="table-toolbar">
         <div class="search-box">
-          <span class="search-icon">🔎</span>
+          <span class="search-icon" aria-hidden="true">/</span>
           <input type="text" id="leaderboard-search-input" placeholder="Search architecture, family, or backbone..." aria-label="Search models">
         </div>
 
@@ -252,7 +265,7 @@
     <!-- ============================================================== -->
     <!-- VIEW 3: PARETO FRONTIER & VISUAL ANALYTICS                     -->
     <!-- ============================================================== -->
-    <section class="view-panel" id="view-analytics">
+    <section class="view-panel" id="view-analytics" role="tabpanel" aria-labelledby="tab-btn-analytics">
       <div class="panel-header">
         <div>
           <h2 class="panel-heading">Visual Analytics & Pareto Frontiers</h2>
@@ -306,7 +319,7 @@
           </div>
 
           <div class="chart-footer-note">
-            <span class="note-bullet">🛡️</span>
+            <span class="note-bullet" aria-hidden="true">Safety:</span>
             <strong>Danger Zone:</strong> Models in the right sector risk severe collisions by failing to detect drop-offs or rocks.
           </div>
         </div>
@@ -326,7 +339,7 @@
           </div>
 
           <div class="chart-footer-note">
-            <span class="note-bullet">📈</span>
+            <span class="note-bullet" aria-hidden="true">Finding:</span>
             <strong>Major Impact:</strong> Real-time models like PIDNet-S gain <strong>+3.73 pp</strong> and DDRNet gains <strong>+3.49 pp</strong> under convergence training.
           </div>
         </div>
@@ -363,7 +376,7 @@
     <!-- ============================================================== -->
     <!-- VIEW 4: INTERACTIVE MASK SPLIT INSPECTOR                       -->
     <!-- ============================================================== -->
-    <section class="view-panel" id="view-inspector">
+    <section class="view-panel" id="view-inspector" role="tabpanel" aria-labelledby="tab-btn-inspector">
       <div class="panel-header">
         <div>
           <h2 class="panel-heading">Interactive Mask Split Inspector</h2>
@@ -448,7 +461,7 @@
 
           <!-- Draggable Divider -->
           <div class="split-divider" id="split-divider">
-            <div class="split-handle" aria-label="Drag to adjust split position">
+            <div class="split-handle" role="slider" tabindex="0" aria-label="Comparison split position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50 percent">
               <span class="handle-arrow">◀</span>
               <span class="handle-bar"></span>
               <span class="handle-arrow">▶</span>
@@ -498,11 +511,11 @@
     <!-- ============================================================== -->
     <!-- VIEW 5: QUALITATIVE GALLERY & 544 TEST BROWSER                -->
     <!-- ============================================================== -->
-    <section class="view-panel" id="view-gallery">
+    <section class="view-panel" id="view-gallery" role="tabpanel" aria-labelledby="tab-btn-gallery">
       <div class="panel-header">
         <div>
           <h2 class="panel-heading">Qualitative Review Gallery</h2>
-          <p class="panel-desc">Curated failure mode taxonomy, percentile performance slices, field robot sequences, and complete 544 test image browser.</p>
+          <p class="panel-desc">Curated failure modes, percentile slices, field-robot sequences, and the test images packaged with this visualizer.</p>
         </div>
 
         <!-- Category Filter Pills -->
@@ -514,17 +527,17 @@
           <button class="pill-btn" data-cat="percentiles">Percentile Slices</button>
           <button class="pill-btn" data-cat="alice_sequence">ALICE Field Robot</button>
           <button class="pill-btn" data-cat="success_cases">Success Highlights</button>
-          <button class="pill-btn" data-cat="all_544_browser">Browse 544 Test Set</button>
+          <button class="pill-btn" data-cat="all_544_browser" id="btn-browse-test-set">Browse packaged test set</button>
         </div>
       </div>
 
       <!-- Search & Controls for 544 Browser (Hidden by default, active when browsing) -->
       <div class="gallery-search-bar hidden" id="browser-search-bar">
         <div class="search-box">
-          <span class="search-icon">🔎</span>
-          <input type="text" id="browser-search-input" placeholder="Search sample by ID (e.g. mixed_100, mixed_pln_961)...">
+          <span class="search-icon" aria-hidden="true">/</span>
+          <input type="text" id="browser-search-input" aria-label="Search packaged test samples" placeholder="Search by sample ID">
         </div>
-        <div class="pagination-info" id="browser-pagination-info">Showing samples 1 - 24 of 544</div>
+        <div class="pagination-info" id="browser-pagination-info" aria-live="polite">Showing packaged samples</div>
         <div class="pagination-controls">
           <button class="btn btn-sm btn-glass" id="btn-prev-page">◀ Prev</button>
           <button class="btn btn-sm btn-glass" id="btn-next-page">Next ▶</button>
@@ -540,7 +553,7 @@
     <!-- ============================================================== -->
     <!-- VIEW 6: EDGE HARDWARE LAB & DEPLOYMENT BENCHMARK               -->
     <!-- ============================================================== -->
-    <section class="view-panel" id="view-hardware">
+    <section class="view-panel" id="view-hardware" role="tabpanel" aria-labelledby="tab-btn-hardware">
       <div class="panel-header">
         <div>
           <h2 class="panel-heading">Edge Hardware Deployment Lab</h2>
@@ -553,7 +566,7 @@
         <!-- H100 Card -->
         <div class="hw-card cyan-border">
           <div class="hw-card-header">
-            <div class="hw-icon cyan">☁️</div>
+            <div class="hw-icon cyan" aria-hidden="true">H1</div>
             <div>
               <h3 class="hw-name">NVIDIA H100 NVL MIG</h3>
               <span class="hw-sub">Cloud / Server GPU Baseline</span>
@@ -578,7 +591,7 @@
         <!-- RTX 5060 Card -->
         <div class="hw-card emerald-border">
           <div class="hw-card-header">
-            <div class="hw-icon emerald">⚡</div>
+            <div class="hw-icon emerald" aria-hidden="true">E1</div>
             <div>
               <h3 class="hw-name">NVIDIA GeForce RTX 5060</h3>
               <span class="hw-sub">Embedded Autonomous Rover GPU</span>
@@ -603,7 +616,7 @@
         <!-- Ryzen 5500 Card -->
         <div class="hw-card amber-border">
           <div class="hw-card-header">
-            <div class="hw-icon amber">🖥️</div>
+            <div class="hw-icon amber" aria-hidden="true">C1</div>
             <div>
               <h3 class="hw-name">AMD Ryzen 5 5500</h3>
               <span class="hw-sub">Low-Power Robot Embedded CPU</span>
@@ -749,7 +762,7 @@
     <!-- ============================================================== -->
     <!-- VIEW 7: THESIS THEORY & CONCEPTS GALLERY                      -->
     <!-- ============================================================== -->
-    <section class="view-panel" id="view-theory">
+    <section class="view-panel" id="view-theory" role="tabpanel" aria-labelledby="tab-btn-theory">
       <div class="panel-header">
         <div>
           <h2 class="panel-heading">Thesis Conceptual Diagrams & Explanations</h2>
@@ -782,8 +795,8 @@
   </footer>
 
   <!-- Seed Details Modal Dialog (Placed at body root for true fixed overlay) -->
-  <div class="modal-backdrop" id="seed-modal-backdrop">
-    <div class="modal-dialog" id="seed-modal-dialog">
+  <div class="modal-backdrop" id="seed-modal-backdrop" aria-hidden="true">
+    <div class="modal-dialog" id="seed-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="seed-modal-title" tabindex="-1">
       <div class="modal-header">
         <div>
           <h3 class="modal-title" id="seed-modal-title">Model Multi-Seed Ledger</h3>
@@ -798,8 +811,8 @@
   </div>
 
   <!-- Image High-Res Lightbox Modal (Placed at body root for true fixed overlay) -->
-  <div class="modal-backdrop" id="image-modal-backdrop">
-    <div class="modal-dialog modal-large" id="image-modal-dialog">
+  <div class="modal-backdrop" id="image-modal-backdrop" aria-hidden="true">
+    <div class="modal-dialog modal-large" id="image-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="lightbox-title" tabindex="-1">
       <div class="modal-header">
         <div>
           <h3 class="modal-title" id="lightbox-title">Sample Inspection</h3>

@@ -94,7 +94,9 @@ def main():
                         elif (DOCS / "media" / "look_here" / fn).exists():
                             it[key] = f"./media/look_here/{fn}"
 
-    # Update test samples
+    # Keep only samples whose assets are actually packaged. Substituting a
+    # representative image for missing samples makes the browser misleading.
+    packaged_test_samples = []
     for ts in data.get("test_samples", []):
         sid = ts.get("id", "")
         if sid in copied_samples:
@@ -102,12 +104,8 @@ def main():
             ts["overlay_url"] = f"./media/samples/overlays/{sid}.png"
             ts["raw_rgb_url"] = f"./media/samples/images/{sid}.png"
             ts["raw_mask_url"] = f"./media/samples/masks/{sid}.png"
-        else:
-            # Fallback for non-packaged samples to mixed_100 or representative sample
-            ts["triptych_url"] = f"./media/samples/triptychs/mixed_100.png"
-            ts["overlay_url"] = f"./media/samples/overlays/mixed_100.png"
-            ts["raw_rgb_url"] = f"./media/samples/images/mixed_100.png"
-            ts["raw_mask_url"] = f"./media/samples/masks/mixed_100.png"
+            packaged_test_samples.append(ts)
+    data["test_samples"] = packaged_test_samples
 
     # Write relative benchmark_data.json
     (DOCS / "data" / "benchmark_data.json").write_text(json.dumps(data, indent=2), encoding="utf-8")
@@ -136,6 +134,9 @@ def main():
     js = js.replace("const triptychUrl = `/media/outputs/mixed_binary_traversability/test_review/all_triptychs/${sampleId}.png`;", "const triptychUrl = `./media/samples/triptychs/${sampleId}.png`;")
 
     (DOCS / "app.js").write_text(js, encoding="utf-8")
+    og_image = ROOT / "visualizer" / "public" / "og.png"
+    if og_image.exists():
+        shutil.copy2(og_image, DOCS / "og.png")
     print("Static files (index.html, index.css, app.js) successfully prepared in docs/!")
 
 if __name__ == "__main__":

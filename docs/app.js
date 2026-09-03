@@ -34,17 +34,19 @@
     browserQuery: ''
   };
 
+  let lastFocusedElement = null;
+
   // Color Palette Constants for Charts & Models
   const MODEL_COLORS = {
-    'FPN/EfficientNet-B0': '#00e5ff',
-    'U-Net/EfficientNet-B0': '#38bdf8',
-    'FPN/MobileNetV2': '#818cf8',
-    'SegFormer-B0': '#a855f7',
-    'U-Net/MobileNetV2': '#c084fc',
-    'ROD ViT-S': '#f43f5e',
-    'PIDNet-S': '#10b981',
-    'BiSeNetV2': '#f59e0b',
-    'DDRNet-23-Slim': '#fb923c'
+    'FPN/EfficientNet-B0': '#146b55',
+    'U-Net/EfficientNet-B0': '#347b75',
+    'FPN/MobileNetV2': '#486b82',
+    'SegFormer-B0': '#59617a',
+    'U-Net/MobileNetV2': '#76637a',
+    'ROD ViT-S': '#a8493f',
+    'PIDNet-S': '#55733e',
+    'BiSeNetV2': '#9b681b',
+    'DDRNet-23-Slim': '#8b5940'
   };
 
   // =========================================================================
@@ -62,8 +64,6 @@
       const res = await fetch('./data/benchmark_data.json');
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       state.data = await res.json();
-      console.log('Benchmark dataset loaded successfully:', state.data);
-
       renderOverview();
       renderLeaderboard();
       renderParetoChart();
@@ -73,6 +73,7 @@
       renderGallery();
       renderTheoryGallery();
       updateSplitInspectorSample(state.currentSampleId);
+      updatePackagedSampleCount();
     } catch (err) {
       console.error('Failed to load benchmark data:', err);
       const main = document.getElementById('app-main');
@@ -93,11 +94,35 @@
 
   function setupNavigation() {
     const tabs = document.querySelectorAll('.nav-tab');
-    tabs.forEach(tab => {
+    tabs.forEach((tab, index) => {
       tab.addEventListener('click', () => {
         const targetId = tab.getAttribute('data-target');
         switchView(targetId);
       });
+
+      tab.addEventListener('keydown', event => {
+        let nextIndex = null;
+        if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+        if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === 'Home') nextIndex = 0;
+        if (event.key === 'End') nextIndex = tabs.length - 1;
+        if (nextIndex !== null) {
+          event.preventDefault();
+          tabs[nextIndex].focus();
+          switchView(tabs[nextIndex].getAttribute('data-target'));
+        }
+      });
+    });
+
+    const initialView = window.location.hash.replace('#', '');
+    const validInitialView = document.getElementById(initialView)?.classList.contains('view-panel');
+    switchView(validInitialView ? initialView : 'view-overview', false);
+
+    window.addEventListener('hashchange', () => {
+      const viewId = window.location.hash.replace('#', '');
+      if (document.getElementById(viewId)?.classList.contains('view-panel')) {
+        switchView(viewId, false);
+      }
     });
 
     // Hero buttons
@@ -111,18 +136,29 @@
     if (btnPareto) btnPareto.addEventListener('click', () => switchView('view-analytics'));
   }
 
-  function switchView(viewId) {
+  function switchView(viewId, updateHash = true) {
+    const nextPanel = document.getElementById(viewId);
+    if (!nextPanel || !nextPanel.classList.contains('view-panel')) return;
     state.currentView = viewId;
 
     // Update Nav Tab UI
     document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.classList.toggle('active', tab.getAttribute('data-target') === viewId);
+      const isActive = tab.getAttribute('data-target') === viewId;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', String(isActive));
+      tab.tabIndex = isActive ? 0 : -1;
     });
 
     // Update View Panels
     document.querySelectorAll('.view-panel').forEach(panel => {
-      panel.classList.toggle('active', panel.id === viewId);
+      const isActive = panel.id === viewId;
+      panel.classList.toggle('active', isActive);
+      panel.setAttribute('aria-hidden', String(!isActive));
     });
+
+    if (updateHash && window.location.hash !== `#${viewId}`) {
+      history.pushState(null, '', `#${viewId}`);
+    }
 
     // Re-render charts or resize responsive elements
     if (viewId === 'view-analytics') {
@@ -134,7 +170,8 @@
       }, 50);
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    window.scrollTo({ top: 0, behavior });
   }
 
   // =========================================================================
@@ -223,6 +260,19 @@
     } else if (policy === 'blue_only') {
       models = [...(state.data.suites.blue_only || [])];
     }
+
+    // Convergence records intentionally contain training metrics only. Join
+    // deployment metadata by model name instead of showing one hard-coded
+    // model's parameter count and speed for every missing value.
+    const deploymentRecords = state.data.suites.blue_green || [];
+    models = models.map(model => {
+      const deployment = deploymentRecords.find(item => item.model === model.model) || {};
+      return {
+        ...model,
+        parameters: model.parameters ?? deployment.parameters ?? null,
+        h100_fps: model.h100_fps ?? deployment.h100_fps ?? null
+      };
+    });
 
     // Filter by Family
     if (state.familyFilter !== 'all') {
@@ -314,8 +364,8 @@
       }
 
       // Speed
-      const fpsStr = m.h100_fps ? m.h100_fps.toFixed(1) : (policy === 'convergence' ? '131.4*' : '--');
-      const paramsStr = m.parameters ? (m.parameters / 1e6).toFixed(2) + 'M' : '5.76M*';
+      const fpsStr = Number.isFinite(m.h100_fps) ? m.h100_fps.toFixed(1) : '—';
+      const paramsStr = Number.isFinite(m.parameters) ? (m.parameters / 1e6).toFixed(2) + 'M' : '—';
 
       return `
         <tr data-model="${escapeHtml(m.model)}">
@@ -360,6 +410,11 @@
         const modelName = btn.getAttribute('data-model');
         openSeedModal(modelName);
       });
+    });
+
+    document.querySelectorAll('.benchmark-table th.sortable').forEach(th => {
+      const isCurrent = th.getAttribute('data-sort') === state.currentSort.key;
+      th.setAttribute('aria-sort', isCurrent ? (state.currentSort.dir === 'asc' ? 'ascending' : 'descending') : 'none');
     });
   }
 
@@ -441,7 +496,7 @@
       `;
     }
 
-    if (modalBackdrop) modalBackdrop.classList.add('open');
+    openModal(modalBackdrop, document.getElementById('seed-modal-dialog'));
   }
 
   // =========================================================================
@@ -939,6 +994,12 @@
       fgLayer.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
       fgLayer.style.webkitClipPath = `inset(0 ${100 - pct}% 0 0)`;
       divider.style.left = `${pct}%`;
+      const handle = divider.querySelector('.split-handle');
+      if (handle) {
+        const rounded = Math.round(pct);
+        handle.setAttribute('aria-valuenow', String(rounded));
+        handle.setAttribute('aria-valuetext', `${rounded} percent`);
+      }
     }
 
     function calculatePercent(clientX) {
@@ -974,6 +1035,20 @@
     container.addEventListener('touchstart', startDrag, { passive: true });
     window.addEventListener('touchmove', onMove, { passive: true });
     window.addEventListener('touchend', stopDrag);
+
+    const handle = divider.querySelector('.split-handle');
+    if (handle) {
+      handle.addEventListener('keydown', event => {
+        if (state.splitMode === 'triptych') return;
+        const step = event.shiftKey ? 10 : 2;
+        if (event.key === 'ArrowLeft') setSplit(state.splitPercent - step);
+        else if (event.key === 'ArrowRight') setSplit(state.splitPercent + step);
+        else if (event.key === 'Home') setSplit(0);
+        else if (event.key === 'End') setSplit(100);
+        else return;
+        event.preventDefault();
+      });
+    }
 
     // Initial 50% split
     setSplit(50);
@@ -1083,7 +1158,7 @@
 
       return `
         <div class="gallery-card" data-id="${escapeHtml(item.id)}" data-thumb="${escapeHtml(thumb)}" data-title="${escapeHtml(item.title)}" data-desc="${escapeHtml(item.description)}">
-          <div class="gallery-thumb-wrap" style="cursor: zoom-in;" title="Click to view full image">
+          <div class="gallery-thumb-wrap" role="button" tabindex="0" aria-label="Open ${escapeHtml(item.title)} image preview">
             <img src="${escapeHtml(thumb)}" alt="${escapeHtml(item.title)}" loading="lazy">
             <span class="gallery-card-badge fsr-tag ${badgeClass}">
               ${escapeHtml(item.category.replace(/_/g, ' '))}
@@ -1097,7 +1172,7 @@
             <div class="gallery-card-footer">
               <span>Sample: ${escapeHtml(item.id)}</span>
               <button type="button" class="btn-inspect-direct" data-id="${escapeHtml(item.id)}" title="Inspect in Interactive Mask Inspector">
-                Inspect 🔎
+                Inspect
               </button>
             </div>
           </div>
@@ -1126,13 +1201,10 @@
         const desc = card.getAttribute('data-desc');
         openImageLightbox(thumb, title, desc, id);
       });
-    });
-
-    // Clicking the rest of the card also inspects
-    container.querySelectorAll('.gallery-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.getAttribute('data-id');
-        openInInspector(id);
+      wrap.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        wrap.click();
       });
     });
   }
@@ -1152,12 +1224,24 @@
 
     const info = document.getElementById('browser-pagination-info');
     if (info) {
-      info.textContent = `Showing samples ${startIdx + 1} - ${Math.min(startIdx + state.browserPerPage, total)} of ${total}`;
+      info.textContent = total
+        ? `Showing ${startIdx + 1}–${Math.min(startIdx + state.browserPerPage, total)} of ${total} packaged samples`
+        : 'No packaged samples match that ID';
+    }
+
+    const prevButton = document.getElementById('btn-prev-page');
+    const nextButton = document.getElementById('btn-next-page');
+    if (prevButton) prevButton.disabled = state.browserPage <= 1;
+    if (nextButton) nextButton.disabled = startIdx + state.browserPerPage >= total;
+
+    if (!paged.length) {
+      container.innerHTML = '<p class="empty-state">No samples found. Try a shorter sample ID.</p>';
+      return;
     }
 
     container.innerHTML = paged.map(s => `
       <div class="gallery-card" data-id="${escapeHtml(s.id)}" data-thumb="${escapeHtml(s.triptych_url)}" data-title="Test Sample: ${escapeHtml(s.id)}" data-desc="Official test sample triptych (RGB, Ground Truth, Prediction).">
-        <div class="gallery-thumb-wrap" style="cursor: zoom-in;" title="Click to view full image">
+        <div class="gallery-thumb-wrap" role="button" tabindex="0" aria-label="Open ${escapeHtml(s.id)} image preview">
           <img src="${escapeHtml(s.triptych_url)}" alt="${escapeHtml(s.id)}" loading="lazy">
           <span class="gallery-card-badge fsr-tag cyan">Test Set</span>
         </div>
@@ -1169,7 +1253,7 @@
           <div class="gallery-card-footer">
             <span>640x384</span>
             <button type="button" class="btn-inspect-direct" data-id="${escapeHtml(s.id)}" title="Inspect in Interactive Mask Inspector">
-              Inspect 🔎
+              Inspect
             </button>
           </div>
         </div>
@@ -1195,12 +1279,10 @@
         const desc = card.getAttribute('data-desc');
         openImageLightbox(thumb, title, desc, id);
       });
-    });
-
-    container.querySelectorAll('.gallery-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.getAttribute('data-id');
-        openInInspector(id);
+      wrap.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        wrap.click();
       });
     });
   }
@@ -1211,9 +1293,9 @@
 
     // Close any open modals
     const imgBackdrop = document.getElementById('image-modal-backdrop');
-    if (imgBackdrop) imgBackdrop.classList.remove('open');
+    if (imgBackdrop?.classList.contains('open')) closeModal(imgBackdrop);
     const seedBackdrop = document.getElementById('seed-modal-backdrop');
-    if (seedBackdrop) seedBackdrop.classList.remove('open');
+    if (seedBackdrop?.classList.contains('open')) closeModal(seedBackdrop);
 
     // Ensure sample exists in inspector dropdown
     const select = document.getElementById('inspector-sample-select');
@@ -1270,7 +1352,32 @@
       };
     }
 
-    if (backdrop) backdrop.classList.add('open');
+    openModal(backdrop, document.getElementById('image-modal-dialog'));
+  }
+
+  function updatePackagedSampleCount() {
+    const count = state.data?.test_samples?.length || 0;
+    const browseButton = document.getElementById('btn-browse-test-set');
+    if (browseButton) browseButton.textContent = `Browse packaged test set (${count})`;
+  }
+
+  function openModal(backdrop, dialog) {
+    if (!backdrop || !dialog) return;
+    lastFocusedElement = document.activeElement;
+    backdrop.classList.add('open');
+    backdrop.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+    requestAnimationFrame(() => dialog.focus());
+  }
+
+  function closeModal(backdrop) {
+    if (!backdrop || !backdrop.classList.contains('open')) return;
+    backdrop.classList.remove('open');
+    backdrop.setAttribute('aria-hidden', 'true');
+    if (!document.querySelector('.modal-backdrop.open')) {
+      document.body.classList.remove('modal-open');
+    }
+    if (lastFocusedElement instanceof HTMLElement) lastFocusedElement.focus();
   }
 
   // =========================================================================
@@ -1284,7 +1391,7 @@
     if (!container) return;
 
     container.innerHTML = state.data.thesis_figures.map(f => `
-      <div class="theory-card" data-img="${escapeHtml(f.img_url)}" data-title="${escapeHtml(f.title)}" data-desc="${escapeHtml(f.description)}">
+      <div class="theory-card" role="button" tabindex="0" aria-label="Open ${escapeHtml(f.title)}" data-img="${escapeHtml(f.img_url)}" data-title="${escapeHtml(f.title)}" data-desc="${escapeHtml(f.description)}">
         <div class="theory-img-wrap">
           <img src="${escapeHtml(f.img_url)}" alt="${escapeHtml(f.title)}" loading="lazy">
         </div>
@@ -1301,6 +1408,11 @@
         const title = card.getAttribute('data-title');
         const desc = card.getAttribute('data-desc');
         openImageLightbox(img, title, desc, 'Thesis Figure');
+      });
+      card.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        card.click();
       });
     });
   }
@@ -1355,7 +1467,9 @@
 
     // Table Header Sort Clicks
     document.querySelectorAll('.benchmark-table th.sortable').forEach(th => {
-      th.addEventListener('click', () => {
+      th.tabIndex = 0;
+      th.setAttribute('role', 'button');
+      const applySort = () => {
         const sortKey = th.getAttribute('data-sort');
         if (state.currentSort.key === sortKey) {
           state.currentSort.dir = state.currentSort.dir === 'asc' ? 'desc' : 'asc';
@@ -1364,6 +1478,12 @@
           state.currentSort.dir = (sortKey === 'fsr' || sortKey === 'fbr') ? 'asc' : 'desc';
         }
         renderLeaderboard();
+      };
+      th.addEventListener('click', applySort);
+      th.addEventListener('keydown', event => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        event.preventDefault();
+        applySort();
       });
     });
 
@@ -1452,7 +1572,7 @@
     const btnCloseSeed = document.getElementById('btn-close-seed-modal');
     if (btnCloseSeed) {
       btnCloseSeed.addEventListener('click', () => {
-        document.getElementById('seed-modal-backdrop').classList.remove('open');
+        closeModal(document.getElementById('seed-modal-backdrop'));
       });
     }
 
@@ -1460,20 +1580,26 @@
     const btnLightboxClose = document.getElementById('btn-lightbox-close');
     if (btnCloseLightbox) {
       btnCloseLightbox.addEventListener('click', () => {
-        document.getElementById('image-modal-backdrop').classList.remove('open');
+        closeModal(document.getElementById('image-modal-backdrop'));
       });
     }
     if (btnLightboxClose) {
       btnLightboxClose.addEventListener('click', () => {
-        document.getElementById('image-modal-backdrop').classList.remove('open');
+        closeModal(document.getElementById('image-modal-backdrop'));
       });
     }
 
     // Close on backdrop click
     document.querySelectorAll('.modal-backdrop').forEach(bd => {
       bd.addEventListener('click', e => {
-        if (e.target === bd) bd.classList.remove('open');
+        if (e.target === bd) closeModal(bd);
       });
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      const openBackdrop = document.querySelector('.modal-backdrop.open');
+      if (openBackdrop) closeModal(openBackdrop);
     });
   }
 
