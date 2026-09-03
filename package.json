@@ -1,7 +1,7 @@
 {
   "name": "ttfm-results-visualizer",
   "version": "1.0.0",
-  "description": "Interactive results for AI Supervision for Traversability Segmentation in Unstructured Environments",
+  "description": "Interactive results for Learning Binary Traversability from Monocular RGB for Off-Road Navigation",
   "main": "visualizer/server.js",
   "scripts": {
     "dev": "node visualizer/server.js",

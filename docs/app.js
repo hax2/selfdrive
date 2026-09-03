@@ -1,6 +1,6 @@
 /**
  * app.js
- * AI Supervision for Traversability Segmentation in Unstructured Environments
+ * Learning Binary Traversability from Monocular RGB for Off-Road Navigation
  * Comprehensive interactive logic for benchmarks, SVG charts, mask splitter,
  * multi-seed drilldown, and qualitative failure analysis.
  */
