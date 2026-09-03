@@ -2228,6 +2228,9 @@ a, button, input, select, [role='button'], [role='slider'] {
 .chart-render-container { background: #f7f6f2; border: 1px solid #dddbd4; border-radius: 4px; }
 .interactive-svg-chart text { fill: #5e635e; }
 .chart-tooltip { color: #fff; background: #202421; border-color: #202421; box-shadow: var(--shadow-md); }
+.chart-tooltip strong,
+.chart-tooltip .tooltip-value { color: #fff; }
+.chart-tooltip .tooltip-title { color: #d9e9df; font-weight: 700; margin-bottom: .3rem; }
 .chart-footer-note, .insight-callout { color: #505550; background: #efeee8; border-color: #d5d3cb; }
 
 .split-container { background: #202421; border-color: #343a35; }

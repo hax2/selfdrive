@@ -617,6 +617,13 @@
       </text>
     `;
 
+    if (hwMode === 'rtx5060') {
+      svgHtml += `
+        <text x="${W - margin.right}" y="${margin.top + 5}" fill="#292c2a" font-size="11" font-weight="700" text-anchor="end">2 OF 9 MODELS BENCHMARKED</text>
+        <text x="${W - margin.right}" y="${margin.top + 22}" fill="#666b67" font-size="10" text-anchor="end">TensorRT pipeline · measured results only</text>
+      `;
+    }
+
     // Compute Pareto optimal frontier
     // Sort points by FPS descending
     const sorted = [...points].sort((a, b) => b.fps - a.fps);
@@ -631,7 +638,7 @@
     pareto.sort((a, b) => a.fps - b.fps);
 
     // Draw Pareto Curve
-    if (pareto.length > 1) {
+    if (pareto.length > 1 && points.length >= 3) {
       const pathData = pareto.map((p, i) => `${i === 0 ? 'M' : 'L'} ${xScale(p.fps)} ${yScale(p.mIoU)}`).join(' ');
       svgHtml += `
         <path d="${pathData}" fill="none" stroke="url(#pareto-grad)" stroke-width="2.5" stroke-dasharray="4 2" />
@@ -680,7 +687,7 @@
 
         if (tooltip) {
           tooltip.innerHTML = `
-            <div style="font-weight: 800; color: ${MODEL_COLORS[name] || '#fff'}; margin-bottom: 0.25rem;">${name}</div>
+            <div class="tooltip-title">${name}</div>
             <div>Test mIoU: <strong>${miou}</strong></div>
             <div>Throughput: <strong>${fps} FPS</strong> (${lat} ms)</div>
             <div>False-Safe Rate: <strong>${fsr === '—' ? 'not measured in this run' : `${fsr}%`}</strong></div>
@@ -692,9 +699,12 @@
 
       el.addEventListener('mousemove', e => {
         if (!tooltip) return;
-        const rect = svg.getBoundingClientRect();
-        const x = e.clientX - rect.left + 15;
-        const y = e.clientY - rect.top - 20;
+        const container = svg.parentElement;
+        const rect = container.getBoundingClientRect();
+        const preferredX = e.clientX - rect.left + 15;
+        const preferredY = e.clientY - rect.top - 20;
+        const x = Math.max(10, Math.min(preferredX, rect.width - tooltip.offsetWidth - 10));
+        const y = Math.max(10, Math.min(preferredY, rect.height - tooltip.offsetHeight - 10));
         tooltip.style.left = `${x}px`;
         tooltip.style.top = `${y}px`;
       });
@@ -706,7 +716,7 @@
   }
 
   function labelHwText(mode) {
-    if (mode === 'rtx5060') return 'RTX 5060 PyTorch eager';
+    if (mode === 'rtx5060') return 'RTX 5060 TensorRT pipeline';
     if (mode === 'ryzen') return 'Ryzen 5500 compiled';
     return 'H100 NVL eager';
   }
