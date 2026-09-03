@@ -675,7 +675,7 @@ def main():
     # Assemble complete visualizer payload
     payload = {
         "meta": {
-            "title": "TTFM Off-Road Traversability Segmentation",
+            "title": "AI Supervision for Traversability Segmentation in Unstructured Environments",
             "subtitle": "Interactive Research Visualizer & Comprehensive Benchmark Explorer",
             "author": "Master's Thesis / UC3M (Universidad Carlos III de Madrid)",
             "dataset": {

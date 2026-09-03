@@ -1,6 +1,6 @@
 /**
  * app.js
- * TTFM Traversability Research Visualizer
+ * AI Supervision for Traversability Segmentation in Unstructured Environments
  * Comprehensive interactive logic for benchmarks, SVG charts, mask splitter,
  * multi-seed drilldown, and qualitative failure analysis.
  */

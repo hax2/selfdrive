@@ -1,7 +1,7 @@
 {
   "name": "ttfm-results-visualizer",
   "version": "1.0.0",
-  "description": "Interactive Research Visualizer for TTFM Off-Road Traversability Segmentation",
+  "description": "Interactive results for AI Supervision for Traversability Segmentation in Unstructured Environments",
   "main": "visualizer/server.js",
   "scripts": {
     "dev": "node visualizer/server.js",

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   TTFM Off-Road Traversability Segmentation Research Visualizer
+   AI Supervision for Traversability Segmentation in Unstructured Environments
    High-Fidelity Glassmorphism & Cyber-Dark Design System
    ========================================================================== */
 
@@ -2007,7 +2007,8 @@ a, button, input, select, [role='button'], [role='slider'] {
 
 .brand-title {
   color: var(--text-bright);
-  font-size: 1rem;
+  max-width: 660px;
+  font-size: .92rem;
   font-weight: 700;
   letter-spacing: -.025em;
 }
@@ -2016,6 +2017,7 @@ a, button, input, select, [role='button'], [role='slider'] {
   background: none;
   color: var(--text-bright);
   -webkit-text-fill-color: currentColor;
+  font-weight: 500;
 }
 
 .brand-subtitle {
